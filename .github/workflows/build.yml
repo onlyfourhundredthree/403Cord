@@ -55,7 +55,8 @@ jobs:
 
             - name: Prepare ASAR package
               run: |
-                  echo '{"name":"403cord","main":"patcher.js"}' > dist/package.json
+                  echo 'require("./patcher.js");' > dist/index.js
+                  echo '{"name":"403cord","main":"index.js"}' > dist/package.json
 
             - name: Package ASAR
               run: npx -y @electron/asar pack dist 403Cord.asar
