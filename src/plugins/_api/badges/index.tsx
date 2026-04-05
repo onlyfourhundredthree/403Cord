@@ -1,37 +1,19 @@
 /*
- * 403Cord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./fixDiscordBadgePadding.css";
 
 import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Badges";
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Flex } from "@components/Flex";
-import { Heart } from "@components/Heart";
-import DonateButton from "@components/settings/DonateButton";
-import { openContributorModal } from "@components/settings/tabs";
-import { Devs, DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
+import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
 import { Logger } from "@utils/Logger";
-import { Margins } from "@utils/margins";
 import { shouldShowContributorBadge } from "@utils/misc";
-import { closeModal, ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import definePlugin from "@utils/types";
-import { ContextMenuApi, Forms, GuildMemberStore, Menu, Toasts, UserStore } from "@webpack/common";
+import { ContextMenuApi, GuildMemberStore, Menu, Toasts } from "@webpack/common";
 
 const CONTRIBUTOR_BADGE = "https://cdn.discordapp.com/emojis/1357798511126777866.webp";
 
@@ -176,7 +158,7 @@ export default definePlugin({
     },
 
     getDonorBadges(userId: string) {
-        let badges = [] as (ProfileBadge & BadgeUserArgs)[];
+        const badges = [] as (ProfileBadge & BadgeUserArgs)[];
 
         // 1. Ozel Üye Badgeleri (Sunucu Rolünden)
         const isDonor = GuildMemberStore?.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID);
@@ -222,4 +204,4 @@ export default definePlugin({
 
         return badges.length ? badges : undefined;
     }
-});;
+});

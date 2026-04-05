@@ -1,20 +1,8 @@
 /*
- * 403Cord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./spotifyStyles.css";
 
@@ -27,10 +15,10 @@ import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { copyWithToast, openImageModal } from "@utils/discord";
 import { classes } from "@utils/misc";
-import { ContextMenuApi, FluxDispatcher, Menu, Popout, React, Slider, useEffect, useState, useStateFromStores } from "@webpack/common";
+import { ContextMenuApi, FluxDispatcher, Menu, Popout, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
-import { VencordSlider } from "./VencordSlider";
 import { SpotifyStore, Track } from "./SpotifyStore";
+import { VencordSlider } from "./VencordSlider";
 
 const cl = classNameFactory("vc-spotify-");
 

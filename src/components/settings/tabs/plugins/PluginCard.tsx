@@ -1,18 +1,18 @@
 /*
- * 403Cord, a Discord client mod
- * Copyright (c) 2025 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import { showNotice } from "@api/Notices";
 import { isPluginEnabled, pluginRequiresRestart, startDependenciesRecursive, startPlugin, stopPlugin } from "@api/PluginManager";
+import { Settings } from "@api/Settings";
 import { CogWheel, InfoIcon } from "@components/Icons";
 import { AddonCard } from "@components/settings/AddonCard";
 import { isObjectEmpty } from "@utils/misc";
+import { PluginTranslationMap } from "@utils/PluginTranslations";
 import { Plugin } from "@utils/types";
 import { React, showToast, Toasts } from "@webpack/common";
-import { PluginTranslationMap } from "@utils/PluginTranslations";
-import { Settings } from "@api/Settings";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";

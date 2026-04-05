@@ -1,13 +1,12 @@
 /*
- * 403Cord, a Discord client mod
- * Copyright (c) 2023 Vendicated, FieryFlames and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 import "./ui/styles.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 import { UserStore } from "@webpack/common";
 

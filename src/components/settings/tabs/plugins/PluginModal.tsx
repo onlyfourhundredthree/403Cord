@@ -1,20 +1,8 @@
 /*
- * 403Cord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 import "./PluginModal.css";
 
@@ -23,12 +11,12 @@ import { useSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Flex } from "@components/Flex";
 import { debounce } from "@shared/debounce";
-import { gitRemote } from "@shared/vencordUserAgent";
 import { classNameFactory } from "@utils/css";
 import { proxyLazy } from "@utils/lazy";
 import { Margins } from "@utils/margins";
 import { classes, isObjectEmpty } from "@utils/misc";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
+import { PluginTranslationMap } from "@utils/PluginTranslations";
 import { OptionType, Plugin } from "@utils/types";
 import { User } from "@vencord/discord-types";
 import { findCssClassesLazy } from "@webpack";
@@ -36,11 +24,10 @@ import { Clickable, FluxDispatcher, Forms, React, Text, Tooltip, useEffect, useM
 import { Constructor } from "type-fest";
 
 import { PluginMeta } from "~plugins";
-import { PluginTranslationMap } from "@utils/PluginTranslations";
 
 import { OptionComponentMap } from "./components";
 import { openContributorModal } from "./ContributorModal";
-import { GithubButton, WebsiteButton } from "./LinkIconButton";
+import { WebsiteButton } from "./LinkIconButton";
 
 const cl = classNameFactory("vc-plugin-modal-");
 
@@ -168,7 +155,7 @@ export default function PluginModal({ plugin, onRestartNeeded, onClose, transiti
                             <div className="vc-settings-modal-links">
                                 <WebsiteButton
                                     text="Discord Sunucumuza Katıl"
-                                    href={`https://discord.gg/403`}
+                                    href={"https://discord.gg/403"}
                                 />
                             </div>
                         )}

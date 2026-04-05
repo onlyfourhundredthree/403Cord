@@ -1,6 +1,6 @@
 /*
- * 403Cord, a Discord client mod
- * Copyright (c) 2024 Vendicated and contributors
+ * Vencord, a Discord client mod
+ * Copyright (c) 2026 Vendicated and contributors
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
@@ -9,7 +9,6 @@ import { Card } from "@components/Card";
 import { Flex } from "@components/Flex";
 import { Margins } from "@components/margins";
 import { Paragraph } from "@components/Paragraph";
-import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
 import definePlugin, { OptionType } from "@utils/types";
 
