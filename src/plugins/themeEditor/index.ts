@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 function updateTheme() {
@@ -117,7 +118,7 @@ export const settings = definePluginSettings({
 export default definePlugin({
     name: "Tema Düzenleyici",
     description: "Kullanıcıların genel Discord temasını diledikleri gibi özelleştirebildiği gelişmiş tema eklentisi.",
-    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
+    authors: [Devs.Toji, Devs.Aki],
     settings,
     start() {
         updateTheme();

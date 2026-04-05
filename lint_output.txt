@@ -1,0 +1,6 @@
+
+C:\Users\Administrator\Documents\Vencord\src\plugins\_core\supportHelper.tsx
+  16:1  error  '@utils/constants' import is duplicated  no-duplicate-imports
+
+✖ 1 problem (1 error, 0 warnings)
+

@@ -7,6 +7,7 @@
 import { definePluginSettings } from "@api/Settings";
 import { BackupRestoreIcon, MainSettingsIcon, PaintbrushIcon, PatchHelperIcon, PlaceholderIcon, PluginsIcon, UpdaterIcon, VesktopSettingsIcon } from "@components/Icons";
 import { BackupAndRestoreTab, PatchHelperTab, PluginsTab, ThemesTab, UpdaterTab, VencordTab } from "@components/settings/tabs";
+import { Devs } from "@utils/constants";
 import { isTruthy } from "@utils/guards";
 import definePlugin, { IconProps, OptionType } from "@utils/types";
 import { waitFor } from "@webpack";
@@ -91,7 +92,7 @@ const settingsSectionMap: [string, string][] = [
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
-    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
+    authors: [Devs.Toji, Devs.Aki],
     required: true,
 
     settings,

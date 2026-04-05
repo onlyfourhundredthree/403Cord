@@ -4,11 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
     name: "CommandsAPI",
-    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
+    authors: [Devs.Toji, Devs.Aki],
     description: "Api required by anything that uses commands",
     patches: [
         // obtain BUILT_IN_COMMANDS instance
