@@ -10,8 +10,8 @@ import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { Button, GuildMemberStore } from "@webpack/common";
 
 export const isDonor = (userId: string) => !!(
-    BadgeAPI.getDonorBadges(userId)?.length > 0
-    || GuildMemberStore?.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID)
+    (BadgeAPI.getDonorBadges(userId)?.length ?? 0) > 0
+    || GuildMemberStore?.getMember(VENCORD_GUILD_ID, userId)?.roles?.includes(DONOR_ROLE_ID)
 );
 
 export function DonateButtonComponent() {

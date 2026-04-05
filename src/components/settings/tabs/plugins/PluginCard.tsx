@@ -12,7 +12,7 @@ import { isObjectEmpty } from "@utils/misc";
 import { Plugin } from "@utils/types";
 import { React, showToast, Toasts } from "@webpack/common";
 import { PluginTranslationMap } from "@utils/PluginTranslations";
-import { Settings } from "vencord";
+import { Settings } from "@api/Settings";
 
 import { cl, logger } from ".";
 import { openPluginModal } from "./PluginModal";
