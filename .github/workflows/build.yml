@@ -23,7 +23,7 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
-            - uses: pnpm/action-setup@v3 # Install pnpm using packageManager key in package.json
+            - uses: pnpm/action-setup@v3
 
             - name: Use Node.js 20
               uses: actions/setup-node@v4
@@ -47,19 +47,23 @@ jobs:
               run: |
                   rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
 
-            - name: Get some values needed for the release
-              id: release_values
+            - name: Get version from package.json
+              id: get_version
               run: |
-                  echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "version=$VERSION" >> $GITHUB_ENV
 
             - name: Package ASAR
-              run: npx @electron/asar pack dist 403Cord.asar
+              run: npx -y @electron/asar pack dist 403Cord.asar
 
-            - name: Upload DevBuild as release
+            - name: Upload release
               if: github.repository == 'onlyfourhundredthree/403Cord'
               run: |
-                  gh release delete devbuild --yes --cleanup-tag > /dev/null 2>&1 || true
-                  gh release create devbuild 403Cord.asar -t "DevBuild $RELEASE_TAG" --latest
+                  gh release delete "v$VERSION" --yes --cleanup-tag > /dev/null 2>&1 || true
+                  gh release create "v$VERSION" 403Cord.asar \
+                    --title "403Cord v$VERSION" \
+                    --notes "403Cord Core Initialized" \
+                    --latest
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  RELEASE_TAG: ${{ env.release_tag }}
+                  VERSION: ${{ env.version }}
