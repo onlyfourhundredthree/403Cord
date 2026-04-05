@@ -6,7 +6,6 @@
 
 import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
-import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { ipcMain } from "electron";
 import { rename, writeFile } from "fs/promises";
 import { join } from "path";
@@ -16,65 +15,58 @@ import gitRemote from "~git-remote";
 
 import { serializeErrors } from "./common";
 
-const API_BASE = `https://api.github.com/repos/${gitRemote}`;
-let PendingUpdates = [] as [string, string][];
+const RAW_PACKAGE_JSON = `https://raw.githubusercontent.com/${gitRemote}/main/package.json`;
+let PendingUpdateUrl: string | null = null;
 
-async function githubGet<T = any>(endpoint: string) {
-    return fetchJson<T>(API_BASE + endpoint, {
-        headers: {
-            Accept: "application/vnd.github+json",
-            // "All API requests MUST include a valid User-Agent header.
-            // Requests with no User-Agent header will be rejected."
-            "User-Agent": VENCORD_USER_AGENT
+async function checkIsOutdated() {
+    try {
+        const pkg = await fetchJson<any>(RAW_PACKAGE_JSON);
+        const latestHash = "v" + pkg.version;
+        if (latestHash !== gitHash) {
+            return {
+                hash: latestHash,
+                version: pkg.version
+            };
         }
-    });
+        return null;
+    } catch {
+        return null;
+    }
 }
 
 async function calculateGitChanges() {
-    const isOutdated = await fetchUpdates();
-    if (!isOutdated) return [];
-
-    const data = await githubGet("/releases/latest");
+    const update = await checkIsOutdated();
+    if (!update) return [];
 
     return [{
-        hash: data.tag_name,
+        hash: update.hash,
         author: "403Cord",
-        message: data.name || "Yeni Güncelleme Mevcut!"
+        message: `Yeni Güncelleme Mevcut! (v${update.version})`
     }];
 }
 
 async function fetchUpdates() {
-    const data = await githubGet("/releases/latest");
+    const update = await checkIsOutdated();
+    if (!update) return false;
 
-    const hash = data.tag_name;
-    if (hash === gitHash)
-        return false;
-
-    data.assets.forEach(({ name, browser_download_url }) => {
-        if (name === "403Cord.asar") {
-            PendingUpdates.push([name, browser_download_url]);
-        }
-    });
+    PendingUpdateUrl = `https://github.com/${gitRemote}/releases/latest/download/403Cord.asar`;
 
     return true;
 }
 
 async function applyUpdates() {
-    const asarUrl = PendingUpdates.find(p => p[0] === "403Cord.asar")?.[1];
-    if (asarUrl) {
-        const contents = await fetchBuffer(asarUrl);
-        // __dirname inside an asar is /.../403Cord.asar/. We want the actual asar file path.
-        const isInsideAsar = __dirname.endsWith(".asar");
-        const asarPath = isInsideAsar ? __dirname : join(__dirname, "..", "403Cord.asar");
+    if (!PendingUpdateUrl) return false;
 
-        try {
-            await rename(asarPath, asarPath + ".old");
-        } catch (e) { }
+    const contents = await fetchBuffer(PendingUpdateUrl);
+    const isInsideAsar = __dirname.endsWith(".asar");
+    const asarPath = isInsideAsar ? __dirname : join(__dirname, "..", "403Cord.asar");
 
-        await writeFile(asarPath, contents);
-    }
+    try {
+        await rename(asarPath, asarPath + ".old");
+    } catch (e) { }
 
-    PendingUpdates = [];
+    await writeFile(asarPath, contents);
+    PendingUpdateUrl = null;
     return true;
 }
 
