@@ -1,0 +1,223 @@
+#vc-spotify-player {
+    padding: 12px;
+    background: transparent;
+    margin: 0;
+    border-bottom: 1px solid var(--border-subtle);
+    position: relative;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+
+    --brand: var(--brand-experiment, #5865f2);
+    --brand-hover: var(--brand-experiment-560);
+}
+
+/* Base text color */
+.vc-spotify-song-title,
+.vc-spotify-progress-time {
+    color: white !important;
+}
+
+.vc-spotify-secondary-song-info,
+.vc-spotify-artist,
+.vc-spotify-album {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.vc-spotify-top-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+#vc-spotify-info-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+}
+
+#vc-spotify-album-image {
+    width: 42px;
+    height: 42px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+#vc-spotify-titles {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+#vc-spotify-song-title {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* Prevent long text from expanding the player height */
+.vc-spotify-ellipoverflow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: block;
+}
+
+.vc-spotify-button-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Native listening along integration */
+[class^="panels_"] {
+    display: flex;
+    flex-direction: column;
+}
+
+[class^="listeningAlong_"] {
+    /* Removed order: -2 to keep it naturally grouped with the Spotify player! */
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+    position: relative;
+    z-index: 100;
+}
+
+#vc-spotify-player {
+    margin-top: 0 !important;
+    /* Removed padding-top to keep the player completely compact as requested */
+}
+
+/* Hide texts, we only want the avatars to overlay! */
+[class^="listeningAlong_"] > div:not([class*="party_"]) {
+    display: none !important;
+}
+
+/* Position avatars strictly above the buttons */
+[class^="listeningAlong_"] [class*="party_"] {
+    position: absolute !important;
+    right: 12px !important;
+    top: 8px !important;
+    /* Will now drop exactly 8px into the player boundaries */
+    pointer-events: auto !important;
+    transform: scale(0.85);
+    transform-origin: top right;
+}
+
+/* FILLED BUTTONS: Transparent Background, White Icons */
+#vc-spotify-player .vc-spotify-button {
+    background-color: transparent !important;
+    color: white !important;
+    border-radius: 4px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.1s;
+    margin-top: 18px;
+    /* Leave breathing room above for the avatars */
+}
+
+#vc-spotify-player .vc-spotify-button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+#vc-spotify-player .vc-spotify-button svg,
+#vc-spotify-player .vc-spotify-button svg path {
+    fill: white !important;
+    color: white !important;
+    width: 20px;
+    height: 20px;
+}
+
+/* PROGRESS BAR: Perfectly Centered & Tracking */
+#vc-spotify-progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 2px;
+}
+
+#vc-spotify-progress-bar [class*="slider"] {
+    flex: 1;
+    margin: 0 !important;
+}
+
+#vc-spotify-progress-bar [class*="bar"] {
+    height: 4px !important;
+    width: 100% !important;
+    left: 0 !important;
+    position: absolute !important;
+    top: 50% !important;
+    margin-top: -2px !important;
+    transform: none !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+}
+
+#vc-spotify-progress-bar [class*="barFill"] {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    transform: none !important;
+    background-color: white !important;
+    border-radius: 2px !important;
+}
+
+#vc-spotify-progress-bar [class*="grabber"] {
+    position: absolute !important;
+    top: 50% !important;
+    margin-top: 0 !important;
+    transform: translateY(-50%) !important;
+    background-color: white !important;
+    border: none !important;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* VOLUME POPOUT - HORIZONTAL (Native Discord Slider compat) */
+.vc-spotify-volume-popout {
+    background: var(--background-floating);
+    padding: 10px 14px;
+    border-radius: 8px;
+    box-shadow: var(--elevation-high);
+    width: 140px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 1px solid var(--border-subtle);
+}
+
+.vc-spotify-volume-popout [class*="slider"] {
+    width: 100% !important;
+}
+
+.vc-spotify-volume-popout [class*="barFill"] {
+    background-color: white !important;
+}
+
+/* Hide unneeded */
+.vc-spotify-minmax {
+    display: none !important;
+}
+
+/* Dim inactive toggle buttons */
+.vc-spotify-shuffle-off.vc-spotify-button,
+.vc-spotify-repeat-off.vc-spotify-button {
+    filter: grayscale(1) opacity(0.6);
+}
