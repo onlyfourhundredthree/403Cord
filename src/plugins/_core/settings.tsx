@@ -105,7 +105,7 @@ const settingsSectionMap: [string, string][] = [
 export default definePlugin({
     name: "Settings",
     description: "Adds Settings UI and debug info",
-    authors: [Devs.Toji, Devs.Aki],
+    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     required: true,
 
     settings,
