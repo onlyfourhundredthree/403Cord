@@ -52,10 +52,13 @@ jobs:
               run: |
                   echo "release_tag=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
+            - name: Package ASAR
+              run: npx @electron/asar pack dist 403Cord.asar
+
             - name: Upload DevBuild as release
               if: github.repository == 'onlyfourhundredthree/403Cord'
               run: |
-                  gh release upload devbuild --clobber dist/* || gh release create devbuild dist/* -t "DevBuild $RELEASE_TAG" --prerelease
+                  gh release upload devbuild --clobber 403Cord.asar || gh release create devbuild 403Cord.asar -t "DevBuild $RELEASE_TAG" --prerelease
                   gh release edit devbuild --title "DevBuild $RELEASE_TAG"
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
