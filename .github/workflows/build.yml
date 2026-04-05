@@ -58,8 +58,8 @@ jobs:
             - name: Upload DevBuild as release
               if: github.repository == 'onlyfourhundredthree/403Cord'
               run: |
-                  gh release upload devbuild --clobber 403Cord.asar || gh release create devbuild 403Cord.asar -t "DevBuild $RELEASE_TAG" --prerelease
-                  gh release edit devbuild --title "DevBuild $RELEASE_TAG"
+                  gh release delete devbuild --yes --cleanup-tag > /dev/null 2>&1 || true
+                  gh release create devbuild 403Cord.asar -t "DevBuild $RELEASE_TAG" --latest
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   RELEASE_TAG: ${{ env.release_tag }}
