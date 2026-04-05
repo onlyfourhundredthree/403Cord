@@ -1,7 +1,30 @@
+/* VOLUME POPOUT - HORIZONTAL (Native Discord Slider compat) */
+.vc-spotify-volume-popout {
+    background: var(--background-floating);
+    padding: 10px 14px;
+    border-radius: 8px;
+    box-shadow: var(--elevation-high);
+    width: 140px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: 1px solid var(--border-subtle);
+}
+
+.vc-spotify-volume-popout [class*="slider"] {
+    width: 100% !important;
+}
+
+.vc-spotify-volume-popout [class*="barFill"] {
+    background-color: white !important;
+}
+
 #vc-spotify-player {
     padding: 12px;
     background: transparent;
     margin: 0;
+    margin-top: 0 !important;
     border-bottom: 1px solid var(--border-subtle);
     position: relative;
     overflow: visible;
@@ -21,7 +44,7 @@
 .vc-spotify-secondary-song-info,
 .vc-spotify-artist,
 .vc-spotify-album {
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: rgb(255 255 255 / 70%) !important;
 }
 
 .vc-spotify-top-row {
@@ -91,11 +114,6 @@
     z-index: 100;
 }
 
-#vc-spotify-player {
-    margin-top: 0 !important;
-    /* Removed padding-top to keep the player completely compact as requested */
-}
-
 /* Hide texts, we only want the avatars to overlay! */
 [class^="listeningAlong_"] > div:not([class*="party_"]) {
     display: none !important;
@@ -106,6 +124,7 @@
     position: absolute !important;
     right: 12px !important;
     top: 8px !important;
+
     /* Will now drop exactly 8px into the player boundaries */
     pointer-events: auto !important;
     transform: scale(0.85);
@@ -126,11 +145,12 @@
     border: none;
     transition: background-color 0.1s;
     margin-top: 18px;
+
     /* Leave breathing room above for the avatars */
 }
 
 #vc-spotify-player .vc-spotify-button:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: rgb(255 255 255 / 10%) !important;
 }
 
 #vc-spotify-player .vc-spotify-button svg,
@@ -164,7 +184,7 @@
     top: 50% !important;
     margin-top: -2px !important;
     transform: none !important;
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgb(255 255 255 / 15%) !important;
     border-radius: 2px !important;
 }
 
@@ -186,29 +206,7 @@
     transform: translateY(-50%) !important;
     background-color: white !important;
     border: none !important;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5) !important;
-}
-
-/* VOLUME POPOUT - HORIZONTAL (Native Discord Slider compat) */
-.vc-spotify-volume-popout {
-    background: var(--background-floating);
-    padding: 10px 14px;
-    border-radius: 8px;
-    box-shadow: var(--elevation-high);
-    width: 140px;
-    height: 40px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    border: 1px solid var(--border-subtle);
-}
-
-.vc-spotify-volume-popout [class*="slider"] {
-    width: 100% !important;
-}
-
-.vc-spotify-volume-popout [class*="barFill"] {
-    background-color: white !important;
+    box-shadow: 0 0 5px rgb(0 0 0 / 50%) !important;
 }
 
 /* Hide unneeded */
