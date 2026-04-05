@@ -53,6 +53,10 @@ jobs:
                   VERSION=$(node -p "require('./package.json').version")
                   echo "version=$VERSION" >> $GITHUB_ENV
 
+            - name: Prepare ASAR package
+              run: |
+                  echo '{"name":"403cord","main":"patcher.js"}' > dist/package.json
+
             - name: Package ASAR
               run: npx -y @electron/asar pack dist 403Cord.asar
 
