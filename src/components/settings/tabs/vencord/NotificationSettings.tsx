@@ -16,17 +16,17 @@ import { Button, Forms, Select, Slider, Text } from "@webpack/common";
 export function NotificationSection() {
     return (
         <section className={Margins.top16}>
-            <Forms.FormTitle tag="h5">Notifications</Forms.FormTitle>
+            <Forms.FormTitle tag="h5">Bildirimler</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom8}>
-                Settings for Notifications sent by 403Cord.
-                This does NOT include Discord notifications (messages, etc)
+                403Cord tarafından gönderilen bildirimlerin ayarları.
+                Bu, Discord bildirimlerini (mesajlar vb.) İÇERMEZ.
             </Forms.FormText>
             <Flex>
                 <Button onClick={openNotificationSettingsModal}>
-                    Notification Settings
+                    Bildirim Ayarları
                 </Button>
                 <Button onClick={openNotificationLogModal}>
-                    View Notification Log
+                    Bildirim Geçmişi
                 </Button>
             </Flex>
         </section>
@@ -37,7 +37,7 @@ export function openNotificationSettingsModal() {
     openModal(props => (
         <ModalRoot {...props} size={ModalSize.MEDIUM}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Settings</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Bildirim Ayarları</Text>
                 <ModalCloseButton onClick={props.onClose} />
             </ModalHeader>
 
@@ -53,26 +53,26 @@ function NotificationSettings() {
 
     return (
         <div style={{ padding: "1em 0" }}>
-            <Forms.FormTitle tag="h5">Notification Style</Forms.FormTitle>
+            <Forms.FormTitle tag="h5">Bildirim Stili</Forms.FormTitle>
             {settings.useNative !== "never" && Notification?.permission === "denied" && (
                 <ErrorCard style={{ padding: "1em" }} className={Margins.bottom8}>
-                    <Forms.FormTitle tag="h5">Desktop Notification Permission denied</Forms.FormTitle>
-                    <Forms.FormText>You have denied Notification Permissions. Thus, Desktop notifications will not work!</Forms.FormText>
+                    <Forms.FormTitle tag="h5">Masaüstü Bildirim İzni Reddedildi</Forms.FormTitle>
+                    <Forms.FormText>Bildirim izinlerini reddetmişsiniz. Bu nedenle masaüstü bildirimleri çalışmayacaktır!</Forms.FormText>
                 </ErrorCard>
             )}
             <Forms.FormText className={Margins.bottom8}>
-                Some plugins may show you notifications. These come in two styles:
+                Bazı eklentiler size bildirim gösterebilir. Bunlar iki şekilde gelir:
                 <ul>
-                    <li><strong>403Cord Notifications</strong>: These are in-app notifications</li>
-                    <li><strong>Desktop Notifications</strong>: Native Desktop notifications (like when you get a ping)</li>
+                    <li><strong>403Cord Bildirimleri</strong>: Bunlar uygulama içi bildirimlerdir</li>
+                    <li><strong>Masaüstü Bildirimleri</strong>: Yerel masaüstü bildirimleri (ping aldığınızda gelen gibi)</li>
                 </ul>
             </Forms.FormText>
             <Select
                 placeholder="Notification Style"
                 options={[
-                    { label: "Only use Desktop notifications when Discord is not focused", value: "not-focused", default: true },
-                    { label: "Always use Desktop notifications", value: "always" },
-                    { label: "Always use 403Cord notifications", value: "never" },
+                    { label: "Yalnızca Discord odakta değilken masaüstü bildirimlerini kullan", value: "not-focused", default: true },
+                    { label: "Her zaman masaüstü bildirimlerini kullan", value: "always" },
+                    { label: "Her zaman 403Cord bildirimlerini kullan", value: "never" },
                 ] satisfies Array<{ value: typeof settings["useNative"]; } & Record<string, any>>}
                 closeOnSelect={true}
                 select={v => settings.useNative = v}
@@ -80,21 +80,21 @@ function NotificationSettings() {
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Position</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Bildirim Konumu</Forms.FormTitle>
             <Select
                 isDisabled={settings.useNative === "always"}
-                placeholder="Notification Position"
+                placeholder="Bildirim Konumu"
                 options={[
-                    { label: "Bottom Right", value: "bottom-right", default: true },
-                    { label: "Top Right", value: "top-right" },
+                    { label: "Sağ Alt", value: "bottom-right", default: true },
+                    { label: "Sağ Üst", value: "top-right" },
                 ] satisfies Array<{ value: typeof settings["position"]; } & Record<string, any>>}
                 select={v => settings.position = v}
                 isSelected={v => v === settings.position}
                 serialize={identity}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Timeout</Forms.FormTitle>
-            <Forms.FormText className={Margins.bottom16}>Set to 0s to never automatically time out</Forms.FormText>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Bildirim Süresi</Forms.FormTitle>
+            <Forms.FormText className={Margins.bottom16}>Otomatik kapanmasını istemiyorsanız 0s olarak ayarlayın</Forms.FormText>
             <Slider
                 disabled={settings.useNative === "always"}
                 markers={[0, 1000, 2500, 5000, 10_000, 20_000]}
@@ -107,10 +107,10 @@ function NotificationSettings() {
                 stickToMarkers={false}
             />
 
-            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Notification Log Limit</Forms.FormTitle>
+            <Forms.FormTitle tag="h5" className={Margins.top16 + " " + Margins.bottom8}>Bildirim Geçmişi Limiti</Forms.FormTitle>
             <Forms.FormText className={Margins.bottom16}>
-                The amount of notifications to save in the log until old ones are removed.
-                Set to <code>0</code> to disable Notification log and <code>∞</code> to never automatically remove old Notifications
+                Eski bildirimler silinmeden önce kayıt altına alınacak bildirim sayısı.
+                <code>0</code> olarak ayarlarsanız bildirim geçmişi devre dışı kalır, <code>∞</code> olarak ayarlarsanız eski bildirimler hiçbir zaman otomatik silinmez.
             </Forms.FormText>
             <Slider
                 markers={[0, 25, 50, 75, 100, 200]}

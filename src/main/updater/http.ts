@@ -20,7 +20,7 @@ import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
 import { VENCORD_USER_AGENT } from "@shared/vencordUserAgent";
 import { ipcMain } from "electron";
-import { writeFile } from "fs/promises";
+import { rename, writeFile } from "fs/promises";
 import { join } from "path";
 
 import gitHash from "~git-hash";
@@ -46,25 +46,24 @@ async function calculateGitChanges() {
     const isOutdated = await fetchUpdates();
     if (!isOutdated) return [];
 
-    const data = await githubGet(`/compare/${gitHash}...HEAD`);
+    const data = await githubGet("/releases/latest");
 
-    return data.commits.map((c: any) => ({
-        // github api only sends the long sha
-        hash: c.sha.slice(0, 7),
-        author: c.author.login,
-        message: c.commit.message.split("\n")[0]
-    }));
+    return [{
+        hash: data.tag_name,
+        author: "403Cord",
+        message: data.name || "Yeni Güncelleme Mevcut!"
+    }];
 }
 
 async function fetchUpdates() {
     const data = await githubGet("/releases/latest");
 
-    const hash = data.name.slice(data.name.lastIndexOf(" ") + 1);
+    const hash = data.tag_name;
     if (hash === gitHash)
         return false;
 
     data.assets.forEach(({ name, browser_download_url }) => {
-        if (VENCORD_FILES.some(s => name.startsWith(s))) {
+        if (name === "403Cord.asar") {
             PendingUpdates.push([name, browser_download_url]);
         }
     });
@@ -73,14 +72,19 @@ async function fetchUpdates() {
 }
 
 async function applyUpdates() {
-    const fileContents = await Promise.all(PendingUpdates.map(async ([name, url]) => {
-        const contents = await fetchBuffer(url);
-        return [join(__dirname, name), contents] as const;
-    }));
+    const asarUrl = PendingUpdates.find(p => p[0] === "403Cord.asar")?.[1];
+    if (asarUrl) {
+        const contents = await fetchBuffer(asarUrl);
+        // __dirname inside an asar is /.../403Cord.asar/. We want the actual asar file path.
+        let isInsideAsar = __dirname.endsWith(".asar");
+        const asarPath = isInsideAsar ? __dirname : join(__dirname, "..", "403Cord.asar");
 
-    await Promise.all(fileContents.map(async ([filename, contents]) =>
-        writeFile(filename, contents))
-    );
+        try {
+            await rename(asarPath, asarPath + ".old");
+        } catch (e) { }
+
+        await writeFile(asarPath, contents);
+    }
 
     PendingUpdates = [];
     return true;
