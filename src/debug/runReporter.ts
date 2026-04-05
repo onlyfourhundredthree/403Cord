@@ -28,8 +28,7 @@ async function runReporter() {
             }
         }, "Vencord Reporter");
 
-        // @ts-expect-error
-        403Cord.Webpack._initReporter = function () {
+        (window as any)["403Cord"].Webpack._initReporter = function () {
             // initReporter is called in the patched entry point of Discord
             // setImmediate to only start searching for lazy chunks after Discord initialized the app
             setTimeout(() => loadLazyChunks().then(loadLazyChunksResolve), 0);
