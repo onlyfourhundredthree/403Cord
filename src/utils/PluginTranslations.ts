@@ -269,10 +269,6 @@ export const PluginTranslationMap: Record<string, { name: string, description: s
         name: "Yayında Yayıncı Modu",
         description: "Discord'da ekran paylaşımına başladığınızda kişisel izolasoyun için otomatik yayıncı modunu etkinleştirir."
     },
-    ThemeAttributes: {
-        name: "Tema Öznitelikleri",
-        description: "Client üzerinde arka bazlı stil operasyonları gerektiren özniteliklere CSS tabakasını açar."
-    },
     UserMessagesPronouns: {
         name: "Kullanıcı Zamiri Mesajları",
         description: "Kişiselleştirimiş sohbet deneyimi için kullancıların ismini ve zamir eklentisini okutur."
