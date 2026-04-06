@@ -30,7 +30,7 @@ const settings = definePluginSettings({
         description: "Where to show the game activity toggle button",
         options: [
             { label: "Next to Mute/Deafen", value: "PANEL", default: true },
-            { label: "Vencord Toolbox", value: "TOOLBOX" }
+            { label: "403 Toolbox", value: "TOOLBOX" }
         ],
         get hidden() {
             return !isPluginEnabled(VencordToolboxPlugin.name);

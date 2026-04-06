@@ -21,7 +21,7 @@ export const settings = definePluginSettings({
     showPluginMenu: {
         type: OptionType.BOOLEAN,
         default: true,
-        description: "Show the plugins menu in the toolbox",
+        description: "Araç Kutusunda eklentiler menüsünü göster"
     }
 });
 
@@ -55,7 +55,7 @@ function VencordPopoutButton() {
                     ref={buttonRef}
                     className="vc-toolbox-btn"
                     onClick={() => setShow(v => !v)}
-                    tooltip={isShown ? null : "Vencord Toolbox"}
+                    tooltip={isShown ? null : "403 Toolbox"}
                     icon={() => <Icon isShown={isShown} />}
                     selected={isShown}
                 />
@@ -65,8 +65,8 @@ function VencordPopoutButton() {
 }
 
 export default definePlugin({
-    name: "VencordToolbox",
-    description: "Adds a button to the titlebar that houses 403Cord quick actions",
+    name: "403Toolbox",
+    description: "Üst menüye çeşitli 403Cord hızlı işlemlerini barındıran bir buton ekler.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
 
     settings,
