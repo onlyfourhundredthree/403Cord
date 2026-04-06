@@ -35,6 +35,7 @@
     margin: 3px;
     position: absolute;
     width: 28px;
+
     /* GPU Acceleration */
     will-change: transform;
     contain: layout style;

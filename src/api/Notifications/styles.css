@@ -11,6 +11,7 @@
     width: 100%;
     border: 1px solid var(--background-modifier-accent);
     box-shadow: var(--elevation-medium);
+
     /* GPU Acceleration */
     will-change: transform, opacity;
     contain: layout style paint;
@@ -77,6 +78,7 @@
     cursor: pointer;
     color: var(--interactive-normal);
     opacity: 0.6;
+
     /* GPU Acceleration */
     will-change: transform, opacity;
     transform: translateZ(0);
@@ -153,6 +155,7 @@
     width: 100%;
     margin-bottom: 1rem;
     box-sizing: border-box;
+
     /* GPU Acceleration */
     will-change: transform, opacity;
     contain: layout style;

@@ -12,14 +12,19 @@ Her commit'ten önce şu 2 işlem **MUTLAKA** yapılmalıdır:
 - Her commit'ten önce `pnpm lint -- --fix` çalıştırılmalıdır
 - CSS dosyalarında `comment-empty-line-before` gibi hatalar otomatik düzeltilir
 
+### 3. Stylelint Fix
+- Her commit'ten önce `pnpm lint-styles -- --fix` çalıştırılmalıdır
+- CSS dosyalarındaki style hatalarını düzeltir
+
 ## Commit Akışı
 
 1. Değişiklikleri yap
 2. `package.json` versiyonunu artır
 3. `pnpm lint -- --fix` çalıştır
-4. `git add -A`
-5. `git commit -m "..."`
-6. Push yap
+4. `pnpm lint-styles -- --fix` çalıştır
+5. `git add -A`
+6. `git commit -m "..."`
+7. Push yap
 
 ## Performans Optimizasyonları
 

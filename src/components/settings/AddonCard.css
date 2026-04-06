@@ -7,6 +7,7 @@
     height: 100%;
     padding: 12px;
     width: 100%;
+
     /* GPU Acceleration */
     will-change: transform, box-shadow;
     contain: layout style paint;
@@ -97,6 +98,7 @@
 
 .vc-addon-title:hover {
     overflow: visible;
+
     /* GPU Acceleration for animation */
     will-change: transform;
     transform: translateZ(0);

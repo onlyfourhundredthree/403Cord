@@ -22,6 +22,7 @@
     gap: 0.5em;
     padding: 8px 9px;
     border-radius: 8px;
+
     /* GPU Acceleration */
     will-change: transform, box-shadow;
     contain: layout style;
