@@ -9,14 +9,16 @@ import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } f
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
-    const inChannel = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId() === channelId);
+    const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
+
+    const inChannel = currentVoiceChannelId === channelId;
 
     React.useEffect(() => {
         if (!inChannel) return;
 
         const update = () => {
             const val = RTCConnectionStore.getAveragePing();
-            setPing(typeof val === "number" ? val : null);
+            if (typeof val === "number") setPing(val);
         };
 
         update();
@@ -58,12 +60,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: "UNREAD_IMPORTANT:",
+            // This is the correct module for Voice Channel items in the sidebar
+            find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
                 {
-                    // Match the Children.count anchor and append our ping after it (at the far right of icons)
-                    match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
-                    replace: (m, channel) => `${m},$self.VoicePing({channelId:${channel}.id})`
+                    // Inject our ping component after the edit button in the channel status array
+                    match: /this\.renderEditButton\(\)/,
+                    replace: "$&, $self.VoicePing({channelId:this.props.channel.id})"
                 }
             ]
         }
