@@ -25,9 +25,9 @@ function updateThemeStyles(settings: any) {
         css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
     }
 
-    // Theme Addons (External Imports)
+    // Theme Addons (External Imports - Deploy versions are more stable)
     if (settings.store.themeFrostedGlass) {
-        css.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
+        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
     }
     if (settings.store.themeWindowsTitlebar) {
         css.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
@@ -41,49 +41,49 @@ function updateThemeStyles(settings: any) {
 
     // Backgrounds
     if (settings.store.backgroundImage) {
-        css.push(`  --background-image: url('${settings.store.backgroundImage}') !important;`);
+        css.push(`  --background-image: url('${settings.store.backgroundImage}');`);
     }
-    css.push(`  --background-image-blur: ${settings.store.backgroundBlur}px !important;`);
-    css.push(`  --background-image-size: ${settings.store.backgroundSize} !important;`);
-    css.push(`  --background-image-position: ${settings.store.backgroundPosition} !important;`);
+    css.push(`  --background-image-blur: ${settings.store.backgroundBlur}px;`);
+    css.push(`  --background-image-size: ${settings.store.backgroundSize};`);
+    css.push(`  --background-image-position: ${settings.store.backgroundPosition};`);
 
     // Popouts
     if (settings.store.popoutImage) {
-        css.push(`  --popout-modal-image: url('${settings.store.popoutImage}') !important;`);
+        css.push(`  --popout-modal-image: url('${settings.store.popoutImage}');`);
     } else {
-        css.push("  --popout-modal-image: transparent !important;");
+        css.push("  --popout-modal-image: transparent;");
     }
-    css.push(`  --popout-modal-blur: ${settings.store.popoutBlur}px !important;`);
-    css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness} !important;`);
+    css.push(`  --popout-modal-blur: ${settings.store.popoutBlur}px;`);
+    css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness};`);
 
     // Home Button
     if (settings.store.homeIconUrl) {
-        css.push(`  --home-button-image: url('${settings.store.homeIconUrl}') !important;`);
-        css.push(`  --home-image: url('${settings.store.homeIconUrl}') !important;`);
+        css.push(`  --home-button-image: url('${settings.store.homeIconUrl}');`);
+        css.push(`  --home-image: url('${settings.store.homeIconUrl}');`);
     }
 
     // Colors & Gradients
     if (settings.store.gradientPrimary) {
-        css.push(`  --gradient-primary: ${settings.store.gradientPrimary} !important;`);
+        css.push(`  --gradient-primary: ${settings.store.gradientPrimary};`);
     }
     if (settings.store.gradientSecondary) {
-        css.push(`  --gradient-secondary: ${settings.store.gradientSecondary} !important;`);
+        css.push(`  --gradient-secondary: ${settings.store.gradientSecondary};`);
     }
-    css.push(`  --gradient-direction: ${settings.store.gradientDirection} !important;`);
+    css.push(`  --gradient-direction: ${settings.store.gradientDirection};`);
 
     if (settings.store.linkColour) {
-        css.push(`  --link-colour: ${settings.store.linkColour} !important;`);
+        css.push(`  --link-colour: ${settings.store.linkColour};`);
     }
 
     // Layout & Extras
-    css.push(`  --window-padding: ${settings.store.windowPadding}px !important;`);
-    css.push(`  --window-roundness: ${settings.store.windowRoundness}px !important;`);
-    css.push(`  --font: ${settings.store.fontQuicksand ? "Quicksand" : "gg sans"} !important;`);
+    css.push(`  --window-padding: ${settings.store.windowPadding}px;`);
+    css.push(`  --window-roundness: ${settings.store.windowRoundness}px;`);
+    css.push(`  --font: ${settings.store.fontQuicksand ? "Quicksand" : "gg sans"};`);
 
     // Brightness Control
-    css.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness} !important;`);
-    css.push(`  --left-brightness: ${settings.store.leftBrightness} !important;`);
-    css.push(`  --middle-brightness: ${settings.store.middleBrightness} !important;`);
+    css.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness};`);
+    css.push(`  --left-brightness: ${settings.store.leftBrightness};`);
+    css.push(`  --middle-brightness: ${settings.store.middleBrightness};`);
 
     css.push("}");
 
