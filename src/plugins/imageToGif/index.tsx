@@ -28,11 +28,16 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
     );
 };
 
-async function uploadToCatbox(blob: Blob): Promise<string> {
+async function uploadToCatbox(uint8Array: Uint8Array): Promise<string> {
+    const helper = (VencordNative as any).pluginHelpers.ImageToGif;
+    if (helper?.uploadToCatbox) {
+        return await helper.uploadToCatbox(uint8Array);
+    }
+
+    // Fallback if native is not available (e.g. web or not rebuilt)
     const formData = new FormData();
     formData.append("reqtype", "fileupload");
-    // We need to name it .gif so Catbox gives us a .gif URL
-    formData.append("fileToUpload", blob, "image.gif");
+    formData.append("fileToUpload", new Blob([uint8Array as any], { type: "image/gif" }), "image.gif");
 
     const response = await fetch("https://catbox.moe/user/api.php", {
         method: "POST",
@@ -82,14 +87,14 @@ async function convertToGifAndFavorite(url: string) {
         gif.writeFrame(index, canvas.width, canvas.height, { palette });
         gif.finish();
 
-        const gifBlob = new Blob([gif.bytesView()], { type: "image/gif" });
+        const uint8Array = gif.bytesView();
 
         showNotification({
             title: "Görselden Gif",
             body: "Siteye yükleniyor (Catbox)...",
         });
 
-        const catboxUrl = await uploadToCatbox(gifBlob);
+        const catboxUrl = await uploadToCatbox(uint8Array);
 
         if (FavoriteGifActions?.addFavoriteGif) {
             FavoriteGifActions.addFavoriteGif({

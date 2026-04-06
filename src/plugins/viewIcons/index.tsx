@@ -89,14 +89,14 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="view-avatar"
-                label="View Avatar"
+                label="Avatarı Görüntüle"
                 action={() => openAvatar(IconUtils.getUserAvatarURL(user, true))}
                 icon={ImageIcon}
             />
             {memberAvatar && (
                 <Menu.MenuItem
                     id="view-server-avatar"
-                    label="View Server Avatar"
+                    label="Sunucu Avatarını Görüntüle"
                     action={() => openAvatar(IconUtils.getGuildMemberAvatarURLSimple({
                         userId: user.id,
                         avatar: memberAvatar,

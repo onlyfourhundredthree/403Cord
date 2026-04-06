@@ -86,7 +86,7 @@ export default definePlugin({
                 children.unshift(
                     <Menu.MenuItem
                         id="vc-copy-role-color"
-                        label="Copy Role Color"
+                        label="Rol Rengini Kopyala"
                         action={() => copyToClipboard(role.colorString!)}
                         icon={AppearanceIcon}
                     />
@@ -97,7 +97,7 @@ export default definePlugin({
                 children.unshift(
                     <Menu.MenuItem
                         id="vc-edit-role"
-                        label="Edit Role"
+                        label="Rolü Düzenle"
                         action={async () => {
                             await GuildSettingsActions.open(guild.id, "ROLES");
                             GuildSettingsActions.selectRole(id);
@@ -111,7 +111,7 @@ export default definePlugin({
                 children.push(
                     <Menu.MenuItem
                         id="vc-view-role-icon"
-                        label="View Role Icon"
+                        label="Rol İkonunu Görüntüle"
                         action={() => {
                             openImageModal({
                                 url: `${location.protocol}//${window.GLOBAL_ENV.CDN_HOST}/role-icons/${role.id}/${role.icon}.${settings.store.roleIconFileFormat}`,
