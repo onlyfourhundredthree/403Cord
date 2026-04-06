@@ -5,32 +5,27 @@
  */
 
 import definePlugin from "@utils/types";
-import { React, RTCConnectionStore, SelectedChannelStore } from "@webpack/common";
+import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
-    const [inChannel, setInChannel] = React.useState(false);
+    const inChannel = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId() === channelId);
 
     React.useEffect(() => {
+        if (!inChannel) return;
         const update = () => {
-            const currentId = SelectedChannelStore.getVoiceChannelId();
-            const isIn = currentId === channelId;
-            setInChannel(isIn);
-            if (isIn) {
-                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
-                setPing(typeof val === "number" && val > 0 ? val : null);
-            }
+            const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
+            if (val > 0) setPing(Math.round(val));
         };
-
         update();
-        const interval = setInterval(update, 2000);
+        const interval = setInterval(update, 1500);
         return () => clearInterval(interval);
-    }, [channelId]);
+    }, [inChannel, channelId]);
 
     if (!inChannel) return null;
 
     return (
-        <div
+        <span
             className="vc-voice-ping"
             style={{
                 color: "var(--text-feedback-positive)",
@@ -41,12 +36,11 @@ function VoicePing({ channelId }: { channelId: string; }) {
                 marginLeft: "8px",
                 fontFamily: "var(--font-code)",
                 alignSelf: "center",
-                cursor: "default",
-                verticalAlign: "middle"
+                cursor: "default"
             }}
         >
-            {ping !== null ? Math.round(ping) : "---"}ms
-        </div>
+            {ping !== null ? `${ping}ms` : "---ms"}
+        </span>
     );
 }
 
@@ -57,27 +51,18 @@ export default definePlugin({
 
     patches: [
         {
-            find: "UNREAD_IMPORTANT:",
+            // The VoiceChannel component is the one that contains renderEditButton
+            find: ".handleVoiceStatusClick",
             replacement: [
                 {
-                    // Inject a local variable for the ping during prop destructuring
-                    match: /({channel:(\i),name:(\i).+?;)/,
-                    replace: "$1 let $vcping=$self.VoicePing({channelId:$2.id});"
+                    // Define a local variable for the ping component at the start of render
+                    match: /render\(\)\{/,
+                    replace: "render(){const $vcp=$self.VoicePing({channelId:this.props.channel.id});"
                 },
                 {
-                    // Put the ping at the beginning of the status icons area
-                    match: /\.Children\.count.+?:null(?<=,channel:\i.+?)/,
-                    replace: "($vcping, $&)"
-                }
-            ]
-        },
-        {
-            // Redundant patch for VoiceChannel component directly
-            find: "VoiceChannel.renderPopout: There must always be something to render",
-            replacement: [
-                {
-                    match: /className:(\i)\.children,children:\[/,
-                    replace: "$&$self.VoicePing({channelId:this.props.channel.id}),"
+                    // Inject the component after the edit button in the status icons array
+                    match: /this\.renderEditButton\(\)/,
+                    replace: "$&, $vcp"
                 }
             ]
         }
