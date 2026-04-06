@@ -20,6 +20,11 @@
     box-shadow: var(--elevation-high);
 }
 
+.vc-notification-log-wrapper .vc-notification-root {
+    background: var(--background-secondary-alt);
+    border-left: 4px solid var(--brand-500);
+}
+
 .vc-notification-root:not(.vc-notification-log-wrapper > .vc-notification-root) {
     position: absolute;
     z-index: 2147483647;
@@ -87,7 +92,7 @@
     width: 48px;
     border-radius: 8px;
     object-fit: cover;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
 }
 
 .vc-notification-progressbar {
@@ -146,10 +151,7 @@
     margin-bottom: 0;
 }
 
-.vc-notification-log-wrapper .vc-notification-root {
-    background: var(--background-secondary-alt);
-    border-left: 4px solid var(--brand-500);
-}
+
 
 .vc-notification-log-removing {
     height: 0 !important;

@@ -60,8 +60,8 @@ async function runUpdateCheck() {
             await update();
             if (Settings.autoUpdateNotification) {
                 notify({
-                    title: "Vencord has been updated!",
-                    body: "Click here to restart",
+                    title: "403Cord güncellendi!",
+                    body: "Yeniden başlatmak için tıklayın",
                     onClick: relaunch
                 });
             }
@@ -69,12 +69,12 @@ async function runUpdateCheck() {
         }
 
         notify({
-            title: "A 403Cord update is available!",
-            body: "Click here to view the update",
+            title: "403Cord güncellendi!",
+            body: "Güncellemeyi görüntülemek için tıklayın",
             onClick: () => openSettingsTabModal(UpdaterTab!)
         });
     } catch (err) {
-        UpdateLogger.error("Failed to check for updates", err);
+        UpdateLogger.error("Güncelleme kontrolü başarısız", err);
     }
 }
 
