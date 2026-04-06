@@ -5,26 +5,28 @@
  */
 
 import definePlugin from "@utils/types";
-import { React, RTCConnectionStore, SelectedChannelStore } from "@webpack/common";
+import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
+    const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
+
+    const inChannel = currentVoiceChannelId === channelId;
 
     React.useEffect(() => {
+        if (!inChannel) return;
+
         const update = () => {
-            if (SelectedChannelStore.getVoiceChannelId() === channelId) {
-                setPing(RTCConnectionStore.getAveragePing());
-            } else if (ping !== null) {
-                setPing(null);
-            }
+            const val = RTCConnectionStore.getAveragePing();
+            if (typeof val === "number") setPing(val);
         };
 
         update();
-        const interval = setInterval(update, 2500);
+        const interval = setInterval(update, 2000);
         return () => clearInterval(interval);
-    }, [channelId, ping]);
+    }, [inChannel, channelId]);
 
-    if (ping == null || ping <= 0) return null;
+    if (!inChannel) return null;
 
     return (
         <div
@@ -35,17 +37,18 @@ function VoicePing({ channelId }: { channelId: string; }) {
                 fontWeight: "700",
                 display: "inline-flex",
                 alignItems: "center",
-                marginRight: "4px",
+                marginRight: "6px",
                 fontFamily: "var(--font-code)",
                 backgroundColor: "rgba(0, 0, 0, 0.15)",
                 padding: "0 4px",
                 borderRadius: "4px",
                 height: "16px",
                 lineHeight: "16px",
-                alignSelf: "center"
+                alignSelf: "center",
+                cursor: "default"
             }}
         >
-            {Math.round(ping)}ms
+            {ping && ping > 0 ? Math.round(ping) : "---"}ms
         </div>
     );
 }
@@ -59,10 +62,10 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                // Patch into the Children.count check which is where status icons are rendered.
-                // Placing our component BEFORE the match ensures it appears to the left of other icons.
-                match: /\.Children\.count.{0,10}?:null(?<=,channel:(\i).+?)/,
-                replace: (m, channel) => `$self.VoicePing({channelId:${channel}.id}),${m}`
+                // Find the children container for status icons (children__2ea32 in HTML)
+                // and inject VoicePing as the first element of that array.
+                match: /({channel:(\i).+?className:(\i)\.children,children:\[)/,
+                replace: "$1 $self.VoicePing({channelId:$2.id}),"
             }
         }
     ],
