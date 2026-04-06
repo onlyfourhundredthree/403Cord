@@ -20,7 +20,7 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 export default definePlugin({
-    name: "KediUWu",
+    name: "Mouse Cat",
     description: "Discord ekranındayken mouse'unuzu bir kedi takip eder.",
     authors: [Devs.Toji, Devs.Aki],
 
