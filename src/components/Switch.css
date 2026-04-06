@@ -35,7 +35,11 @@
     margin: 3px;
     position: absolute;
     width: 28px;
-    transition: 100ms transform ease-in-out;
+    /* GPU Acceleration */
+    will-change: transform;
+    contain: layout style;
+    transform: translateZ(0);
+    transition: transform 80ms ease-out;
     overflow: visible;
 }
 

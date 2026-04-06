@@ -3,7 +3,11 @@
 }
 
 .vc-donate-button .vc-heart-icon {
-    transition: transform 0.3s;
+    /* GPU Acceleration */
+    will-change: transform;
+    transform: translateZ(0);
+    contain: layout style;
+    transition: transform 0.2s ease-out;
     margin-right: 0.5em;
 }
 

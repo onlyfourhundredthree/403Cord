@@ -40,6 +40,8 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
     const currentVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const originalVideoElementRef = useRef<HTMLVideoElement | null>(null);
     const imageRef = useRef<HTMLImageElement | null>(null);
+    const rafIdRef = useRef<number | null>(null);
+    const pendingPositionRef = useRef<Vec2 | null>(null);
 
     // since we accessing document im gonna use useLayoutEffect
     useLayoutEffect(() => {
@@ -58,21 +60,32 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
                 currentVideoElementRef.current.currentTime = originalVideoElementRef.current.currentTime;
         };
 
-        const updateMousePosition = (e: MouseEvent) => {
-            if (!element.current) return;
+        const processPosition = () => {
+            if (!pendingPositionRef.current || !element.current) return;
 
+            const e = pendingPositionRef.current;
             if (instance.state.mouseOver && instance.state.mouseDown) {
                 const offset = size.current / 2;
-                const pos = { x: e.pageX, y: e.pageY };
-                const x = -((pos.x - element.current.getBoundingClientRect().left) * zoom.current - offset);
-                const y = -((pos.y - element.current.getBoundingClientRect().top) * zoom.current - offset);
+                const bounds = element.current.getBoundingClientRect();
+                const x = -((e.x - bounds.left) * zoom.current - offset);
+                const y = -((e.y - bounds.top) * zoom.current - offset);
                 setLensPosition({ x: e.x - offset, y: e.y - offset });
                 setImagePosition({ x, y });
                 setOpacity(1);
             } else {
                 setOpacity(0);
             }
+            pendingPositionRef.current = null;
+        };
 
+        const updateMousePosition = (e: MouseEvent) => {
+            pendingPositionRef.current = { x: e.pageX, y: e.pageY };
+            if (rafIdRef.current === null) {
+                rafIdRef.current = requestAnimationFrame(() => {
+                    processPosition();
+                    rafIdRef.current = null;
+                });
+            }
         };
 
         const onMouseDown = (e: MouseEvent) => {
@@ -123,10 +136,10 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
 
         document.addEventListener("keydown", onKeyDown);
         document.addEventListener("keyup", onKeyUp);
-        document.addEventListener("mousemove", updateMousePosition);
+        document.addEventListener("mousemove", updateMousePosition, { passive: true });
         document.addEventListener("mousedown", onMouseDown);
         document.addEventListener("mouseup", onMouseUp);
-        document.addEventListener("wheel", onWheel);
+        document.addEventListener("wheel", onWheel, { passive: true });
 
         return () => {
             document.removeEventListener("keydown", onKeyDown);
@@ -135,6 +148,9 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             document.removeEventListener("mousedown", onMouseDown);
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
+            if (rafIdRef.current !== null) {
+                cancelAnimationFrame(rafIdRef.current);
+            }
         };
     }, []);
 

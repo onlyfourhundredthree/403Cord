@@ -8,14 +8,18 @@
     border-radius: var(--radius-sm, 8px);
     font-family: var(--font-primary);
     text-align: start;
-    transition: 50ms ease-in;
-    transition-property: background-color, color, border-color, opacity;
+    /* GPU Acceleration */
+    will-change: background-color, border-color;
+    contain: layout style;
+    transform: translateZ(0);
+    transition: background-color 50ms ease-in, border-color 50ms ease-in, color 50ms ease-in;
     background: var(--control-secondary-background-default);
     color: var(--text-default);
     white-space: nowrap;
 
     &:hover {
-        transition: .15s ease-out;
+        transition-duration: .15s;
+        transition-timing-function: ease-out;
     }
 
     &:disabled {

@@ -7,8 +7,12 @@
     height: 100%;
     padding: 12px;
     width: 100%;
-    transition: 0.1s ease-out;
-    transition-property: box-shadow, transform, background, opacity;
+    /* GPU Acceleration */
+    will-change: transform, box-shadow;
+    contain: layout style paint;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
     box-sizing: border-box;
 }
 
@@ -93,5 +97,8 @@
 
 .vc-addon-title:hover {
     overflow: visible;
+    /* GPU Acceleration for animation */
+    will-change: transform;
+    transform: translateZ(0);
     animation: vc-addon-title var(--duration) linear infinite;
 }

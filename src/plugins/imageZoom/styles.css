@@ -10,6 +10,12 @@
     filter: drop-shadow(0 0 2px grey);
     pointer-events: none;
 
+    /* GPU Acceleration for smooth movement */
+    will-change: transform, opacity;
+    contain: layout style paint;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+
     /* negate the border offsetting the lens */
     margin: -2px;
 }

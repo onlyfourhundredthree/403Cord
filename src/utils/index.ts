@@ -13,6 +13,7 @@ export * from "./cspViolations";
 export * from "./css";
 export * from "./discord";
 export * from "./guards";
+export * from "./IntervalManager";
 export * from "./intlHash";
 export * from "./lazy";
 export * from "./lazyReact";

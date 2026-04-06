@@ -22,7 +22,11 @@
     gap: 0.5em;
     padding: 8px 9px;
     border-radius: 8px;
-    transition: 0.1s ease-out;
+    /* GPU Acceleration */
+    will-change: transform, box-shadow;
+    contain: layout style;
+    transform: translateZ(0);
+    transition: transform 0.1s ease-out, background-color 0.1s ease-out, box-shadow 0.1s ease-out;
     box-sizing: border-box;
 }
 

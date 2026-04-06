@@ -20,6 +20,25 @@ const settings = definePluginSettings({
     }
 });
 
+// Image URL cache for performance - maps original URL to processed URL
+const imageUrlCache = new Map<string, string>();
+const MAX_CACHE_SIZE = 500; // Limit cache to prevent memory bloat
+
+function getCachedUrl(key: string): string | undefined {
+    return imageUrlCache.get(key);
+}
+
+function setCachedUrl(key: string, url: string): void {
+    // LRU-like cache eviction
+    if (imageUrlCache.size >= MAX_CACHE_SIZE) {
+        const firstKey = imageUrlCache.keys().next().value;
+        if (firstKey) {
+            imageUrlCache.delete(firstKey);
+        }
+    }
+    imageUrlCache.set(key, url);
+}
+
 export default definePlugin({
     name: "FixImagesQuality",
     description: "Improves quality of images by loading them at their original resolution",
@@ -65,6 +84,11 @@ export default definePlugin({
         try {
             const { contentType, height, src, width, mosaicStyleAlt, trigger } = props;
 
+            // Create cache key
+            const cacheKey = `${src}|${width}|${height}|${freeze}|${trigger}`;
+            const cached = getCachedUrl(cacheKey);
+            if (cached) return cached;
+
             // Embed images do not have a content type set.
             // It's difficult to differentiate between images and videos. but mosaicStyleAlt seems exclusive to images
             const isImage = contentType?.startsWith("image/") ?? (typeof mosaicStyleAlt === "boolean");
@@ -85,18 +109,25 @@ export default definePlugin({
                 const pixels = width * height;
                 const limit = 2000 * 1200;
 
-                if (pixels <= limit)
-                    return url.toString();
+                if (pixels <= limit) {
+                    const result = url.toString();
+                    setCachedUrl(cacheKey, result);
+                    return result;
+                }
 
                 const scale = Math.sqrt(pixels / limit);
 
                 url.searchParams.set("width", Math.round(width / scale).toString());
                 url.searchParams.set("height", Math.round(height / scale).toString());
-                return url.toString();
+                const result = url.toString();
+                setCachedUrl(cacheKey, result);
+                return result;
             }
 
             url.hostname = "cdn.discordapp.com";
-            return url.toString();
+            const result = url.toString();
+            setCachedUrl(cacheKey, result);
+            return result;
         } catch (e) {
             new Logger("FixImagesQuality").error("Failed to make image src", e);
             return;
