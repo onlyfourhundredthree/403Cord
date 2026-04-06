@@ -13,7 +13,12 @@ const intervalManager = new IntervalManager();
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
     const [isVisible, setIsVisible] = React.useState(!document.hidden);
-    const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
+
+    const currentVoiceChannelId = useStateFromStores(
+        [SelectedChannelStore],
+        () => SelectedChannelStore.getVoiceChannelId(),
+        []
+    );
 
     const inChannel = currentVoiceChannelId === channelId;
 
@@ -45,8 +50,7 @@ function VoicePing({ channelId }: { channelId: string; }) {
         update();
         intervalManager.setInterval("voicePing", update, 2000);
 
-        return () => {
-            intervalManager.clearInterval("voicePing");
+        return () => { intervalManager.clearInterval("voicePing");
         };
     }, [inChannel, channelId, isVisible]);
 
@@ -58,7 +62,7 @@ function VoicePing({ channelId }: { channelId: string; }) {
             style={{
                 color: "var(--text-positive)",
                 fontSize: "11px",
-                fontWeight: "700",
+                fontWeight: 700,
                 display: "inline-flex",
                 alignItems: "center",
                 marginRight: "6px",

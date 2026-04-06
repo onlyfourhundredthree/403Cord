@@ -64,7 +64,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
             [guildId]
         );
 
-        if (!isTooltip && groups.length >= 1 && groups[0].id !== "unknown") {
+        if (!isTooltip && groups?.length >= 1 && groups[0].id !== "unknown") {
             count = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
         }
 
