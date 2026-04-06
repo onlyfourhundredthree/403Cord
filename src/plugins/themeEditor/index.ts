@@ -8,7 +8,7 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-const CSS_ID = "403-cord-theme-addons";
+const CSS_ID = "403-cord-theme-engine";
 
 function updateThemeStyles(settings: any) {
     let styleEl = document.getElementById(CSS_ID);
@@ -20,40 +20,41 @@ function updateThemeStyles(settings: any) {
 
     const css: string[] = [];
 
-    // Addons / Imports (GitHub üzerinden çekilen güncel dosyalar)
+    // Font Import
     if (settings.store.fontQuicksand) {
         css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
-        css.push("body, button, input, select, textarea, [class*='text-'], [class*='name-'], [class*='header-'] { font-family: 'Quicksand', sans-serif !important; }");
     }
+
+    // Theme Addons (External Imports)
     if (settings.store.themeFrostedGlass) {
-        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
+        css.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
+    }
+    if (settings.store.themeWindowsTitlebar) {
+        css.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
     }
     if (settings.store.themeRadialStatus) {
         css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
     }
-    if (settings.store.themeHorizontalServerList) {
-        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/HorizontalServerList/deploy/HorizontalServerList.theme.css');");
-    }
 
-    // Root Variables (Arayüz ayarlarından gelen renk, blur ve ölçü değişiklikleri)
+    // Root Variables
     css.push(":root {");
 
     // Backgrounds
     if (settings.store.backgroundImage) {
         css.push(`  --background-image: url('${settings.store.backgroundImage}') !important;`);
     }
-    css.push(`  --background-image-blur: ${settings.store.backgroundBlur || 0}px !important;`);
-    css.push(`  --background-image-size: ${settings.store.backgroundSize || "cover"} !important;`);
-    css.push(`  --background-image-position: ${settings.store.backgroundPosition || "center"} !important;`);
+    css.push(`  --background-image-blur: ${settings.store.backgroundBlur}px !important;`);
+    css.push(`  --background-image-size: ${settings.store.backgroundSize} !important;`);
+    css.push(`  --background-image-position: ${settings.store.backgroundPosition} !important;`);
 
     // Popouts
     if (settings.store.popoutImage) {
         css.push(`  --popout-modal-image: url('${settings.store.popoutImage}') !important;`);
     } else {
-        css.push("  --popout-modal-image: transparent !important;");
+        css.push(`  --popout-modal-image: transparent !important;`);
     }
-    css.push(`  --popout-modal-blur: ${settings.store.popoutBlur || 0}px !important;`);
-    css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness || 0.6} !important;`);
+    css.push(`  --popout-modal-blur: ${settings.store.popoutBlur}px !important;`);
+    css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness} !important;`);
 
     // Home Button
     if (settings.store.homeIconUrl) {
@@ -68,44 +69,23 @@ function updateThemeStyles(settings: any) {
     if (settings.store.gradientSecondary) {
         css.push(`  --gradient-secondary: ${settings.store.gradientSecondary} !important;`);
     }
-    css.push(`  --gradient-direction: ${settings.store.gradientDirection || "320deg"} !important;`);
+    css.push(`  --gradient-direction: ${settings.store.gradientDirection} !important;`);
 
-    if (settings.store.accentColor) {
-        css.push(`  --brand-experiment: ${settings.store.accentColor} !important;`);
-        css.push(`  --brand-experiment-500: ${settings.store.accentColor} !important;`);
-    }
     if (settings.store.linkColour) {
         css.push(`  --link-colour: ${settings.store.linkColour} !important;`);
-        css.push(`  --text-link: ${settings.store.linkColour} !important;`);
     }
 
-    // Layout & Padding
-    css.push(`  --window-padding: ${settings.store.windowPadding || 0}px !important;`);
-    css.push(`  --window-roundness: ${settings.store.windowRoundness || 0}px !important;`);
+    // Layout & Extras
+    css.push(`  --window-padding: ${settings.store.windowPadding}px !important;`);
+    css.push(`  --window-roundness: ${settings.store.windowRoundness}px !important;`);
+    css.push(`  --font: ${settings.store.fontQuicksand ? "Quicksand" : "gg sans"} !important;`);
 
-    // Brightness
-    css.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness || 0.6} !important;`);
-    css.push(`  --left-brightness: ${settings.store.leftBrightness || 0.6} !important;`);
-    css.push(`  --middle-brightness: ${settings.store.middleBrightness || 0.6} !important;`);
+    // Brightness Control
+    css.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness} !important;`);
+    css.push(`  --left-brightness: ${settings.store.leftBrightness} !important;`);
+    css.push(`  --middle-brightness: ${settings.store.middleBrightness} !important;`);
 
     css.push("}");
-
-    // Fix for Wordmark/Title in Custom Title Bar
-    if (settings.store.customTitleText) {
-        css.push(`
-            [class*="wordmark-"]::after {
-                content: "${settings.store.customTitleText}";
-                display: inline-block;
-                margin-left: 8px;
-                color: var(--text-muted);
-                font-size: 12px;
-                font-family: var(--font);
-            }
-            [class*="wordmark-"] > svg {
-                display: ${settings.store.hideDiscordLogo ? "none" : "block"};
-            }
-        `);
-    }
 
     // Custom CSS
     if (settings.store.customCss) {
@@ -117,7 +97,7 @@ function updateThemeStyles(settings: any) {
 
 const settings = definePluginSettings({
     fontQuicksand: {
-        description: "Özel Quicksand Fontu",
+        description: "Quicksand Fontunu Aktif Et",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
@@ -128,20 +108,20 @@ const settings = definePluginSettings({
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
+    themeWindowsTitlebar: {
+        description: "Windows Uyumlu Üst Bar",
+        type: OptionType.BOOLEAN,
+        default: true,
+        onChange: () => updateThemeStyles(settings)
+    },
     themeRadialStatus: {
         description: "Radial Durum Halkaları",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
-    themeHorizontalServerList: {
-        description: "Yatay Sunucu Listesi",
-        type: OptionType.BOOLEAN,
-        default: false,
-        onChange: () => updateThemeStyles(settings)
-    },
     backgroundImage: {
-        description: "Uygulama Arka Planı URL",
+        description: "Ana Arka Plan URL (png/jpg)",
         type: OptionType.STRING,
         default: "https://i.imgur.com/OHStaWu.png",
         onChange: () => updateThemeStyles(settings)
@@ -153,25 +133,49 @@ const settings = definePluginSettings({
         onChange: () => updateThemeStyles(settings)
     },
     backgroundSize: {
-        description: "Arka Plan Boyutu",
+        description: "Arka Plan Ebatı (cover, contain vb.)",
         type: OptionType.STRING,
         default: "cover",
+        onChange: () => updateThemeStyles(settings)
+    },
+    backgroundPosition: {
+        description: "Arka Plan Konumu (center, top vb.)",
+        type: OptionType.STRING,
+        default: "center",
         onChange: () => updateThemeStyles(settings)
     },
     popoutImage: {
         description: "Popout/Modal Arka Plan URL",
         type: OptionType.STRING,
-        default: "",
+        default: "transparent",
+        onChange: () => updateThemeStyles(settings)
+    },
+    popoutBlur: {
+        description: "Popout Bulanıklığı (px)",
+        type: OptionType.NUMBER,
+        default: 0,
+        onChange: () => updateThemeStyles(settings)
+    },
+    popoutBrightness: {
+        description: "Popout Parlaklığı (0-1 arası)",
+        type: OptionType.NUMBER,
+        default: 0.6,
+        onChange: () => updateThemeStyles(settings)
+    },
+    homeIconUrl: {
+        description: "Ana Sayfa (Home) Butonu İkonu",
+        type: OptionType.STRING,
+        default: "https://i.imgur.com/rAzycBK.png",
         onChange: () => updateThemeStyles(settings)
     },
     gradientPrimary: {
-        description: "Ana Gradyan (RGB örn: 219, 219, 164)",
+        description: "Ana Gradyan Rengi (R,G,B Formatı)",
         type: OptionType.STRING,
         default: "219, 219, 164",
         onChange: () => updateThemeStyles(settings)
     },
     gradientSecondary: {
-        description: "İkincil Gradyan (RGB örn: 14, 163, 232)",
+        description: "İkincil Gradyan Rengi (R,G,B Formatı)",
         type: OptionType.STRING,
         default: "14, 163, 232",
         onChange: () => updateThemeStyles(settings)
@@ -183,13 +187,13 @@ const settings = definePluginSettings({
         onChange: () => updateThemeStyles(settings)
     },
     linkColour: {
-        description: "Bağlantı Rengi (Hex)",
+        description: "Link/Bağlantı Rengi",
         type: OptionType.STRING,
         default: "#88f7ff",
         onChange: () => updateThemeStyles(settings)
     },
     windowPadding: {
-        description: "Pencere Kenar Boşluğu (px)",
+        description: "Pencere Boşluğu (Padding px)",
         type: OptionType.NUMBER,
         default: 0,
         onChange: () => updateThemeStyles(settings)
@@ -200,26 +204,26 @@ const settings = definePluginSettings({
         default: 0,
         onChange: () => updateThemeStyles(settings)
     },
-    homeIconUrl: {
-        description: "Ana Sayfa Buton URL",
-        type: OptionType.STRING,
-        default: "https://i.imgur.com/rAzycBK.png",
+    serverlistBrightness: {
+        description: "Sunucu Listesi Parlaklığı (0-1)",
+        type: OptionType.NUMBER,
+        default: 0.6,
         onChange: () => updateThemeStyles(settings)
     },
-    customTitleText: {
-        description: "Başlık Barı Yazısı (Logo Yanı)",
-        type: OptionType.STRING,
-        default: "4 0 3",
+    leftBrightness: {
+        description: "Sol Panel Parlaklığı (0-1)",
+        type: OptionType.NUMBER,
+        default: 0.6,
         onChange: () => updateThemeStyles(settings)
     },
-    hideDiscordLogo: {
-        description: "Discord Logosunu Gizle",
-        type: OptionType.BOOLEAN,
-        default: false,
+    middleBrightness: {
+        description: "Chat Alanı Parlaklığı (0-1)",
+        type: OptionType.NUMBER,
+        default: 0.6,
         onChange: () => updateThemeStyles(settings)
     },
     customCss: {
-        description: "Ekstra CSS Modları",
+        description: "Özel CSS Modları",
         type: OptionType.STRING,
         multiline: true,
         default: "",
@@ -229,7 +233,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Tema Düzenleyici",
-    description: "403Cord Gelişmiş Dinamik Tema Yöneticisi.",
+    description: "403Cord Dinamik Tema Yöneticisi.",
     authors: [Devs.Toji, Devs.Aki],
     settings,
 
