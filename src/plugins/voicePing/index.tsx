@@ -17,8 +17,7 @@ function VoicePing({ channelId }: { channelId: string; }) {
             const isIn = currentId === channelId;
             setInChannel(isIn);
             if (isIn) {
-                // Try multiple ways to get ping
-                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? (RTCConnectionStore as any).getPing?.() ?? 0;
+                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
                 setPing(typeof val === "number" && val > 0 ? val : null);
             }
         };
@@ -31,23 +30,23 @@ function VoicePing({ channelId }: { channelId: string; }) {
     if (!inChannel) return null;
 
     return (
-        <span
+        <div
             className="vc-voice-ping"
             style={{
                 color: "var(--text-feedback-positive)",
                 fontSize: "12px",
-                fontWeight: "600",
+                fontWeight: "400",
                 display: "inline-flex",
                 alignItems: "center",
-                marginLeft: "10px",
+                marginLeft: "8px",
                 fontFamily: "var(--font-code)",
                 alignSelf: "center",
                 cursor: "default",
                 verticalAlign: "middle"
             }}
         >
-            {ping !== null ? `${Math.round(ping)}ms` : "---ms"}
-        </span>
+            {ping !== null ? Math.round(ping) : "---"}ms
+        </div>
     );
 }
 
@@ -58,11 +57,25 @@ export default definePlugin({
 
     patches: [
         {
-            // Use the same finding string as ShowHiddenChannels for the VoiceChannel component
+            find: "UNREAD_IMPORTANT:",
+            replacement: [
+                {
+                    // Inject a local variable for the ping during prop destructuring
+                    match: /({channel:(\i),name:(\i).+?;)/,
+                    replace: "$1 let $vcping=$self.VoicePing({channelId:$2.id});"
+                },
+                {
+                    // Put the ping at the beginning of the status icons area
+                    match: /\.Children\.count.+?:null(?<=,channel:\i.+?)/,
+                    replace: "($vcping, $&)"
+                }
+            ]
+        },
+        {
+            // Redundant patch for VoiceChannel component directly
             find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
                 {
-                    // Target the children array start for icons area
                     match: /className:(\i)\.children,children:\[/,
                     replace: "$&$self.VoicePing({channelId:this.props.channel.id}),"
                 }
