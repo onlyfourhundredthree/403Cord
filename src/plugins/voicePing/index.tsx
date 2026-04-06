@@ -8,31 +8,47 @@ import definePlugin from "@utils/types";
 import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
 
 function VoicePing({ channelId }: { channelId: string; }) {
-    const ping = useStateFromStores([RTCConnectionStore, SelectedChannelStore], () => {
-        if (SelectedChannelStore.getVoiceChannelId() !== channelId) return null;
-        return RTCConnectionStore.getAveragePing();
-    });
+    const [ping, setPing] = React.useState<number | null>(null);
+    const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
 
-    if (ping == null || ping <= 0) return null;
+    const inChannel = currentVoiceChannelId === channelId;
+
+    React.useEffect(() => {
+        if (!inChannel) return;
+
+        const update = () => {
+            const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
+            if (typeof val === "number") setPing(val);
+        };
+
+        update();
+        const interval = setInterval(update, 2000);
+        return () => clearInterval(interval);
+    }, [inChannel, channelId]);
+
+    if (!inChannel) return null;
 
     return (
-        <span
+        <div
             className="vc-voice-ping"
             style={{
-                color: "var(--text-feedback-positive)",
-                fontSize: "12px",
-                fontWeight: "400",
+                color: "var(--text-positive)",
+                fontSize: "11px",
+                fontWeight: "700",
                 display: "inline-flex",
                 alignItems: "center",
-                marginLeft: "10px",
+                marginRight: "6px",
                 fontFamily: "var(--font-code)",
-                alignSelf: "center",
-                cursor: "default",
-                verticalAlign: "middle"
+                backgroundColor: "rgba(0, 0, 0, 0.15)",
+                padding: "0 4px",
+                borderRadius: "4px",
+                height: "16px",
+                lineHeight: "16px",
+                alignSelf: "center"
             }}
         >
-            {Math.round(ping)}ms
-        </span>
+            {ping && ping > 0 ? Math.round(ping) : "---"}ms
+        </div>
     );
 }
 
