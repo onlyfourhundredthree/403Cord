@@ -8,34 +8,37 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
-const THEME_PREFIX = "403cord-theme-";
 const VARS_ID = "403cord-theme-vars";
+const LINK_PREFIX = "403cord-link-";
 
-// Her tema icin ayri bir <link> etiketi oluşturur - Discord'un kendi tema sistemiyle tamamen uyumlu
-function setThemeLink(id: string, url: string | null) {
-    const fullId = THEME_PREFIX + id;
-    let link = document.getElementById(fullId) as HTMLLinkElement | null;
+// Sabit tema linkleri - bunlar her zaman yuklenir, acma/kapama yok
+const THEME_LINKS = [
+    { id: "font", url: "https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap" },
+    { id: "frostedglass", url: "https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css" },
+    { id: "titlebar", url: "https://discordstyles.github.io/Addons/windows-titlebar.css" },
+    { id: "radialstatus", url: "https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css" },
+];
 
-    if (!url) {
-        // Tema kapatıldı, link'i sil
-        link?.remove();
-        return;
-    }
+function injectThemeLinks() {
+    for (const theme of THEME_LINKS) {
+        const fullId = LINK_PREFIX + theme.id;
+        if (document.getElementById(fullId)) continue;
 
-    if (!link) {
-        link = document.createElement("link");
+        const link = document.createElement("link");
         link.id = fullId;
         link.rel = "stylesheet";
         link.type = "text/css";
+        link.href = theme.url;
         document.documentElement.appendChild(link);
-    }
-
-    if (link.href !== url) {
-        link.href = url;
     }
 }
 
-// Degiskenler icin tekil bir <style> etiketi
+function removeThemeLinks() {
+    for (const theme of THEME_LINKS) {
+        document.getElementById(LINK_PREFIX + theme.id)?.remove();
+    }
+}
+
 function updateVars(settings: any) {
     let style = document.getElementById(VARS_ID) as HTMLStyleElement | null;
     if (!style) {
@@ -86,7 +89,7 @@ function updateVars(settings: any) {
     // Layout
     lines.push(`  --window-padding: ${settings.store.windowPadding}px;`);
     lines.push(`  --window-roundness: ${settings.store.windowRoundness}px;`);
-    lines.push(`  --font: ${settings.store.fontQuicksand ? "Quicksand" : "gg sans"};`);
+    lines.push("  --font: Quicksand;");
 
     // Brightness
     lines.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness};`);
@@ -103,168 +106,115 @@ function updateVars(settings: any) {
     style.textContent = lines.join("\n");
 }
 
-function applyAll(settings: any) {
-    // Font - Google Fonts
-    setThemeLink("font", settings.store.fontQuicksand
-        ? "https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap"
-        : null
-    );
-
-    // FrostedGlass
-    setThemeLink("frostedglass", settings.store.themeFrostedGlass
-        ? "https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css"
-        : null
-    );
-
-    // Windows Titlebar
-    setThemeLink("titlebar", settings.store.themeWindowsTitlebar
-        ? "https://discordstyles.github.io/Addons/windows-titlebar.css"
-        : null
-    );
-
-    // Radial Status
-    setThemeLink("radialstatus", settings.store.themeRadialStatus
-        ? "https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css"
-        : null
-    );
-
-    // Variables
-    updateVars(settings);
-}
-
 const settings = definePluginSettings({
-    fontQuicksand: {
-        description: "Quicksand Fontu",
-        type: OptionType.BOOLEAN,
-        default: true,
-        onChange: () => applyAll(settings)
-    },
-    themeFrostedGlass: {
-        description: "Buzlu Cam (Frosted Glass) Efekti",
-        type: OptionType.BOOLEAN,
-        default: true,
-        onChange: () => applyAll(settings)
-    },
-    themeWindowsTitlebar: {
-        description: "Windows Uyumlu Üst Bar",
-        type: OptionType.BOOLEAN,
-        default: true,
-        onChange: () => applyAll(settings)
-    },
-    themeRadialStatus: {
-        description: "Radial Durum Halkaları",
-        type: OptionType.BOOLEAN,
-        default: true,
-        onChange: () => applyAll(settings)
-    },
     backgroundImage: {
         description: "Ana Arka Plan URL",
         type: OptionType.STRING,
         default: "https://i.imgur.com/OHStaWu.png",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     backgroundBlur: {
         description: "Arka Plan Bulanıklığı (px)",
         type: OptionType.NUMBER,
         default: 0,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     backgroundSize: {
         description: "Arka Plan Ebatı (cover, contain vb.)",
         type: OptionType.STRING,
         default: "cover",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     backgroundPosition: {
         description: "Arka Plan Konumu (center, top vb.)",
         type: OptionType.STRING,
         default: "center",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     popoutImage: {
         description: "Popout/Modal Arka Plan URL",
         type: OptionType.STRING,
         default: "transparent",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     popoutBlur: {
         description: "Popout Bulanıklığı (px)",
         type: OptionType.NUMBER,
         default: 0,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     popoutBrightness: {
         description: "Popout Parlaklığı (0-1)",
         type: OptionType.NUMBER,
         default: 0.6,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     homeIconUrl: {
         description: "Ana Sayfa Buton İkonu",
         type: OptionType.STRING,
         default: "https://i.imgur.com/rAzycBK.png",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     gradientPrimary: {
         description: "Ana Gradyan (R,G,B)",
         type: OptionType.STRING,
         default: "219, 219, 164",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     gradientSecondary: {
         description: "İkincil Gradyan (R,G,B)",
         type: OptionType.STRING,
         default: "14, 163, 232",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     gradientDirection: {
         description: "Gradyan Açısı (örn: 320deg)",
         type: OptionType.STRING,
         default: "320deg",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     linkColour: {
         description: "Link Rengi",
         type: OptionType.STRING,
         default: "#88f7ff",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     windowPadding: {
         description: "Pencere Boşluğu (px)",
         type: OptionType.NUMBER,
         default: 0,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     windowRoundness: {
         description: "Pencere Köşe Yuvarlaklığı (px)",
         type: OptionType.NUMBER,
         default: 0,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     serverlistBrightness: {
         description: "Sunucu Listesi Parlaklığı (0-1)",
         type: OptionType.NUMBER,
         default: 0.6,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     leftBrightness: {
         description: "Sol Panel Parlaklığı (0-1)",
         type: OptionType.NUMBER,
         default: 0.6,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     middleBrightness: {
         description: "Chat Alanı Parlaklığı (0-1)",
         type: OptionType.NUMBER,
         default: 0.6,
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     },
     customCss: {
         description: "Özel CSS Kodları",
         type: OptionType.STRING,
         multiline: true,
         default: "",
-        onChange: () => applyAll(settings)
+        onChange: () => updateVars(settings)
     }
 });
 
@@ -275,12 +225,12 @@ export default definePlugin({
     settings,
 
     start() {
-        applyAll(settings);
+        injectThemeLinks();
+        updateVars(settings);
     },
 
     stop() {
-        // Tüm tema linklerini temizle
-        document.querySelectorAll(`[id^="${THEME_PREFIX}"]`).forEach(el => el.remove());
+        removeThemeLinks();
         document.getElementById(VARS_ID)?.remove();
     }
 });
