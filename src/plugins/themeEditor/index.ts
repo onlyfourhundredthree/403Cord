@@ -8,6 +8,12 @@ import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
+function getImg(val: string) {
+    if (!val || val === "transparent" || val === "none") return val || "none";
+    if (val.startsWith("url(")) return val;
+    return `url('${val}')`;
+}
+
 function updateTheme() {
     const elId = "-vencord-custom-theme-editor";
     let el = document.getElementById(elId);
@@ -21,23 +27,21 @@ function updateTheme() {
 
     // Ozel CSS kurali: @import satirlari her zaman en ustte olmak zorundadir!
     if (settings.store.fontQuicksand) imports.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
-    if (settings.store.themeFrostedGlass) imports.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
+    if (settings.store.themeFrostedGlass) imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
     if (settings.store.themeWindowsTitlebar) imports.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
-    if (settings.store.themeServerColumns) imports.push("@import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/ServerColumns/ServerColumns.css');");
-    if (settings.store.themeRadialStatus) imports.push("@import url('https://discordstyles.github.io/RadialStatus/dist/RadialStatus.css');");
-    if (settings.store.themeDiscolored) imports.push("@import url('https://nyri4.github.io/Discolored/main.css');");
+    if (settings.store.themeRadialStatus) imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
 
     const rootBlock = `
 :root {
-  --background-image: ${settings.store.backgroundImage};
+  --background-image: ${getImg(settings.store.backgroundImage)};
   --background-image-blur: ${settings.store.backgroundImageBlur};
   --background-image-size: ${settings.store.backgroundImageSize};
   --background-image-position: ${settings.store.backgroundImagePosition};
-  --popout-modal-image: ${settings.store.popoutModalImage};
+  --popout-modal-image: ${getImg(settings.store.popoutModalImage)};
   --popout-modal-blur: ${settings.store.popoutModalBlur};
   --popout-modal-size: ${settings.store.popoutModalSize};
   --popout-modal-position: ${settings.store.popoutModalPosition};
-  --home-button-image: ${settings.store.homeButtonImage};
+  --home-button-image: ${getImg(settings.store.homeButtonImage)};
   --home-button-size: ${settings.store.homeButtonSize};
   --home-button-position: ${settings.store.homeButtonPosition};
   --serverlist-brightness: ${settings.store.serverlistBrightness};
@@ -82,22 +86,81 @@ export const settings = definePluginSettings({
     fontQuicksand: { type: OptionType.BOOLEAN, description: "Quicksand Font Kullan", default: true, onChange: () => updateTheme() },
     themeFrostedGlass: { type: OptionType.BOOLEAN, description: "Frosted Glass Aktifleştir", default: true, onChange: () => updateTheme() },
     themeWindowsTitlebar: { type: OptionType.BOOLEAN, description: "Windows Uyumlu Üst Bar", default: true, onChange: () => updateTheme() },
-    themeServerColumns: { type: OptionType.BOOLEAN, description: "Sunucu Sütunları", default: true, onChange: () => updateTheme() },
     themeRadialStatus: { type: OptionType.BOOLEAN, description: "Yuvarlak Durum Çizgileri", default: true, onChange: () => updateTheme() },
-    themeDiscolored: { type: OptionType.BOOLEAN, description: "Discolored Eklentisi", default: true, onChange: () => updateTheme() },
 
     // --- DEĞİŞKENLER (VARIABLES) ---
-    backgroundImage: { type: OptionType.STRING, description: "Arkaplan Görseli (Background Image)", default: "url('https://i.imgur.com/OHStaWu.png')", onChange: () => updateTheme() },
-    backgroundImageBlur: { type: OptionType.STRING, description: "Arkaplan Bulanıklığı (Image Blur)", default: "0px", onChange: () => updateTheme() },
-    backgroundImageSize: { type: OptionType.STRING, description: "Arkaplan Boyutu (Image Size)", default: "cover", onChange: () => updateTheme() },
-    backgroundImagePosition: { type: OptionType.STRING, description: "Arkaplan Pozisyonu (Image Position)", default: "center", onChange: () => updateTheme() },
-    popoutModalImage: { type: OptionType.STRING, description: "Popout Modal Görseli", default: "transparent", onChange: () => updateTheme() },
+    backgroundImage: { type: OptionType.STRING, description: "Arkaplan Görseli URL", default: "https://images3.alphacoders.com/120/thumb-1920-1209094.jpg", onChange: () => updateTheme() },
+    backgroundImageBlur: { type: OptionType.STRING, description: "Arkaplan Bulanıklığı (px)", default: "0px", onChange: () => updateTheme() },
+    backgroundImageSize: {
+        type: OptionType.SELECT,
+        description: "Arkaplan Boyutu",
+        options: [
+            { label: "Cover (Ekranı Kapla)", value: "cover", default: true },
+            { label: "Contain (Sığdır)", value: "contain" },
+            { label: "Auto (Orijinal Boyut)", value: "auto" },
+            { label: "100% 100% (Tam Uzat)", value: "100% 100%" }
+        ],
+        onChange: () => updateTheme()
+    },
+    backgroundImagePosition: {
+        type: OptionType.SELECT,
+        description: "Arkaplan Pozisyonu",
+        options: [
+            { label: "Merkez (Center)", value: "center", default: true },
+            { label: "Üst (Top)", value: "top" },
+            { label: "Alt (Bottom)", value: "bottom" },
+            { label: "Sol (Left)", value: "left" },
+            { label: "Sağ (Right)", value: "right" }
+        ],
+        onChange: () => updateTheme()
+    },
+    popoutModalImage: { type: OptionType.STRING, description: "Popout Modal Görseli URL", default: "transparent", onChange: () => updateTheme() },
     popoutModalBlur: { type: OptionType.STRING, description: "Popout Modal Bulanıklığı", default: "0px", onChange: () => updateTheme() },
-    popoutModalSize: { type: OptionType.STRING, description: "Popout Modal Boyutu", default: "cover", onChange: () => updateTheme() },
-    popoutModalPosition: { type: OptionType.STRING, description: "Popout Modal Pozisyonu", default: "center", onChange: () => updateTheme() },
-    homeButtonImage: { type: OptionType.STRING, description: "Ana Sayfa Buton Görseli", default: "url('https://i.imgur.com/rAzycBK.png')", onChange: () => updateTheme() },
-    homeButtonSize: { type: OptionType.STRING, description: "Ana Sayfa Buton Boyutu", default: "cover", onChange: () => updateTheme() },
-    homeButtonPosition: { type: OptionType.STRING, description: "Ana Sayfa Buton Pozisyonu", default: "center", onChange: () => updateTheme() },
+    popoutModalSize: {
+        type: OptionType.SELECT,
+        description: "Popout Modal Boyutu",
+        options: [
+            { label: "Cover (Ekranı Kapla)", value: "cover", default: true },
+            { label: "Contain (Sığdır)", value: "contain" },
+            { label: "Auto (Orijinal Boyut)", value: "auto" }
+        ],
+        onChange: () => updateTheme()
+    },
+    popoutModalPosition: {
+        type: OptionType.SELECT,
+        description: "Popout Modal Pozisyonu",
+        options: [
+            { label: "Merkez (Center)", value: "center", default: true },
+            { label: "Üst (Top)", value: "top" },
+            { label: "Alt (Bottom)", value: "bottom" },
+            { label: "Sol (Left)", value: "left" },
+            { label: "Sağ (Right)", value: "right" }
+        ],
+        onChange: () => updateTheme()
+    },
+    homeButtonImage: { type: OptionType.STRING, description: "Ana Sayfa Buton Görseli URL", default: "https://i.imgur.com/rAzycBK.png", onChange: () => updateTheme() },
+    homeButtonSize: {
+        type: OptionType.SELECT,
+        description: "Ana Sayfa Buton Boyutu",
+        options: [
+            { label: "Cover (Ekranı Kapla)", value: "cover", default: true },
+            { label: "Contain (Sığdır)", value: "contain" },
+            { label: "Auto (Orijinal Boyut)", value: "auto" }
+        ],
+        onChange: () => updateTheme()
+    },
+    homeButtonPosition: {
+        type: OptionType.SELECT,
+        description: "Ana Sayfa Buton Pozisyonu",
+        options: [
+            { label: "Merkez (Center)", value: "center", default: true },
+            { label: "Üst (Top)", value: "top" },
+            { label: "Alt (Bottom)", value: "bottom" },
+            { label: "Sol (Left)", value: "left" },
+            { label: "Sağ (Right)", value: "right" }
+        ],
+        onChange: () => updateTheme()
+    },
     serverlistBrightness: { type: OptionType.STRING, description: "Sunucu Listesi Parlaklığı", default: "0.6", onChange: () => updateTheme() },
     leftBrightness: { type: OptionType.STRING, description: "Sol Panel Parlaklığı", default: "0.6", onChange: () => updateTheme() },
     middleBrightness: { type: OptionType.STRING, description: "Orta Alan Parlaklığı", default: "0.6", onChange: () => updateTheme() },
