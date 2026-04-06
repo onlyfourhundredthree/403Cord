@@ -57,12 +57,14 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         [currentChannel?.id]
     );
 
+    const onlineCountFromStore = useStateFromStores(
+        [OnlineMemberCountStore],
+        () => OnlineMemberCountStore.getCount(guildId),
+        [guildId]
+    );
+
     const onlineCount = useMemo(() => {
-        let count = useStateFromStores(
-            [OnlineMemberCountStore],
-            () => OnlineMemberCountStore.getCount(guildId),
-            [guildId]
-        );
+        let count = onlineCountFromStore;
 
         if (!isTooltip && groups?.length >= 1 && groups[0].id !== "unknown") {
             count = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count ?? 0), 0);
@@ -73,12 +75,13 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         }
 
         return count;
-    }, [isTooltip, groups, threadGroups, guildId]);
+    }, [isTooltip, groups, threadGroups, guildId, onlineCountFromStore]);
 
     useEffect(() => {
-        if (guildId) {
+        if (!guildId) return;
+        try {
             OnlineMemberCountStore.ensureCount(guildId);
-        }
+        } catch { }
     }, [guildId]);
 
     const formattedVoiceCount = useMemo(() => numberFormat(voiceActivityCount ?? 0), [voiceActivityCount]);

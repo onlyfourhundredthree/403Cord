@@ -451,7 +451,10 @@ function stopBackgroundOptimization() {
 }
 
 function handleVisibilityChange() {
-    if (document.hidden) {
+    const { hidden } = document;
+    logger.debug(`Visibility changed: ${hidden ? "hidden" : "visible"}`);
+
+    if (hidden) {
         startBackgroundOptimization();
     } else {
         stopBackgroundOptimization();
