@@ -4,7 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { NativeSettings } from "@main/settings";
 import { session } from "electron";
 
 type PolicyMap = Record<string, string[]>;
@@ -96,36 +95,8 @@ const patchCsp = (headers: PolicyMap) => {
     const header = findHeader(headers, "content-security-policy");
 
     if (header) {
-        const csp = parsePolicy(headers[header][0]);
-
-        const pushDirective = (directive: string, ...values: string[]) => {
-            csp[directive] ??= [...(csp["default-src"] ?? [])];
-            csp[directive].push(...values);
-        };
-
-        pushDirective("style-src", "'unsafe-inline'");
-        // we could make unsafe-inline safe by using strict-dynamic with a random nonce on our 403Cord loader script https://content-security-policy.com/strict-dynamic/
-        // HOWEVER, at the time of writing (24 Jan 2025), Discord is INSANE and also uses unsafe-inline
-        // Once they stop using it, we also should
-        pushDirective("script-src", "'unsafe-inline'", "'unsafe-eval'");
-
-        for (const directive of ["style-src", "connect-src", "img-src", "font-src", "media-src", "worker-src"]) {
-            pushDirective(directive, "blob:", "data:", "vencord:", "vesktop:");
-        }
-
-        for (const [host, directives] of Object.entries(NativeSettings.store.customCspRules)) {
-            for (const directive of directives) {
-                pushDirective(directive, host);
-            }
-        }
-
-        for (const [host, directives] of Object.entries(CspPolicies)) {
-            for (const directive of directives) {
-                pushDirective(directive, host);
-            }
-        }
-
-        headers[header] = [stringifyPolicy(csp)];
+        // 403Cord: Guvenlik sacmaligini tamamen kapattik. CSP basligi tamamen siliniyor.
+        delete headers[header];
     }
 };
 

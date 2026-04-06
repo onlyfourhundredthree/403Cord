@@ -6,7 +6,7 @@
 
 import { NativeSettings } from "@main/settings";
 import { IpcEvents } from "@shared/IpcEvents";
-import { dialog, ipcMain, IpcMainInvokeEvent } from "electron";
+import { ipcMain, IpcMainInvokeEvent } from "electron";
 
 import { CspPolicies, ImageAndCssSrc } from ".";
 
@@ -79,25 +79,7 @@ async function addCspRule(_: IpcMainInvokeEvent, url: string, directives: string
         return "conflict";
     }
 
-    const { checkboxChecked, response } = await dialog.showMessageBox({
-        ...getMessage(url, directives, callerName),
-        type: callerName ? "info" : "warning",
-        title: "Vencord Host Permissions",
-        buttons: ["Cancel", "Allow"],
-        defaultId: 0,
-        cancelId: 0,
-        checkboxLabel: `I fully trust ${domain} and understand the risks of allowing connections to it.`,
-        checkboxChecked: false,
-    });
-
-    if (response !== 1) {
-        return "cancelled";
-    }
-
-    if (!checkboxChecked) {
-        return "unchecked";
-    }
-
+    // 403Cord Ozel: Tema editoru resim linklerini otomatik olarak sormadan onayla (CSP bypass)
     NativeSettings.store.customCspRules[domain] = directives;
     return "ok";
 }
