@@ -4,10 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-// Tema dosyalarını internetten (import ile) çekmek yerine direkt buraya dahil ediyoruz:
-// Bu dosyayı "src/plugins/themeEditor/core.css" yolundan dilediğiniz gibi düzenleyebilirsiniz.
-import "./core.css";
-
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -24,6 +20,21 @@ function updateThemeStyles(settings: any) {
 
     const css: string[] = [];
 
+    // Addons / Imports (GitHub üzerinden çekilen güncel dosyalar)
+    if (settings.store.fontQuicksand) {
+        css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
+        css.push("body, button, input, select, textarea, [class*='text-'], [class*='name-'], [class*='header-'] { font-family: 'Quicksand', sans-serif !important; }");
+    }
+    if (settings.store.themeFrostedGlass) {
+        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
+    }
+    if (settings.store.themeRadialStatus) {
+        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
+    }
+    if (settings.store.themeHorizontalServerList) {
+        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/HorizontalServerList/deploy/HorizontalServerList.theme.css');");
+    }
+
     // Root Variables (Arayüz ayarlarından gelen renk, blur ve ölçü değişiklikleri)
     css.push(":root {");
 
@@ -39,7 +50,7 @@ function updateThemeStyles(settings: any) {
     if (settings.store.popoutImage) {
         css.push(`  --popout-modal-image: url('${settings.store.popoutImage}') !important;`);
     } else {
-        css.push("  --popout-modal-image: transparent !important;");
+        css.push(`  --popout-modal-image: transparent !important;`);
     }
     css.push(`  --popout-modal-blur: ${settings.store.popoutBlur || 0}px !important;`);
     css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness || 0.6} !important;`);
@@ -69,8 +80,6 @@ function updateThemeStyles(settings: any) {
     }
 
     // Layout & Padding
-    css.push(`  --columns: ${settings.store.columns || 2} !important;`);
-    css.push(`  --guildgap: ${settings.store.guildGap || 2} !important;`);
     css.push(`  --window-padding: ${settings.store.windowPadding || 0}px !important;`);
     css.push(`  --window-roundness: ${settings.store.windowRoundness || 0}px !important;`);
 
@@ -78,9 +87,6 @@ function updateThemeStyles(settings: any) {
     css.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness || 0.6} !important;`);
     css.push(`  --left-brightness: ${settings.store.leftBrightness || 0.6} !important;`);
     css.push(`  --middle-brightness: ${settings.store.middleBrightness || 0.6} !important;`);
-
-    // Font
-    css.push(`  --font: ${settings.store.fontQuicksand ? "Quicksand" : "inherit"} !important;`);
 
     css.push("}");
 
@@ -111,7 +117,7 @@ function updateThemeStyles(settings: any) {
 
 const settings = definePluginSettings({
     fontQuicksand: {
-        description: "Special Quicksand Fontu",
+        description: "Özel Quicksand Fontu",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
@@ -122,28 +128,16 @@ const settings = definePluginSettings({
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
-    themeWindowsTitlebar: {
-        description: "Windows Uyumlu Üst Bar",
-        type: OptionType.BOOLEAN,
-        default: true,
-        onChange: () => updateThemeStyles(settings)
-    },
-    themeServerColumns: {
-        description: "Sunucu Sütun Gridi",
-        type: OptionType.BOOLEAN,
-        default: true,
-        onChange: () => updateThemeStyles(settings)
-    },
     themeRadialStatus: {
         description: "Radial Durum Halkaları",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
-    themeDiscolored: {
-        description: "Renkli SVG İkonlar",
+    themeHorizontalServerList: {
+        description: "Yatay Sunucu Listesi",
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         onChange: () => updateThemeStyles(settings)
     },
     backgroundImage: {
@@ -194,18 +188,6 @@ const settings = definePluginSettings({
         default: "#88f7ff",
         onChange: () => updateThemeStyles(settings)
     },
-    columns: {
-        description: "Sunucu Sütun Sayısı",
-        type: OptionType.NUMBER,
-        default: 2,
-        onChange: () => updateThemeStyles(settings)
-    },
-    guildGap: {
-        description: "Sunucu Arası Boşluk",
-        type: OptionType.NUMBER,
-        default: 2,
-        onChange: () => updateThemeStyles(settings)
-    },
     windowPadding: {
         description: "Pencere Kenar Boşluğu (px)",
         type: OptionType.NUMBER,
@@ -225,19 +207,19 @@ const settings = definePluginSettings({
         onChange: () => updateThemeStyles(settings)
     },
     customTitleText: {
-        description: "Başlık Barı Yazısı (Wordmark Yanı)",
+        description: "Başlık Barı Yazısı (Logo Yanı)",
         type: OptionType.STRING,
         default: "4 0 3",
         onChange: () => updateThemeStyles(settings)
     },
     hideDiscordLogo: {
-        description: "Discord Logosunu Gizle (Sol Üst)",
+        description: "Discord Logosunu Gizle",
         type: OptionType.BOOLEAN,
         default: false,
         onChange: () => updateThemeStyles(settings)
     },
     customCss: {
-        description: "Extra CSS Modları",
+        description: "Ekstra CSS Modları",
         type: OptionType.STRING,
         multiline: true,
         default: "",
