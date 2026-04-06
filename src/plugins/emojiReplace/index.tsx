@@ -48,11 +48,11 @@ function updateStyle(provider: string) {
 }
 
 export default definePlugin({
-    name: "EmojiReplace",
+    name: "403EmojiReplace",
     description: "Discord'un varsayılan emojilerini Apple, Google, Facebook ve daha fazlası gibi farklı sağlayıcıların emojileriyle değiştirir.",
     authors: [
-        { name: "DevilBro", id: 278543574059057154n },
-        { name: "Antigravity", id: 0n }
+        { name: "toji", id: 1078973188718993418n },
+        { name: "aki", id: 219652216095506433n }
     ],
     settings,
 

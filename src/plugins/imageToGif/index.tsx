@@ -8,7 +8,7 @@ import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Menu,SelectedChannelStore } from "@webpack/common";
+import { Menu, SelectedChannelStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
@@ -99,8 +99,7 @@ async function convertToGifAndSend(url: string) {
             sendMessage(channelId, { content: catboxUrl });
             showNotification({
                 title: "Başarılı!",
-                body: "GIF oluşturuldu ve kanala gönderildi. Artık gife sağ tıklayıp favorileyebilirsin.",
-                image: catboxUrl
+                body: "GIF oluşturuldu ve kanala gönderildi. Artık gife sağ tıklayıp favorileyebilirsin."
             });
         } else {
             showNotification({
@@ -121,9 +120,9 @@ async function convertToGifAndSend(url: string) {
 }
 
 export default definePlugin({
-    name: "ImageToGif",
+    name: "Görselden Gif",
     description: "Görseli GIF'e dönüştürüp Catbox'a yükler ve mevcut kanala mesaj olarak gönderir.",
-    authors: [{ name: "antigravity", id: 0n }],
+    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     contextMenus: {
         "image-context": imageContextMenuPatch
     }

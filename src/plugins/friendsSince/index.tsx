@@ -58,7 +58,7 @@ export default definePlugin({
         if (isSidebar) {
             return (
                 <Section
-                    heading="Friends Since"
+                    heading="Şu Tarihten Beri Arkadaşsınız:"
                     headingVariant="text-xs/semibold"
                     headingColor="text-strong"
                 >
@@ -71,7 +71,7 @@ export default definePlugin({
 
         return (
             <Section
-                heading="Friends Since"
+                heading="Şu Tarihten Beri Arkadaşsınız:"
                 headingVariant="text-xs/medium"
                 headingColor="text-default"
                 className="vc-friendsSince-profile-section"
