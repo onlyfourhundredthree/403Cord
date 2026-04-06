@@ -10,7 +10,7 @@ import { addServerListElement, removeServerListElement, ServerListRenderPosition
 import { TextButton } from "@components/Button";
 import ErrorBoundary from "@components/ErrorBoundary";
 import definePlugin from "@utils/types";
-import { ActiveJoinedThreadsStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore, i18n } from "@webpack/common";
+import { ActiveJoinedThreadsStore, FluxDispatcher, GuildChannelStore, GuildStore, React, ReadStateStore } from "@webpack/common";
 
 function onClick() {
     const channels: Array<any> = [];
@@ -46,7 +46,7 @@ const ReadAllButton = () => (
         onClick={onClick}
         className="vc-ranb-button"
     >
-        {i18n.t.MARK_AS_READ || "Okundu"}
+        OKUNDU
     </TextButton>
 );
 
