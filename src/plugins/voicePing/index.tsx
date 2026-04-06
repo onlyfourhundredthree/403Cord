@@ -9,16 +9,14 @@ import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } f
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
-    const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
-
-    const inChannel = currentVoiceChannelId === channelId;
+    const inChannel = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId() === channelId);
 
     React.useEffect(() => {
         if (!inChannel) return;
 
         const update = () => {
             const val = RTCConnectionStore.getAveragePing();
-            if (typeof val === "number") setPing(val);
+            setPing(typeof val === "number" ? val : null);
         };
 
         update();
@@ -37,18 +35,18 @@ function VoicePing({ channelId }: { channelId: string; }) {
                 fontWeight: "700",
                 display: "inline-flex",
                 alignItems: "center",
-                marginRight: "6px",
+                marginLeft: "8px",
                 fontFamily: "var(--font-code)",
                 backgroundColor: "rgba(0, 0, 0, 0.15)",
-                padding: "0 4px",
+                padding: "1px 6px",
                 borderRadius: "4px",
-                height: "16px",
-                lineHeight: "16px",
+                height: "18px",
+                lineHeight: "18px",
                 alignSelf: "center",
                 cursor: "default"
             }}
         >
-            {ping && ping > 0 ? Math.round(ping) : "---"}ms
+            {ping !== null && ping > 0 ? Math.round(ping) : "---"}ms
         </div>
     );
 }
@@ -61,12 +59,13 @@ export default definePlugin({
     patches: [
         {
             find: "UNREAD_IMPORTANT:",
-            replacement: {
-                // Find the children container for status icons (children__2ea32 in HTML)
-                // and inject VoicePing as the first element of that array.
-                match: /({channel:(\i).+?className:(\i)\.children,children:\[)/,
-                replace: "$1 $self.VoicePing({channelId:$2.id}),"
-            }
+            replacement: [
+                {
+                    // Match the Children.count anchor and append our ping after it (at the far right of icons)
+                    match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
+                    replace: (m, channel) => `${m},$self.VoicePing({channelId:${channel}.id})`
+                }
+            ]
         }
     ],
 
