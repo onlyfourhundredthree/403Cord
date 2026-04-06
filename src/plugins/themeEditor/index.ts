@@ -28,7 +28,6 @@ function updateTheme() {
     // Ozel CSS kurali: @import satirlari her zaman en ustte olmak zorundadir!
     if (settings.store.fontQuicksand) imports.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
     if (settings.store.themeFrostedGlass) imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
-    if (settings.store.themeWindowsTitlebar) imports.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
     if (settings.store.themeRadialStatus) imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
 
     const rootBlock = `
@@ -85,7 +84,6 @@ export const settings = definePluginSettings({
     // --- TEMA AÇMA / KAPATMA BUTONLARI ---
     fontQuicksand: { type: OptionType.BOOLEAN, description: "Quicksand Font Kullan", default: true, onChange: () => updateTheme() },
     themeFrostedGlass: { type: OptionType.BOOLEAN, description: "Frosted Glass Aktifleştir", default: true, onChange: () => updateTheme() },
-    themeWindowsTitlebar: { type: OptionType.BOOLEAN, description: "Windows Uyumlu Üst Bar", default: true, onChange: () => updateTheme() },
     themeRadialStatus: { type: OptionType.BOOLEAN, description: "Yuvarlak Durum Çizgileri", default: true, onChange: () => updateTheme() },
 
     // --- DEĞİŞKENLER (VARIABLES) ---

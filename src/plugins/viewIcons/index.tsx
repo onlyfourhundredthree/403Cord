@@ -35,11 +35,11 @@ const settings = definePluginSettings({
             {
                 label: "webp",
                 value: "webp",
-                default: true
             },
             {
                 label: "png",
                 value: "png",
+                default: true
             },
             {
                 label: "jpg",
@@ -50,7 +50,7 @@ const settings = definePluginSettings({
     imgSize: {
         type: OptionType.SELECT,
         description: "The image size to use",
-        options: ["128", "256", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "1024" }))
+        options: ["128", "256", "512", "1024", "2048", "4096"].map(n => ({ label: n, value: n, default: n === "2048" }))
     }
 });
 
@@ -165,7 +165,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
 
 export default definePlugin({
     name: "ViewIcons",
-    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
+    authors: [{ name: "antigravity", id: 0n }],
     description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user, server and group channel context menu.",
     tags: ["ImageUtilities"],
     dependencies: ["DynamicImageModalAPI"],

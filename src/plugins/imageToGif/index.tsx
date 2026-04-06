@@ -5,7 +5,6 @@
  */
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
-import { showNotification } from "@api/Notifications";
 import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
 import { Menu, SelectedChannelStore } from "@webpack/common";
@@ -26,8 +25,57 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
     );
 };
 
+const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
+    const { message } = props;
+    if (!message) return;
+
+    const images: string[] = [];
+
+    for (const attachment of message.attachments ?? []) {
+        if (attachment.content_type?.startsWith("image/") && !attachment.content_type.includes("gif")) {
+            images.push(attachment.url);
+        }
+    }
+
+    for (const embed of message.embeds ?? []) {
+        if (embed.image?.url && !embed.image.url.includes(".gif")) {
+            images.push(embed.image.url);
+        } else if (embed.type === "image" && embed.url && !embed.url.includes(".gif")) {
+            images.push(embed.url);
+        }
+    }
+
+    if (images.length === 0) return;
+
+    children.push(
+        <Menu.MenuGroup id="vc-image-to-gif-message">
+            {images.length === 1 ? (
+                <Menu.MenuItem
+                    id="convert-to-gif-message"
+                    label="Görselden Gif"
+                    action={() => convertToGifAndSend(images[0])}
+                />
+            ) : (
+                <Menu.MenuItem
+                    id="convert-to-gif-message-multiple"
+                    label="Görselden Gif"
+                >
+                    {images.map((url, i) => (
+                        <Menu.MenuItem
+                            key={i}
+                            id={`convert-to-gif-message-${i}`}
+                            label={`Görsel ${i + 1}`}
+                            action={() => convertToGifAndSend(url)}
+                        />
+                    ))}
+                </Menu.MenuItem>
+            )}
+        </Menu.MenuGroup>
+    );
+};
+
 async function uploadToCatbox(uint8Array: Uint8Array): Promise<string> {
-    const helper = (VencordNative as any).pluginHelpers.ImageToGif;
+    const helper = (VencordNative as any).pluginHelpers["Görselden Gif"];
     if (helper?.uploadToCatbox) {
         return await helper.uploadToCatbox(uint8Array);
     }
@@ -49,11 +97,6 @@ async function uploadToCatbox(uint8Array: Uint8Array): Promise<string> {
 async function convertToGifAndSend(url: string) {
     let objUrl: string | null = null;
     try {
-        showNotification({
-            title: "Görselden Gif",
-            body: "Görsel indiriliyor ve işleniyor...",
-        });
-
         const response = await fetch(url);
         if (!response.ok) throw new Error("Görsel indirilemedi.");
 
@@ -87,32 +130,14 @@ async function convertToGifAndSend(url: string) {
 
         const uint8Array = gif.bytesView();
 
-        showNotification({
-            title: "Görselden Gif",
-            body: "Siteye yükleniyor (Catbox)...",
-        });
-
         const catboxUrl = await uploadToCatbox(uint8Array);
 
         const channelId = SelectedChannelStore.getChannelId();
         if (channelId) {
             sendMessage(channelId, { content: catboxUrl });
-            showNotification({
-                title: "Başarılı!",
-                body: "GIF oluşturuldu ve kanala gönderildi. Artık gife sağ tıklayıp favorileyebilirsin."
-            });
-        } else {
-            showNotification({
-                title: "Hata",
-                body: "Kanal bulunamadı, GIF gönderilemedi.",
-            });
         }
 
     } catch (err: any) {
-        showNotification({
-            title: "Görselden Gif Hatası",
-            body: err.message,
-        });
         console.error(err);
     } finally {
         if (objUrl) URL.revokeObjectURL(objUrl);
@@ -122,8 +147,9 @@ async function convertToGifAndSend(url: string) {
 export default definePlugin({
     name: "Görselden Gif",
     description: "Görseli GIF'e dönüştürüp Catbox'a yükler ve mevcut kanala mesaj olarak gönderir.",
-    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
+    authors: [{ name: "antigravity", id: 0n }],
     contextMenus: {
-        "image-context": imageContextMenuPatch
+        "image-context": imageContextMenuPatch,
+        "message": messageContextMenuPatch
     }
 });

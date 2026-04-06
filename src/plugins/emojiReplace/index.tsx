@@ -48,7 +48,7 @@ function updateStyle(provider: string) {
 }
 
 export default definePlugin({
-    name: "403EmojiReplace",
+    name: "Emoji Değiştirici",
     description: "Discord'un varsayılan emojilerini Apple, Google, Facebook ve daha fazlası gibi farklı sağlayıcıların emojileriyle değiştirir.",
     authors: [
         { name: "toji", id: 1078973188718993418n },
