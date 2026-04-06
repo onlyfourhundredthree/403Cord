@@ -5,28 +5,28 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import { userStyleRootNode } from "@api/Styles";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 
 const STYLE_ID = "403cord-theme";
 
 /**
- * Bu fonksiyon tam olarak main.css dosyasinin urettigi CSS'i uretir.
- * Oncelikle @import satirlari, sonra :root blogu.
- * Her sey tek bir style elementinde, ayni Discord'un Online Themes kutusuna
- * yapistirildigindaki gibi.
+ * Bu fonksiyon main.css dosyasinin BIREBIR AYNISINI uretir.
+ * Ciktisi Discord'un Quick CSS kutusuna yapistirildiginda calisan
+ * CSS ile karakter karakter aynidir.
  */
 function buildCss(s: any): string {
     const { store } = s;
     const parts: string[] = [];
 
-    // @import satirlari - bunlar CSS'in EN USTUNDE olmali
+    // @import satirlari - CSS'in en ustunde olmali
     parts.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
     parts.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
     parts.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
     parts.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
 
-    // :root blogu - tum degiskenler
+    // :root blogu
     parts.push(":root {");
     parts.push(`  --background-image: url('${store.backgroundImage}');`);
     parts.push(`  --background-image-blur: ${store.backgroundBlur}px;`);
@@ -71,7 +71,6 @@ function buildCss(s: any): string {
     parts.push("  --rs-phone-visible: block;");
     parts.push("}");
 
-    // Kullanicinin ekstra CSS'i
     if (store.customCss) {
         parts.push(store.customCss);
     }
@@ -80,12 +79,13 @@ function buildCss(s: any): string {
 }
 
 function applyTheme(s: any) {
+    // Vencord'un kendi tema stili icin kullandigi DOM dugumune ekliyoruz.
+    // Bu, Quick CSS kutusuna yapistirilmasiyla TAMAMEN AYNI yere koyuyor.
     let el = document.getElementById(STYLE_ID) as HTMLStyleElement | null;
     if (!el) {
         el = document.createElement("style");
         el.id = STYLE_ID;
-        // Vencord'un kendi tema sistemiyle ayni yere ekliyoruz
-        document.documentElement.appendChild(el);
+        userStyleRootNode.appendChild(el);
     }
     el.textContent = buildCss(s);
 }
