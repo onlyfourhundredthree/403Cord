@@ -32,18 +32,13 @@ function VoicePing({ channelId }: { channelId: string; }) {
         <div
             className="vc-voice-ping"
             style={{
-                color: "var(--text-positive)",
-                fontSize: "11px",
-                fontWeight: "700",
+                color: "var(--text-feedback-positive)",
+                fontSize: "12px",
+                fontWeight: "400",
                 display: "inline-flex",
                 alignItems: "center",
-                marginLeft: "8px",
+                marginLeft: "10px",
                 fontFamily: "var(--font-code)",
-                backgroundColor: "rgba(0, 0, 0, 0.15)",
-                padding: "1px 6px",
-                borderRadius: "4px",
-                height: "18px",
-                lineHeight: "18px",
                 alignSelf: "center",
                 cursor: "default"
             }}
