@@ -65,18 +65,20 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
         );
 
         if (!isTooltip && groups?.length >= 1 && groups[0].id !== "unknown") {
-            count = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
+            count = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count ?? 0), 0);
         }
 
         if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
-            count = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
+            count = Object.values(threadGroups).reduce((total, curr: any) => total + (curr.sectionId === "offline" ? 0 : curr.userIds?.length ?? 0), 0);
         }
 
         return count;
     }, [isTooltip, groups, threadGroups, guildId]);
 
     useEffect(() => {
-        OnlineMemberCountStore.ensureCount(guildId);
+        if (guildId) {
+            OnlineMemberCountStore.ensureCount(guildId);
+        }
     }, [guildId]);
 
     const formattedVoiceCount = useMemo(() => numberFormat(voiceActivityCount ?? 0), [voiceActivityCount]);
