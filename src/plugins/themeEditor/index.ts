@@ -4,6 +4,10 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+// Tema dosyalarını internetten (import ile) çekmek yerine direkt buraya dahil ediyoruz:
+// Bu dosyayı "src/plugins/themeEditor/core.css" yolundan dilediğiniz gibi düzenleyebilirsiniz.
+import "./core.css";
+
 import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
@@ -20,35 +24,10 @@ function updateThemeStyles(settings: any) {
 
     const css: string[] = [];
 
-    // Addons / Imports
-    if (settings.store.fontQuicksand) {
-        css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
-        css.push("body, button, input, select, textarea, [class*='text-'], [class*='name-'], [class*='header-'] { font-family: 'Quicksand', sans-serif !important; }");
-    }
-    if (settings.store.themeFrostedGlass) {
-        css.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
-    }
-    if (settings.store.themeWindowsTitlebar) {
-        css.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
-    }
-    if (settings.store.themeServerColumns) {
-        css.push("@import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/ServerColumns/ServerColumns.css');");
-    }
-    if (settings.store.themeRadialStatus) {
-        css.push("@import url('https://discordstyles.github.io/RadialStatus/dist/RadialStatus.css');");
-    }
-    if (settings.store.themeDiscolored) {
-        css.push("@import url('https://nyri4.github.io/Discolored/main.css');");
-    }
-
-    // Root Variables
+    // Root Variables (Arayüz ayarlarından gelen renk, blur ve ölçü değişiklikleri)
     css.push(":root {");
 
     // Backgrounds
-    if (settings.store.themeUrl) {
-        css.push(`  @import url('${settings.store.themeUrl}');`);
-    }
-
     if (settings.store.backgroundImage) {
         css.push(`  --background-image: url('${settings.store.backgroundImage}') !important;`);
     }
@@ -240,7 +219,7 @@ const settings = definePluginSettings({
         onChange: () => updateThemeStyles(settings)
     },
     homeIconUrl: {
-        description: "Kaiser Home Buton URL",
+        description: "Ana Sayfa Buton URL",
         type: OptionType.STRING,
         default: "https://i.imgur.com/rAzycBK.png",
         onChange: () => updateThemeStyles(settings)
@@ -268,7 +247,7 @@ const settings = definePluginSettings({
 
 export default definePlugin({
     name: "Tema Düzenleyici",
-    description: "Discord temanızı düzenleyin ve kendinize özel bir tema yaratın.",
+    description: "403Cord Gelişmiş Dinamik Tema Yöneticisi.",
     authors: [Devs.Toji, Devs.Aki],
     settings,
 
