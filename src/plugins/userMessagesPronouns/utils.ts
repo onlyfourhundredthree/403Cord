@@ -5,8 +5,8 @@
  */
 
 import { getCurrentChannel } from "@utils/discord";
-import { UserProfileStore, useStateFromStores, React } from "@webpack/common";
 import { findByPropsLazy } from "@webpack";
+import { React, UserProfileStore, useStateFromStores } from "@webpack/common";
 
 import { PronounsFormat, settings } from "./settings";
 

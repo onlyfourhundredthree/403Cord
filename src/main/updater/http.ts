@@ -64,8 +64,9 @@ async function applyUpdates() {
         throw new Error("Downloaded update file is too small to be a valid ASAR");
     }
 
-    const isInsideAsar = __dirname.endsWith(".asar");
-    const asarPath = isInsideAsar ? __dirname : join(__dirname, "..", "403Cord.asar");
+    // Get the actual ASAR path by looking for the last .asar segment in __dirname
+    const asarMatched = __dirname.match(/^(.*\.asar)([\\/].*)?$/i);
+    const asarPath = asarMatched ? asarMatched[1] : join(__dirname, "..", "403Cord.asar");
     const tempPath = asarPath + ".download";
     const oldPath = asarPath + ".old";
 
@@ -76,14 +77,26 @@ async function applyUpdates() {
     try { await unlink(oldPath); } catch { }
 
     // 3. Rename current ASAR to backup
-    try { await rename(asarPath, oldPath); } catch { }
+    try {
+        await rename(asarPath, oldPath);
+    } catch (e) {
+        // Log this, as it is often a locking issue on Windows
+        console.error("[Updater] Failed to rename current asar to .old (probably locked)", e);
+    }
 
     // 4. Atomically rename temp download to final path
     try {
         await rename(tempPath, asarPath);
-    } catch {
-        // Fallback: direct write if rename fails (e.g. cross-device)
-        await writeFile(asarPath, contents);
+    } catch (e) {
+        // Fallback: direct write if rename fails (e.g. cross-device or locked and rename failed)
+        try {
+            await writeFile(asarPath, contents);
+        } catch (e2) {
+            // If even this fails, cleanup and throw
+            try { await unlink(tempPath); } catch { }
+            console.error("[Updater] Failed to apply update to", asarPath, e2);
+            throw new Error(`Güncelleme dosyası yazılamadı: ${asarPath}. Lütfen yönetici olarak çalıştırmayı deneyin.`);
+        }
         try { await unlink(tempPath); } catch { }
     }
 
