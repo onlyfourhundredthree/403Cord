@@ -10,7 +10,23 @@ import definePlugin, { OptionType } from "@utils/types";
 
 const CSS_ID = "403-cord-theme-engine";
 
-function updateThemeStyles(settings: any) {
+// Temaları bellekte tutalım ki her ayar değişiminde tekrar fetch atıp Discord'u dondurmayalım
+const themeCache: Record<string, string> = {};
+
+async function fetchThemeCss(url: string): Promise<string> {
+    if (themeCache[url]) return themeCache[url];
+    try {
+        const res = await fetch(url);
+        if (!res.ok) return "";
+        const text = await res.text();
+        themeCache[url] = text;
+        return text;
+    } catch {
+        return "";
+    }
+}
+
+async function updateThemeStyles(settings: any) {
     let styleEl = document.getElementById(CSS_ID);
     if (!styleEl) {
         styleEl = document.createElement("style");
@@ -19,25 +35,31 @@ function updateThemeStyles(settings: any) {
     }
 
     const css: string[] = [];
+    const cssImports: string[] = [];
 
-    // Font Import
+    // Font Import (Bunu @import yapabiliriz, Google Fonts'a CSP engeli yok)
     if (settings.store.fontQuicksand) {
-        css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
+        cssImports.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
     }
 
-    // Theme Addons (External Imports - Deploy versions are more stable)
+    // Theme Addons (External Imports) - Discord CSP raw.githubusercontent'u @import olarak ENGELLER!
+    // Bu yüzden fetch atıp TEXT olarak çekip içine yazıyoruz. Böylece sorun ve yavaşlama olmuyor.
     if (settings.store.themeFrostedGlass) {
-        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
+        const text = await fetchThemeCss("https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css");
+        css.push(text);
     }
     if (settings.store.themeWindowsTitlebar) {
-        css.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
+        const text = await fetchThemeCss("https://discordstyles.github.io/Addons/windows-titlebar.css");
+        css.push(text);
     }
     if (settings.store.themeRadialStatus) {
-        css.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
+        const text = await fetchThemeCss("https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css");
+        css.push(text);
     }
 
     // Root Variables
     css.push(":root {");
+
 
     // Backgrounds
     if (settings.store.backgroundImage) {
@@ -92,7 +114,7 @@ function updateThemeStyles(settings: any) {
         css.push(settings.store.customCss);
     }
 
-    styleEl.innerHTML = css.join("\n");
+    styleEl.innerHTML = cssImports.join("\n") + "\n" + css.join("\n");
 }
 
 const settings = definePluginSettings({
