@@ -21,13 +21,12 @@ import { isTruthy } from "@utils/guards";
 import { Logger } from "@utils/Logger";
 import { Margins } from "@utils/margins";
 import { classes } from "@utils/misc";
+import { PluginTranslationMap } from "@utils/PluginTranslations";
 import { useAwaiter, useCleanupEffect } from "@utils/react";
 import { Alerts, Button, lodash, Parser, React, Select, TextInput, Tooltip, useMemo, useState } from "@webpack/common";
 import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
-
-import { PluginTranslationMap } from "@utils/PluginTranslations";
 
 import { PluginCard } from "./PluginCard";
 import { UIElementsButton } from "./UIElements";
