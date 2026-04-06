@@ -6,8 +6,9 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
+import { sendMessage } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Menu,MessageActions, SelectedChannelStore } from "@webpack/common";
+import { Menu,SelectedChannelStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
@@ -95,7 +96,7 @@ async function convertToGifAndSend(url: string) {
 
         const channelId = SelectedChannelStore.getChannelId();
         if (channelId) {
-            MessageActions.sendMessage(channelId, { content: catboxUrl });
+            sendMessage(channelId, { content: catboxUrl });
             showNotification({
                 title: "Başarılı!",
                 body: "GIF oluşturuldu ve kanala gönderildi. Artık gife sağ tıklayıp favorileyebilirsin.",
