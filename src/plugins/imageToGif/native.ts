@@ -13,15 +13,15 @@ export async function uploadToCatbox(_: IpcMainInvokeEvent, buffer: Uint8Array) 
 
         const header = [
             `--${boundary}`,
-            'Content-Disposition: form-data; name="reqtype"',
-            '',
-            'fileupload',
+            "Content-Disposition: form-data; name=\"reqtype\"",
+            "",
+            "fileupload",
             `--${boundary}`,
-            'Content-Disposition: form-data; name="fileToUpload"; filename="image.gif"',
-            'Content-Type: image/gif',
-            '',
-            '',
-        ].join('\r\n');
+            "Content-Disposition: form-data; name=\"fileToUpload\"; filename=\"image.gif\"",
+            "Content-Type: image/gif",
+            "",
+            "",
+        ].join("\r\n");
 
         const footer = `\r\n--${boundary}--\r\n`;
 
