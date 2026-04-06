@@ -178,7 +178,7 @@ async function doClone(guildId: string, data: Sticker | Emoji) {
             await cloneEmoji(guildId, data);
 
         Toasts.show({
-            message: `Successfully cloned ${data.name} to ${GuildStore.getGuild(guildId)?.name ?? "your server"}!`,
+            message: `Başarıyla ${data.name} ${GuildStore.getGuild(guildId)?.name ?? "your server"} sunucusuna klonlandı!`,
             type: Toasts.Type.SUCCESS,
             id: Toasts.genId()
         });
@@ -215,7 +215,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
 
     return (
         <>
-            <Forms.FormTitle className={Margins.top20}>Custom Name</Forms.FormTitle>
+            <Forms.FormTitle className={Margins.top20}>Özel İsim</Forms.FormTitle>
             <CheckedTextInput
                 value={name}
                 onChange={v => {
@@ -225,7 +225,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                 validate={v =>
                     (data.t === "Emoji" && v.length > 2 && v.length < 32 && nameValidator.test(v))
                     || (data.t === "Sticker" && v.length > 2 && v.length < 30)
-                    || "Name must be between 2 and 32 characters and only contain alphanumeric characters"
+                    || "İsim en az 2, en fazla 32 karakter olmalı ve yalnızca alfanümerik karakterler içermelidir"
                 }
             />
             <div style={{
@@ -243,7 +243,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                 onMouseLeave={onMouseLeave}
                                 onMouseEnter={onMouseEnter}
                                 role="button"
-                                aria-label={"Clone to " + g.name}
+                                aria-label={"Şuraya klonla " + g.name}
                                 aria-disabled={isCloning}
                                 style={{
                                     borderRadius: "50%",
@@ -308,7 +308,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
         <Menu.MenuItem
             id="emote-cloner"
             key="emote-cloner"
-            label={`Clone ${type}`}
+            label={`Klonla: ${type}`}
             action={() =>
                 openModalLazy(async () => {
                     const res = await fetchData();
@@ -327,7 +327,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                                     width={24}
                                     style={{ marginRight: "0.5em" }}
                                 />
-                                <Forms.FormText>Clone {data.name}</Forms.FormText>
+                                <Forms.FormText>Klonla: {data.name}</Forms.FormText>
                             </ModalHeader>
                             <ModalContent>
                                 <CloneModal data={data} />
