@@ -158,6 +158,8 @@ export default definePlugin({
     },
 
     getDonorBadges(userId: string) {
+        if (shouldShowContributorBadge(userId)) return undefined;
+
         const badges = [] as (ProfileBadge & BadgeUserArgs)[];
 
         // 1. Ozel Üye Badgeleri (Sunucu Rolünden)

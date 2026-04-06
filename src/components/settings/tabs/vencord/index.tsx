@@ -124,9 +124,9 @@ function VencordSettings() {
             {isDonor(user?.id)
                 ? (
                     <SpecialCard
-                        title="Bağışlar"
-                        subtitle="Bağış yaptığın için teşekkürler!"
-                        description="Özelliklerini istediğin zaman @vending.machine'e mesaj atarak yönetebilirsin."
+                        title="Destekçi"
+                        subtitle="Bizi desteklediğin için teşekkürler!"
+                        description="Özelliklerini istediğin zaman @hicbirseyisiklemeyenprofil'e mesaj atarak yönetebilirsin."
                         cardImage={VENNIE_DONATOR_IMAGE}
                         backgroundImage={DONOR_BACKGROUND_IMAGE}
                         backgroundColor="#ED87A9"

@@ -27,6 +27,8 @@ import { JSX } from "react";
 
 import Plugins, { ExcludedPlugins, PluginMeta } from "~plugins";
 
+import { PluginTranslationMap } from "@utils/PluginTranslations";
+
 import { PluginCard } from "./PluginCard";
 import { UIElementsButton } from "./UIElements";
 
@@ -71,7 +73,15 @@ const enum SearchStatus {
 function ExcludedPluginsList({ search }: { search: string; }) {
     const matchingExcludedPlugins = search
         ? Object.entries(ExcludedPlugins)
-            .filter(([name]) => name.toLowerCase().includes(search))
+            .filter(([name]) => {
+                const searchLower = search.toLowerCase();
+                const translation = PluginTranslationMap[name];
+                return (
+                    name.toLowerCase().includes(searchLower) ||
+                    translation?.name.toLowerCase().includes(searchLower) ||
+                    translation?.description.toLowerCase().includes(searchLower)
+                );
+            })
         : [];
 
     const ExcludedReasons: Record<"web" | "discordDesktop" | "vesktop" | "desktop" | "dev", string> = {
@@ -177,10 +187,14 @@ function PluginSettings() {
 
         if (!search.length) return true;
 
+        const translation = PluginTranslationMap[plugin.name];
+
         return (
             plugin.name.toLowerCase().includes(search) ||
             plugin.description.toLowerCase().includes(search) ||
-            plugin.tags?.some(t => t.toLowerCase().includes(search))
+            plugin.tags?.some(t => t.toLowerCase().includes(search)) ||
+            translation?.name.toLowerCase().includes(search) ||
+            translation?.description.toLowerCase().includes(search)
         );
     };
 

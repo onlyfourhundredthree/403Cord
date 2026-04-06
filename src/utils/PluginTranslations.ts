@@ -74,7 +74,7 @@ export const PluginTranslationMap: Record<string, { name: string, description: s
         description: "Discord'un sarı renkteki Boşta durumuna geçmesi için gereken süre."
     },
     Decor: {
-        name: "Özel Avatar Dekorasyonları",
+        name: "Avatar Çerçeveleri",
         description: "Kendi yarattığınız özel avatar çerçevelerini (decor) profilinizde kullanmanızı sağlar."
     },
     DevCompanion: {

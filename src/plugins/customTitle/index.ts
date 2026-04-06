@@ -8,34 +8,58 @@ import { Devs } from "@utils/constants";
 import definePlugin from "@utils/types";
 
 let originalTitleDesc: PropertyDescriptor | undefined;
+let intervalId: any;
+let observer: MutationObserver | undefined;
+
+const TARGET_TITLE = "4 0 3";
+
+function forceTitle() {
+    if (document.title !== TARGET_TITLE) {
+        if (originalTitleDesc?.set) {
+            originalTitleDesc.set.call(document, TARGET_TITLE);
+        } else {
+            document.title = TARGET_TITLE;
+        }
+    }
+}
 
 export default definePlugin({
     name: "CustomTitle",
-    description: "Forces the application window title to always be '4 0 3'",
+    description: "Uygulama penceresi başlığını her zaman '4 0 3' olarak zorlar",
     authors: [Devs.Toji, Devs.Aki],
     enabledByDefault: true,
 
     start() {
         originalTitleDesc = Object.getOwnPropertyDescriptor(Document.prototype, "title");
-        if (!originalTitleDesc) return;
 
         Object.defineProperty(document, "title", {
             configurable: true,
-            get: () => "4 0 3",
+            get: () => TARGET_TITLE,
             set: v => {
-                // Ignore Discord's attempts to set the title, always set it to 4 0 3
-                originalTitleDesc!.set!.call(document, "4 0 3");
+                forceTitle();
             }
         });
 
         // Set it initially
-        originalTitleDesc.set!.call(document, "4 0 3");
+        forceTitle();
+
+        // Fallback: MutationObserver to watch for <title> tag changes
+        const titleEl = document.querySelector("title");
+        if (titleEl) {
+            observer = new MutationObserver(() => forceTitle());
+            observer.observe(titleEl, { childList: true, characterData: true });
+        }
+
+        // Periodic check to ensure it stays
+        intervalId = setInterval(forceTitle, 5000);
     },
 
     stop() {
+        clearInterval(intervalId);
+        observer?.disconnect();
         if (originalTitleDesc) {
             Object.defineProperty(document, "title", originalTitleDesc);
-            document.title = "Discord"; // Reset to default
+            document.title = "Discord";
         }
     }
 });

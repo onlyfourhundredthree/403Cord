@@ -18,30 +18,60 @@ function updateThemeStyles(settings: any) {
         document.head.appendChild(styleEl);
     }
 
-    const imports: string[] = [];
+    const css: string[] = [];
 
+    // Fonts
     if (settings.store.fontQuicksand) {
-        imports.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
-        // Quicksand font CSS helper
-        imports.push("body, button, input, select, textarea, [class*='text-'] { font-family: 'Quicksand', sans-serif !important; }");
+        css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
+        css.push("body, button, input, select, textarea, [class*='text-'], [class*='name-'], [class*='header-'] { font-family: 'Quicksand', sans-serif !important; }");
     }
+
+    // Addons
     if (settings.store.themeFrostedGlass) {
-        imports.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
+        css.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
     }
     if (settings.store.themeWindowsTitlebar) {
-        imports.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
+        css.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
     }
     if (settings.store.themeServerColumns) {
-        imports.push("@import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/ServerColumns/ServerColumns.css');");
+        css.push("@import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/ServerColumns/ServerColumns.css');");
     }
     if (settings.store.themeRadialStatus) {
-        imports.push("@import url('https://discordstyles.github.io/RadialStatus/dist/RadialStatus.css');");
+        css.push("@import url('https://discordstyles.github.io/RadialStatus/dist/RadialStatus.css');");
     }
     if (settings.store.themeDiscolored) {
-        imports.push("@import url('https://nyri4.github.io/Discolored/main.css');");
+        css.push("@import url('https://nyri4.github.io/Discolored/main.css');");
     }
 
-    styleEl.innerHTML = imports.join("\n");
+    // Custom Colors & Variables
+    css.push(":root {");
+    if (settings.store.accentColor) {
+        css.push(`  --brand-experiment: ${settings.store.accentColor} !important;`);
+        css.push(`  --brand-experiment-500: ${settings.store.accentColor} !important;`);
+        css.push(`  --text-link: ${settings.store.accentColor} !important;`);
+    }
+    if (settings.store.backgroundChat) {
+        css.push(`  --background-primary: ${settings.store.backgroundChat} !important;`);
+    }
+    if (settings.store.backgroundSidebar) {
+        css.push(`  --background-secondary: ${settings.store.backgroundSidebar} !important;`);
+        css.push(`  --background-secondary-alt: ${settings.store.backgroundSidebar} !important;`);
+    }
+    if (settings.store.backgroundTertiary) {
+        css.push(`  --background-tertiary: ${settings.store.backgroundTertiary} !important;`);
+    }
+    if (settings.store.homeIconUrl) {
+        css.push(`  --home-image: url('${settings.store.homeIconUrl}') !important;`);
+        css.push(`  .homeIcon-158wK6 { content: var(--home-image); }`);
+    }
+    css.push("}");
+
+    // Custom CSS from string
+    if (settings.store.customCss) {
+        css.push(settings.store.customCss);
+    }
+
+    styleEl.innerHTML = css.join("\n");
 }
 
 const settings = definePluginSettings({
@@ -79,6 +109,43 @@ const settings = definePluginSettings({
         description: "Discolored Eklentisi (Discord'un sıkıcı SVG ikonlarını renkli hale getirir)",
         type: OptionType.BOOLEAN,
         default: true,
+        onChange: () => updateThemeStyles(settings)
+    },
+    accentColor: {
+        description: "Vurgu Rengi (Hex Kodu Örn: #5865f2)",
+        type: OptionType.STRING,
+        default: "",
+        onChange: () => updateThemeStyles(settings)
+    },
+    backgroundChat: {
+        description: "Sohbet Arka Planı (Hex Kodu Örn: #1e1e1e)",
+        type: OptionType.STRING,
+        default: "",
+        onChange: () => updateThemeStyles(settings)
+    },
+    backgroundSidebar: {
+        description: "Yan Panel Arka Planı (Sunucu Listesi vb.)",
+        type: OptionType.STRING,
+        default: "",
+        onChange: () => updateThemeStyles(settings)
+    },
+    backgroundTertiary: {
+        description: "Üçüncül Arka Plan (Ayarlar, Arama vb.)",
+        type: OptionType.STRING,
+        default: "",
+        onChange: () => updateThemeStyles(settings)
+    },
+    homeIconUrl: {
+        description: "Discord Ana Sayfa Butonu Görseli (URL)",
+        type: OptionType.STRING,
+        default: "",
+        onChange: () => updateThemeStyles(settings)
+    },
+    customCss: {
+        description: "Özel CSS Kodları",
+        type: OptionType.STRING,
+        multiline: true,
+        default: "",
         onChange: () => updateThemeStyles(settings)
     }
 });
