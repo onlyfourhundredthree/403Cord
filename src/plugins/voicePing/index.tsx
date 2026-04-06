@@ -17,8 +17,9 @@ function VoicePing({ channelId }: { channelId: string; }) {
             const isIn = currentId === channelId;
             setInChannel(isIn);
             if (isIn) {
-                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
-                setPing(val > 0 ? val : null);
+                // Try multiple ways to get ping
+                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? (RTCConnectionStore as any).getPing?.() ?? 0;
+                setPing(typeof val === "number" && val > 0 ? val : null);
             }
         };
 
@@ -45,7 +46,7 @@ function VoicePing({ channelId }: { channelId: string; }) {
                 verticalAlign: "middle"
             }}
         >
-            {ping !== null ? Math.round(ping) : "---"}ms
+            {ping !== null ? `${Math.round(ping)}ms` : "---ms"}
         </span>
     );
 }
@@ -57,12 +58,12 @@ export default definePlugin({
 
     patches: [
         {
-            // Find the Voice Channel component in the sidebar using a very specific handler name
-            find: ".handleVoiceStatusClick",
+            // Use the same finding string as ShowHiddenChannels for the VoiceChannel component
+            find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
                 {
-                    // Target the beginning of the status icons array (children__2ea32)
-                    match: /className:\i\.children,children:\[/,
+                    // Target the children array start for icons area
+                    match: /className:(\i)\.children,children:\[/,
                     replace: "$&$self.VoicePing({channelId:this.props.channel.id}),"
                 }
             ]
