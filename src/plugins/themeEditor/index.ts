@@ -50,7 +50,7 @@ function updateThemeStyles(settings: any) {
     if (settings.store.popoutImage) {
         css.push(`  --popout-modal-image: url('${settings.store.popoutImage}') !important;`);
     } else {
-        css.push(`  --popout-modal-image: transparent !important;`);
+        css.push("  --popout-modal-image: transparent !important;");
     }
     css.push(`  --popout-modal-blur: ${settings.store.popoutBlur || 0}px !important;`);
     css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness || 0.6} !important;`);

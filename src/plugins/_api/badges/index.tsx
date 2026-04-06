@@ -158,13 +158,12 @@ export default definePlugin({
     },
 
     getDonorBadges(userId: string) {
-        if (shouldShowContributorBadge(userId)) return undefined;
-
         const badges = [] as (ProfileBadge & BadgeUserArgs)[];
 
         // 1. Ozel Üye Badgeleri (Sunucu Rolünden)
         const isDonor = GuildMemberStore?.getMember(VENCORD_GUILD_ID, userId)?.roles.includes(DONOR_ROLE_ID);
-        if (isDonor) {
+        // Sadece developer degilse bu genel donor badge'ini goster
+        if (isDonor && !shouldShowContributorBadge(userId)) {
             badges.push({
                 iconSrc: "https://cdn.discordapp.com/emojis/1357798501232414992.webp",
                 description: "403Cord Özel Üye",
