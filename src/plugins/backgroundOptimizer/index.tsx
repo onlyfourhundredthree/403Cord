@@ -5,9 +5,12 @@
  */
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Logger } from "@utils/Logger";
 import definePlugin, { makeRange, OptionType } from "@utils/types";
-import { FluxDispatcher } from "@webpack/common";
+import { findComponentByCodeLazy } from "@webpack";
+import { FluxDispatcher, useRef, useState } from "@webpack/common";
+import type { PropsWithChildren } from "react";
 
 const logger = new Logger("BackgroundOptimizer");
 
@@ -20,7 +23,7 @@ const settings = definePluginSettings({
             { label: "Hafif - Sadece animasyonlar", value: "light", default: false },
             { label: "Orta - Animasyon + Event filtreleme", value: "medium", default: false },
             { label: "Agresif - Tüm optimizasyonlar", value: "aggressive", default: true },
-            { label: "Ultra - Maximum performans (ses hariç her şey)", value: "ultra", default: false }
+            { label: "Ultra - Maximum performans", value: "ultra", default: false }
         ]
     },
     gcInterval: {
@@ -29,24 +32,15 @@ const settings = definePluginSettings({
         default: 30,
         ...makeRange(0, 300, 10)
     },
-    freezeDelay: {
-        type: OptionType.NUMBER,
-        description: "Donma gecikmesi (saniye, 0 = hemen)",
-        default: 0,...makeRange(0, 60, 5)
-    },
     keepVoiceConnected: {
         type: OptionType.BOOLEAN,
         description: "Ses bağlantısını canlı tut",
         default: true
-    },
-    showStatusIndicator: {
-        type: OptionType.BOOLEAN,
-        description: "Optimizasyon aktif göstergeci",
-        default: true
     }
 });
 
-// Mode'a göre bloke edilecek event'ler
+const HeaderBarIcon = findComponentByCodeLazy(".HEADER_BAR_BADGE_BOTTOM,", 'position:"bottom"');
+
 const BLOCKED_EVENTS_BY_MODE: Record<string, string[]> = {
     light: [],
     medium: ["TYPING_START", "TYPING_STOP", "MESSAGE_CREATE", "MESSAGE_DELETE", "MESSAGE_UPDATE", "PRESENCE_UPDATE"],
@@ -97,20 +91,9 @@ const KEEP_ALIVE_EVENTS = [
 ];
 
 let originalDispatch: typeof FluxDispatcher.dispatch | null = null;
-let originalSetInterval: typeof setInterval | null = null;
-let originalSetTimeout: typeof setTimeout | null = null;
-let originalRAF: typeof requestAnimationFrame | null = null;
-
-let isBackground = false;
+let isOptimized = false;
 let styleElement: HTMLStyleElement | null = null;
-let statusElement: HTMLDivElement | null = null;
 let gcIntervalId: ReturnType<typeof setInterval> | null = null;
-let freezeTimeoutId: ReturnType<typeof setTimeout> | null = null;
-
-const activeIntervals = new Map<ReturnType<typeof setInterval>, { fn: TimerHandler; delay: number }>();
-const activeTimeouts = new Map<ReturnType<typeof setTimeout>, { fn: TimerHandler; delay: number }>();
-const activeRAFs = new Set<number>();
-const pendingEvents = new Map<string, any[]>();
 
 function createStyle() {
     if (styleElement) return;
@@ -123,7 +106,6 @@ function createStyle() {
     styleElement.id = "vc-bg-optimizer";
     styleElement.textContent = `
         ${isAggressive ? `
-        /* Animasyonları durdur */
         *, *::before, *::after {
             animation-play-state: paused !important;
             animation-duration: 0.001s !important;
@@ -134,7 +116,6 @@ function createStyle() {
         ` : ""}
         
         ${isUltra ? `
-        /* Render optimizasyonları */
         body > *:not(#app-mount) {
             display: none !important;
         }
@@ -151,7 +132,6 @@ function createStyle() {
         }
         ` : ""}
         
-        /* Voice elementlerini koru */
         [class*="voice"], [class*="call"], [class*="audio"],
         [class*="Voice"], [class*="Call"], [class*="Audio"],
         [aria-label*="Voice"], [aria-label*="Call"], [aria-label*="Audio"] {
@@ -162,6 +142,7 @@ function createStyle() {
             visibility: visible !important;
         }
     `;
+    document.head.appendChild(styleElement);
 }
 
 function removeStyle() {
@@ -171,39 +152,8 @@ function removeStyle() {
     }
 }
 
-function createStatusIndicator() {
-    if (!settings.store.showStatusIndicator || statusElement) return;
-
-    statusElement = document.createElement("div");
-    statusElement.id = "vc-bg-optimizer-status";
-    statusElement.style.cssText = `
-        position: fixed;
-        top: 4px;
-        right: 4px;
-        background: linear-gradient(135deg, #5865F2, #57F287);
-        color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 10px;
-        font-weight: 600;
-        z-index: 999999;
-        pointer-events: none;
-        font-family: var(--font-primary);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    `;
-    statusElement.textContent = "⚡ Optimize";
-    document.body.appendChild(statusElement);
-}
-
-function removeStatusIndicator() {
-    if (statusElement) {
-        statusElement.remove();
-        statusElement = null;
-    }
-}
-
 function shouldBlockEvent(type: string): boolean {
-    if (!isBackground) return false;
+    if (!isOptimized) return false;
 
     const { mode } = settings.store;
     const blocked = BLOCKED_EVENTS_BY_MODE[mode] || [];
@@ -219,130 +169,7 @@ function patchedDispatch(event: { type: string; [key: string]: unknown }) {
     if (!shouldBlockEvent(event.type)) {
         return originalDispatch?.call(FluxDispatcher, event);
     }
-
-    // Event'i buffer'a al
-    if (!pendingEvents.has(event.type)) {
-        pendingEvents.set(event.type, []);
-    }
-    pendingEvents.get(event.type)!.push(event);
-
     return;
-}
-
-function processPendingEvents() {
-    pendingEvents.forEach((events, _type) => {
-        events.forEach(event => {
-            originalDispatch?.call(FluxDispatcher, event);
-        });
-    });
-    pendingEvents.clear();
-}
-
-// Interval patch
-function patchInterval() {
-    if (originalSetInterval) return;
-
-    originalSetInterval = window.setInterval;
-    (window as any).setInterval = function (fn: any, delay?: number) {
-        const id = (originalSetInterval as any).call(window, fn, delay);
-
-        if (isBackground && settings.store.mode !== "light") {
-            const fnStr = typeof fn === "function" ? fn.toString() : String(fn);
-            const isVoiceRelated = fnStr.includes("voice") || fnStr.includes("audio") || fnStr.includes("call") || fnStr.includes("rtc");
-
-            if (!isVoiceRelated) {
-                activeIntervals.set(id, { fn, delay: delay || 0 });
-                clearInterval(id);
-            }
-        }
-
-        return id;
-    };
-}
-
-function unpatchInterval() {
-    if (originalSetInterval) {
-        (window as any).setInterval = originalSetInterval;
-        originalSetInterval = null;
-    }
-}
-
-// Timeout patch
-function patchTimeout() {
-    if (originalSetTimeout) return;
-
-    originalSetTimeout = window.setTimeout;
-    (window as any).setTimeout = function (fn: any, delay?: number) {
-        const id = (originalSetTimeout as any).call(window, fn, delay);
-
-        if (isBackground && settings.store.mode === "ultra") {
-            const fnStr = typeof fn === "function" ? fn.toString() : String(fn);
-            const isVoiceRelated = fnStr.includes("voice") || fnStr.includes("audio") || fnStr.includes("call");
-
-            if (!isVoiceRelated) {
-                activeTimeouts.set(id, { fn, delay: delay || 0 });
-                clearTimeout(id);
-            }
-        }
-
-        return id;
-    };
-}
-
-function unpatchTimeout() {
-    if (originalSetTimeout) {
-        (window as any).setTimeout = originalSetTimeout;
-        originalSetTimeout = null;
-    }
-}
-
-// RAF patch
-let rafPatched = false;
-
-function patchRAF() {
-    if (rafPatched || settings.store.mode !== "ultra") return;
-
-    originalRAF = window.requestAnimationFrame;
-    (window as any).requestAnimationFrame = function (callback: FrameRequestCallback): number {
-        const id = originalRAF!.call(window, callback);
-
-        if (isBackground) {
-            activeRAFs.add(id);
-            cancelAnimationFrame(id);
-            return id;
-        }
-
-        return id;
-    };
-
-    rafPatched = true;
-}
-
-function unpatchRAF() {
-    if (originalRAF) {
-        (window as any).requestAnimationFrame = originalRAF;
-        originalRAF = null;
-        rafPatched = false;
-    }
-}
-
-function restoreIntervals() {
-    activeIntervals.forEach(({ fn, delay }, _id) => {
-        (originalSetInterval as any)?.call(window, fn, delay);
-    });
-    activeIntervals.clear();
-}
-
-function restoreTimeouts() {
-    activeTimeouts.forEach(({ fn, delay }, _id) => {
-        (originalSetTimeout as any)?.call(window, fn, delay);
-    });
-    activeTimeouts.clear();
-}
-
-function restoreRAFs() {
-    activeRAFs.forEach(id => cancelAnimationFrame(id));
-    activeRAFs.clear();
 }
 
 function triggerGC() {
@@ -352,151 +179,109 @@ function triggerGC() {
     }
 }
 
-function freezeDOM() {
-    if (settings.store.mode !== "ultra") return;
-
-    const appMount = document.getElementById("app-mount");
-    if (appMount) {
-        appMount.style.setProperty("opacity", "0.01", "important");
-    }
-
-    document.body.querySelectorAll(":not([class*='voice']):not([class*='call']):not([class*='audio'])").forEach(el => {
-        if (el instanceof HTMLElement) {
-            el.style.setProperty("visibility", "hidden", "important");
-        }
-    });
-}
-
-function unfreezeDOM() {
-    const appMount = document.getElementById("app-mount");
-    if (appMount) {
-        appMount.style.removeProperty("opacity");
-    }
-
-    document.body.querySelectorAll("[style*='visibility: hidden']").forEach(el => {
-        if (el instanceof HTMLElement) {
-            el.style.removeProperty("visibility");
-        }
-    });
-}
-
-function startBackgroundOptimization() {
-    isBackground = true;
-    const start = performance.now();
-    const { mode } = settings.store;
-
-    // CSS
+function startOptimization() {
+    isOptimized = true;
     createStyle();
-    document.head.appendChild(styleElement!);
-    createStatusIndicator();
 
-    // Patch'leri aktifleştir
-    patchInterval();
-    patchTimeout();
-    patchRAF();
+    if (!originalDispatch) {
+        originalDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
+        FluxDispatcher.dispatch = patchedDispatch as typeof FluxDispatcher.dispatch;
+    }
 
-    // GC
     if (settings.store.gcInterval > 0 && !gcIntervalId) {
         gcIntervalId = setInterval(() => {
-            if (isBackground) triggerGC();
+            if (isOptimized) triggerGC();
         }, settings.store.gcInterval * 1000);
     }
 
-    // Freeze delay
-    if (settings.store.freezeDelay > 0) {
-        freezeTimeoutId = setTimeout(() => {
-            if (isBackground) freezeDOM();
-        }, settings.store.freezeDelay * 1000);
-    } else if (mode === "ultra") {
-        freezeDOM();
-    }
-
-    const duration = performance.now() - start;
-    logger.info(`Background optimization started (${mode} mode, ${duration.toFixed(2)}ms)`);
+    logger.info(`Optimization started (${settings.store.mode} mode)`);
 }
 
-function stopBackgroundOptimization() {
-    isBackground = false;
-    const start = performance.now();
-
-    // CSS'i kaldır
+function stopOptimization() {
+    isOptimized = false;
     removeStyle();
-    removeStatusIndicator();
 
-    // GC interval'i durdur
     if (gcIntervalId) {
         clearInterval(gcIntervalId);
         gcIntervalId = null;
     }
 
-    // Freeze timeout'u temizle
-    if (freezeTimeoutId) {
-        clearTimeout(freezeTimeoutId);
-        freezeTimeoutId = null;
-    }
-
-    // Bekleyen event'leri işle
-    processPendingEvents();
-
-    // Intervals/Timeouts/RAFs'ı geri yükle
-    restoreIntervals();
-    restoreTimeouts();
-    restoreRAFs();
-
-    // DOM'u geri aç
-    unfreezeDOM();
-
-    const duration = performance.now() - start;
-    logger.info(`Background optimization stopped (${duration.toFixed(2)}ms)`);
+    logger.info("Optimization stopped");
 }
 
-function handleVisibilityChange() {
-    const { hidden } = document;
-    logger.debug(`Visibility changed: ${hidden ? "hidden" : "visible"}`);
+function OptimizeIcon({ isActive }: { isActive: boolean }) {
+    return (
+        <svg viewBox="0 0 24 24" width={24} height={24}>
+            <path
+                fill={isActive ? "#57F287" : "#B5BACF"}
+                d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"
+            />
+        </svg>
+    );
+}
 
-    if (hidden) {
-        startBackgroundOptimization();
-    } else {
-        stopBackgroundOptimization();
-    }
+function OptimizeButton() {
+    const buttonRef = useRef(null);
+    const [, forceUpdate] = useState({});
+
+    const toggle = () => {
+        if (isOptimized) {
+            stopOptimization();
+        } else {
+            startOptimization();
+        }
+        forceUpdate({});
+    };
+
+    return (
+        <HeaderBarIcon
+            ref={buttonRef}
+            className="vc-optimize-btn"
+            onClick={toggle}
+            tooltip={isOptimized ? "Optimizasyonu Kapat" : "Optimizasyonu Aç"}
+            icon={() => <OptimizeIcon isActive={isOptimized} />}
+            selected={isOptimized}
+        />
+    );
 }
 
 export default definePlugin({
     name: "BackgroundOptimizer",
-    description: "Discord arka plandayken RAM/CPU/GPU kullanımını minimize eder. Ses ve kısayollar çalışmaya devam eder.",
+    description: "Performans optimizasyonu - Toolbar butonuna tıklayarak aç/kapat",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
 
-    start() {
-        // Flux'u patch'le
-        originalDispatch = FluxDispatcher.dispatch.bind(FluxDispatcher);
-        FluxDispatcher.dispatch = patchedDispatch as typeof FluxDispatcher.dispatch;
-
-        // Visibility listener
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-
-        // Başlangıç durumu
-        if (document.hidden) {
-            startBackgroundOptimization();
+    patches: [
+        {
+            find: '?"BACK_FORWARD_NAVIGATION":',
+            replacement: {
+                match: /(?<=trailing:.{0,50})\i\.Fragment,(?=\{children:\[)/,
+                replace: "$self.TrailingWrapper,"
+            }
         }
+    ],
 
-        logger.info("BackgroundOptimizer loaded");
+    TrailingWrapper({ children }: PropsWithChildren) {
+        return (
+            <>
+                {children}
+                <ErrorBoundary key="vc-optimize" noop>
+                    <OptimizeButton />
+                </ErrorBoundary>
+            </>
+        );
+    },
+
+    start() {
+        logger.info("BackgroundOptimizer loaded - Click toolbar button to toggle");
     },
 
     stop() {
-        stopBackgroundOptimization();
-
-        // Patch'leri kaldır
+        stopOptimization();
         if (originalDispatch) {
             FluxDispatcher.dispatch = originalDispatch;
+            originalDispatch = null;
         }
-
-        unpatchInterval();
-        unpatchTimeout();
-        unpatchRAF();
-
-        document.removeEventListener("visibilitychange", handleVisibilityChange);
-
         logger.info("BackgroundOptimizer unloaded");
     }
 });
