@@ -91,16 +91,11 @@ export default definePlugin({
             replacement: [
                 {
                     match: /this\.renderEditButton\(\)/,
-                    replace: "$self.renderVoicePing(this.props.channel.id, this.renderEditButton())"
+                    replace: "[$self.VoicePing({channelId:this.props.channel.id}), this.renderEditButton()]"
                 }
             ]
         }
     ],
 
-    renderVoicePing(channelId: string, rendered: any) {
-        return [
-            rendered,
-            <VoicePing key="voice-ping" channelId={channelId} />
-        ];
-    },
+    VoicePing
 });
