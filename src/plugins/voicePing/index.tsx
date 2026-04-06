@@ -5,35 +5,48 @@
  */
 
 import definePlugin from "@utils/types";
-import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
+import { React, RTCConnectionStore, SelectedChannelStore } from "@webpack/common";
 
 function VoicePing({ channelId }: { channelId: string; }) {
-    const ping = useStateFromStores([RTCConnectionStore, SelectedChannelStore], () => {
-        if (SelectedChannelStore.getVoiceChannelId() !== channelId) return null;
-        return RTCConnectionStore.getAveragePing();
-    });
+    const [ping, setPing] = React.useState<number | null>(null);
+
+    React.useEffect(() => {
+        const update = () => {
+            if (SelectedChannelStore.getVoiceChannelId() === channelId) {
+                setPing(RTCConnectionStore.getAveragePing());
+            } else if (ping !== null) {
+                setPing(null);
+            }
+        };
+
+        update();
+        const interval = setInterval(update, 2500);
+        return () => clearInterval(interval);
+    }, [channelId, ping]);
 
     if (ping == null || ping <= 0) return null;
 
     return (
-        <span style={{
-            color: "var(--text-positive)",
-            fontSize: "11px",
-            marginLeft: "6px",
-            marginRight: "4px",
-            fontFamily: "var(--font-code)",
-            fontWeight: "700",
-            backgroundColor: "rgba(0, 0, 0, 0.15)",
-            padding: "1px 4px",
-            borderRadius: "4px",
-            verticalAlign: "middle",
-            display: "inline-flex",
-            alignItems: "center",
-            height: "16px",
-            lineHeight: "1"
-        }}>
+        <div
+            className="vc-voice-ping"
+            style={{
+                color: "var(--text-positive)",
+                fontSize: "11px",
+                fontWeight: "700",
+                display: "inline-flex",
+                alignItems: "center",
+                marginRight: "4px",
+                fontFamily: "var(--font-code)",
+                backgroundColor: "rgba(0, 0, 0, 0.15)",
+                padding: "0 4px",
+                borderRadius: "4px",
+                height: "16px",
+                lineHeight: "16px",
+                alignSelf: "center"
+            }}
+        >
             {Math.round(ping)}ms
-        </span>
+        </div>
     );
 }
 
@@ -46,27 +59,13 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                // Match the end of the destructuring block where channel and name are extracted
-                // and inject our name modification right after the statement finishes.
-                match: /({channel:(\i),name:(\i).+?;)/,
-                replace: "$1 $3=$self.patchName($3, $2);"
+                // Patch into the Children.count check which is where status icons are rendered.
+                // Placing our component BEFORE the match ensures it appears to the left of other icons.
+                match: /\.Children\.count.{0,10}?:null(?<=,channel:(\i).+?)/,
+                replace: (m, channel) => `$self.VoicePing({channelId:${channel}.id}),${m}`
             }
         }
     ],
-
-    patchName(name: any, channel: any) {
-        // Only for voice and stage channels
-        if (channel.type !== 2 && channel.type !== 13) return name;
-
-        return (
-            <React.Fragment>
-                <VoicePing channelId={channel.id} />
-                <span className="vc-voice-ping-name-wrapper" style={{ display: "inline" }}>
-                    {name}
-                </span>
-            </React.Fragment>
-        );
-    },
 
     VoicePing
 });
