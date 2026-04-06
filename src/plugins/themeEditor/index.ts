@@ -20,13 +20,11 @@ function updateThemeStyles(settings: any) {
 
     const css: string[] = [];
 
-    // Fonts
+    // Addons / Imports
     if (settings.store.fontQuicksand) {
         css.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
         css.push("body, button, input, select, textarea, [class*='text-'], [class*='name-'], [class*='header-'] { font-family: 'Quicksand', sans-serif !important; }");
     }
-
-    // Addons
     if (settings.store.themeFrostedGlass) {
         css.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
     }
@@ -43,30 +41,88 @@ function updateThemeStyles(settings: any) {
         css.push("@import url('https://nyri4.github.io/Discolored/main.css');");
     }
 
-    // Custom Colors & Variables
+    // Root Variables
     css.push(":root {");
+
+    // Backgrounds
+    if (settings.store.themeUrl) {
+        css.push(`  @import url('${settings.store.themeUrl}');`);
+    }
+
+    if (settings.store.backgroundImage) {
+        css.push(`  --background-image: url('${settings.store.backgroundImage}') !important;`);
+    }
+    css.push(`  --background-image-blur: ${settings.store.backgroundBlur || 0}px !important;`);
+    css.push(`  --background-image-size: ${settings.store.backgroundSize || "cover"} !important;`);
+    css.push(`  --background-image-position: ${settings.store.backgroundPosition || "center"} !important;`);
+
+    // Popouts
+    if (settings.store.popoutImage) {
+        css.push(`  --popout-modal-image: url('${settings.store.popoutImage}') !important;`);
+    } else {
+        css.push(`  --popout-modal-image: transparent !important;`);
+    }
+    css.push(`  --popout-modal-blur: ${settings.store.popoutBlur || 0}px !important;`);
+    css.push(`  --popout-modal-brightness: ${settings.store.popoutBrightness || 0.6} !important;`);
+
+    // Home Button
+    if (settings.store.homeIconUrl) {
+        css.push(`  --home-button-image: url('${settings.store.homeIconUrl}') !important;`);
+        css.push(`  --home-image: url('${settings.store.homeIconUrl}') !important;`);
+    }
+
+    // Colors & Gradients
+    if (settings.store.gradientPrimary) {
+        css.push(`  --gradient-primary: ${settings.store.gradientPrimary} !important;`);
+    }
+    if (settings.store.gradientSecondary) {
+        css.push(`  --gradient-secondary: ${settings.store.gradientSecondary} !important;`);
+    }
+    css.push(`  --gradient-direction: ${settings.store.gradientDirection || "320deg"} !important;`);
+
     if (settings.store.accentColor) {
         css.push(`  --brand-experiment: ${settings.store.accentColor} !important;`);
         css.push(`  --brand-experiment-500: ${settings.store.accentColor} !important;`);
-        css.push(`  --text-link: ${settings.store.accentColor} !important;`);
     }
-    if (settings.store.backgroundChat) {
-        css.push(`  --background-primary: ${settings.store.backgroundChat} !important;`);
+    if (settings.store.linkColour) {
+        css.push(`  --link-colour: ${settings.store.linkColour} !important;`);
+        css.push(`  --text-link: ${settings.store.linkColour} !important;`);
     }
-    if (settings.store.backgroundSidebar) {
-        css.push(`  --background-secondary: ${settings.store.backgroundSidebar} !important;`);
-        css.push(`  --background-secondary-alt: ${settings.store.backgroundSidebar} !important;`);
-    }
-    if (settings.store.backgroundTertiary) {
-        css.push(`  --background-tertiary: ${settings.store.backgroundTertiary} !important;`);
-    }
-    if (settings.store.homeIconUrl) {
-        css.push(`  --home-image: url('${settings.store.homeIconUrl}') !important;`);
-        css.push(`  .homeIcon-158wK6 { content: var(--home-image); }`);
-    }
+
+    // Layout & Padding
+    css.push(`  --columns: ${settings.store.columns || 2} !important;`);
+    css.push(`  --guildgap: ${settings.store.guildGap || 2} !important;`);
+    css.push(`  --window-padding: ${settings.store.windowPadding || 0}px !important;`);
+    css.push(`  --window-roundness: ${settings.store.windowRoundness || 0}px !important;`);
+
+    // Brightness
+    css.push(`  --serverlist-brightness: ${settings.store.serverlistBrightness || 0.6} !important;`);
+    css.push(`  --left-brightness: ${settings.store.leftBrightness || 0.6} !important;`);
+    css.push(`  --middle-brightness: ${settings.store.middleBrightness || 0.6} !important;`);
+
+    // Font
+    css.push(`  --font: ${settings.store.fontQuicksand ? "Quicksand" : "inherit"} !important;`);
+
     css.push("}");
 
-    // Custom CSS from string
+    // Fix for Wordmark/Title in Custom Title Bar
+    if (settings.store.customTitleText) {
+        css.push(`
+            [class*="wordmark-"]::after {
+                content: "${settings.store.customTitleText}";
+                display: inline-block;
+                margin-left: 8px;
+                color: var(--text-muted);
+                font-size: 12px;
+                font-family: var(--font);
+            }
+            [class*="wordmark-"] > svg {
+                display: ${settings.store.hideDiscordLogo ? "none" : "block"};
+            }
+        `);
+    }
+
+    // Custom CSS
     if (settings.store.customCss) {
         css.push(settings.store.customCss);
     }
@@ -76,73 +132,133 @@ function updateThemeStyles(settings: any) {
 
 const settings = definePluginSettings({
     fontQuicksand: {
-        description: "Quicksand Font Kullan (Google Fonts'tan Özel İnce Yazı Tipi)",
+        description: "Special Quicksand Fontu",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
     themeFrostedGlass: {
-        description: "Frosted Glass Aktifleştir (Buzlu Cam Saydam Tema Efekti)",
+        description: "Buzlu Cam (Frosted Glass) Efekti",
         type: OptionType.BOOLEAN,
-        default: false,
+        default: true,
         onChange: () => updateThemeStyles(settings)
     },
     themeWindowsTitlebar: {
-        description: "Windows Uyumlu Üst Bar (Daha zarif ve temiz native titlebar)",
+        description: "Windows Uyumlu Üst Bar",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
     themeServerColumns: {
-        description: "Sunucu Sütunları (Sunucu listesini ızgara diziliminde yapar)",
+        description: "Sunucu Sütun Gridi",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
     themeRadialStatus: {
-        description: "Yuvarlak Durum Çizgileri (Kullanıcı durumlarını profil fotoğrafı etrafına sarar)",
+        description: "Radial Durum Halkaları",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
     themeDiscolored: {
-        description: "Discolored Eklentisi (Discord'un sıkıcı SVG ikonlarını renkli hale getirir)",
+        description: "Renkli SVG İkonlar",
         type: OptionType.BOOLEAN,
         default: true,
         onChange: () => updateThemeStyles(settings)
     },
-    accentColor: {
-        description: "Vurgu Rengi (Hex Kodu Örn: #5865f2)",
+    backgroundImage: {
+        description: "Uygulama Arka Planı URL",
+        type: OptionType.STRING,
+        default: "https://i.imgur.com/OHStaWu.png",
+        onChange: () => updateThemeStyles(settings)
+    },
+    backgroundBlur: {
+        description: "Arka Plan Bulanıklığı (px)",
+        type: OptionType.NUMBER,
+        default: 0,
+        onChange: () => updateThemeStyles(settings)
+    },
+    backgroundSize: {
+        description: "Arka Plan Boyutu",
+        type: OptionType.STRING,
+        default: "cover",
+        onChange: () => updateThemeStyles(settings)
+    },
+    popoutImage: {
+        description: "Popout/Modal Arka Plan URL",
         type: OptionType.STRING,
         default: "",
         onChange: () => updateThemeStyles(settings)
     },
-    backgroundChat: {
-        description: "Sohbet Arka Planı (Hex Kodu Örn: #1e1e1e)",
+    gradientPrimary: {
+        description: "Ana Gradyan (RGB örn: 219, 219, 164)",
         type: OptionType.STRING,
-        default: "",
+        default: "219, 219, 164",
         onChange: () => updateThemeStyles(settings)
     },
-    backgroundSidebar: {
-        description: "Yan Panel Arka Planı (Sunucu Listesi vb.)",
+    gradientSecondary: {
+        description: "İkincil Gradyan (RGB örn: 14, 163, 232)",
         type: OptionType.STRING,
-        default: "",
+        default: "14, 163, 232",
         onChange: () => updateThemeStyles(settings)
     },
-    backgroundTertiary: {
-        description: "Üçüncül Arka Plan (Ayarlar, Arama vb.)",
+    gradientDirection: {
+        description: "Gradyan Açısı (örn: 320deg)",
         type: OptionType.STRING,
-        default: "",
+        default: "320deg",
+        onChange: () => updateThemeStyles(settings)
+    },
+    linkColour: {
+        description: "Bağlantı Rengi (Hex)",
+        type: OptionType.STRING,
+        default: "#88f7ff",
+        onChange: () => updateThemeStyles(settings)
+    },
+    columns: {
+        description: "Sunucu Sütun Sayısı",
+        type: OptionType.NUMBER,
+        default: 2,
+        onChange: () => updateThemeStyles(settings)
+    },
+    guildGap: {
+        description: "Sunucu Arası Boşluk",
+        type: OptionType.NUMBER,
+        default: 2,
+        onChange: () => updateThemeStyles(settings)
+    },
+    windowPadding: {
+        description: "Pencere Kenar Boşluğu (px)",
+        type: OptionType.NUMBER,
+        default: 0,
+        onChange: () => updateThemeStyles(settings)
+    },
+    windowRoundness: {
+        description: "Pencere Köşe Yuvarlaklığı (px)",
+        type: OptionType.NUMBER,
+        default: 0,
         onChange: () => updateThemeStyles(settings)
     },
     homeIconUrl: {
-        description: "Discord Ana Sayfa Butonu Görseli (URL)",
+        description: "Kaiser Home Buton URL",
         type: OptionType.STRING,
-        default: "",
+        default: "https://i.imgur.com/rAzycBK.png",
+        onChange: () => updateThemeStyles(settings)
+    },
+    customTitleText: {
+        description: "Başlık Barı Yazısı (Wordmark Yanı)",
+        type: OptionType.STRING,
+        default: "4 0 3",
+        onChange: () => updateThemeStyles(settings)
+    },
+    hideDiscordLogo: {
+        description: "Discord Logosunu Gizle (Sol Üst)",
+        type: OptionType.BOOLEAN,
+        default: false,
         onChange: () => updateThemeStyles(settings)
     },
     customCss: {
-        description: "Özel CSS Kodları",
+        description: "Extra CSS Modları",
         type: OptionType.STRING,
         multiline: true,
         default: "",
@@ -151,8 +267,8 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "ThemeEditor",
-    description: "403Cord Dinamik Tema ve Özel Stiller Yöneticisi.",
+    name: "Tema Düzenleyici",
+    description: "Discord temanızı düzenleyin ve kendinize özel bir tema yaratın.",
     authors: [Devs.Toji, Devs.Aki],
     settings,
 
