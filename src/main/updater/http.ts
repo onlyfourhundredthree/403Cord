@@ -7,7 +7,7 @@
 import { fetchBuffer, fetchJson } from "@main/utils/http";
 import { IpcEvents } from "@shared/IpcEvents";
 import { ipcMain } from "electron";
-import { rename, writeFile } from "fs/promises";
+import { rename, unlink, writeFile } from "fs/promises";
 import { join } from "path";
 
 import gitHash from "~git-hash";
@@ -58,14 +58,35 @@ async function applyUpdates() {
     if (!PendingUpdateUrl) return false;
 
     const contents = await fetchBuffer(PendingUpdateUrl);
+
+    // Basic validation: ASAR files must have a valid header
+    if (contents.length < 16) {
+        throw new Error("Downloaded update file is too small to be a valid ASAR");
+    }
+
     const isInsideAsar = __dirname.endsWith(".asar");
     const asarPath = isInsideAsar ? __dirname : join(__dirname, "..", "403Cord.asar");
+    const tempPath = asarPath + ".download";
+    const oldPath = asarPath + ".old";
 
+    // 1. Write to a temporary file first to prevent corruption
+    await writeFile(tempPath, contents);
+
+    // 2. Remove old backup if it exists
+    try { await unlink(oldPath); } catch { }
+
+    // 3. Rename current ASAR to backup
+    try { await rename(asarPath, oldPath); } catch { }
+
+    // 4. Atomically rename temp download to final path
     try {
-        await rename(asarPath, asarPath + ".old");
-    } catch (e) { }
+        await rename(tempPath, asarPath);
+    } catch {
+        // Fallback: direct write if rename fails (e.g. cross-device)
+        await writeFile(asarPath, contents);
+        try { await unlink(tempPath); } catch { }
+    }
 
-    await writeFile(asarPath, contents);
     PendingUpdateUrl = null;
     return true;
 }

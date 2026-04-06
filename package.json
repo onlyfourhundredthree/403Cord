@@ -1,6 +1,6 @@
 {
     "name": "vencord",
-    "private": "true",
+    "private": true,
     "version": "1.0.10",
     "description": "The cutest Discord client mod",
     "homepage": "https://github.com/onlyfourhundredthree/403Cord#readme",
