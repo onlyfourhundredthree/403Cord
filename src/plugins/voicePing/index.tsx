@@ -5,46 +5,48 @@
  */
 
 import definePlugin from "@utils/types";
-import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
+import { React, RTCConnectionStore, SelectedChannelStore } from "@webpack/common";
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
-    const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
-
-    const inChannel = currentVoiceChannelId === channelId;
+    const [inChannel, setInChannel] = React.useState(false);
 
     React.useEffect(() => {
-        if (!inChannel) return;
-
         const update = () => {
-            const val = RTCConnectionStore.getAveragePing();
-            if (typeof val === "number") setPing(val);
+            const currentId = SelectedChannelStore.getVoiceChannelId();
+            const isIn = currentId === channelId;
+            setInChannel(isIn);
+            if (isIn) {
+                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
+                setPing(val > 0 ? val : null);
+            }
         };
 
         update();
         const interval = setInterval(update, 2000);
         return () => clearInterval(interval);
-    }, [inChannel, channelId]);
+    }, [channelId]);
 
     if (!inChannel) return null;
 
     return (
-        <div
+        <span
             className="vc-voice-ping"
             style={{
                 color: "var(--text-feedback-positive)",
                 fontSize: "12px",
-                fontWeight: "400",
+                fontWeight: "600",
                 display: "inline-flex",
                 alignItems: "center",
                 marginLeft: "10px",
                 fontFamily: "var(--font-code)",
                 alignSelf: "center",
-                cursor: "default"
+                cursor: "default",
+                verticalAlign: "middle"
             }}
         >
-            {ping !== null && ping > 0 ? Math.round(ping) : "---"}ms
-        </div>
+            {ping !== null ? Math.round(ping) : "---"}ms
+        </span>
     );
 }
 
@@ -55,13 +57,13 @@ export default definePlugin({
 
     patches: [
         {
-            // This is the correct module for Voice Channel items in the sidebar
-            find: "VoiceChannel.renderPopout: There must always be something to render",
+            // Find the Voice Channel component in the sidebar using a very specific handler name
+            find: ".handleVoiceStatusClick",
             replacement: [
                 {
-                    // Inject our ping component after the edit button in the channel status array
-                    match: /this\.renderEditButton\(\)/,
-                    replace: "$&, $self.VoicePing({channelId:this.props.channel.id})"
+                    // Target the beginning of the status icons array (children__2ea32)
+                    match: /className:\i\.children,children:\[/,
+                    replace: "$&$self.VoicePing({channelId:this.props.channel.id}),"
                 }
             ]
         }
