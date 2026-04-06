@@ -147,7 +147,7 @@ async function convertToGifAndSend(url: string) {
 export default definePlugin({
     name: "Görselden Gif",
     description: "Görseli GIF'e dönüştürüp Catbox'a yükler ve mevcut kanala mesaj olarak gönderir.",
-    authors: [{ name: "antigravity", id: 0n }],
+    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     contextMenus: {
         "image-context": imageContextMenuPatch,
         "message": messageContextMenuPatch
