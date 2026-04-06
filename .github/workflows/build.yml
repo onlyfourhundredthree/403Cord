@@ -1,4 +1,4 @@
-name: Build DevBuild
+name: 403Cord CI/CD
 on:
     push:
         branches:
