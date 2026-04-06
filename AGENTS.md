@@ -46,6 +46,31 @@ Bu projede aşağıdaki performans optimizasyonları uygulanmıştır:
 - `IntervalManager` utility sınıfı eklendi
 - Automatic cleanup için kullanılabilir
 
+### Image Lazy Loading
+- `LazyImage` utility component oluşturuldu
+- `loading="lazy"` attribute tüm görsellere eklendi
+- ServerInfo, ExpressionCloner, PermissionsViewer, SpotifyControls güncellendi
+
+### React Memo Optimizasyonları
+- `CircleIcon`, `VoiceIcon` - React.memo ile sarıldı
+- `PermissionDeniedIcon`, `PermissionAllowedIcon`, `PermissionDefaultIcon` - React.memo ile sarıldı
+
+### Bundle Optimizasyonları
+- Renderer.js: ~480KB
+- Gereksiz imports temizlenmeli
+- Dynamic imports ile code splitting yapılabilir
+
+### Virtual Scrolling
+- `VirtualList` utility component oluşturuldu
+- `useVirtualList` hook oluşturuldu
+- Büyük listeler için performans optimizasyonu
+
+### Web Workers
+- `WorkerUtils.ts` utility oluşturuldu
+- `createWorker` - Basit worker oluşturma
+- `WorkerPool` - Paralel işleme için worker havuzu
+- Ağır işlemler için main thread bloke olmaz
+
 ## Dosya Yapısı
 
 ```

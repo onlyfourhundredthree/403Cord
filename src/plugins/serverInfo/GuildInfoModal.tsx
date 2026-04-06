@@ -84,6 +84,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                     className={cl("banner")}
                     src={bannerUrl}
                     alt=""
+                    loading="lazy"
                     onClick={() => openImageModal({
                         url: bannerUrl,
                         width: 1024
@@ -97,6 +98,7 @@ function GuildInfoModal({ guild }: GuildProps) {
                         className={cl("icon")}
                         src={iconUrl}
                         alt=""
+                        loading="lazy"
                         onClick={() => openImageModal({
                             url: iconUrl,
                             height: 512,

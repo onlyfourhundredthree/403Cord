@@ -279,6 +279,7 @@ function CloneModal({ data }: { data: Sticker | Emoji; }) {
                                             size: 512
                                         })}
                                         alt={g.name}
+                                        loading="lazy"
                                     />
                                 ) : (
                                     <Forms.FormText
@@ -326,6 +327,7 @@ function buildMenuItem(type: "Emoji" | "Sticker", fetchData: () => Promisable<Om
                                     height={24}
                                     width={24}
                                     style={{ marginRight: "0.5em" }}
+                                    loading="lazy"
                                 />
                                 <Forms.FormText>Klonla: {data.name}</Forms.FormText>
                             </ModalHeader>

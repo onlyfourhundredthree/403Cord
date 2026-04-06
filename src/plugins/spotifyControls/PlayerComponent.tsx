@@ -323,6 +323,7 @@ function Info({ track }: { track: Track; }) {
                     id={cl("album-image")}
                     src={img.url}
                     alt="Album Image"
+                    loading="lazy"
                     onClick={() => setCoverExpanded(!coverExpanded)}
                     onContextMenu={e => {
                         ContextMenuApi.openContextMenu(e, () => <AlbumContextMenu track={track} />);
