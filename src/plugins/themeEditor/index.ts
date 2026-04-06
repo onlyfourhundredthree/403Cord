@@ -17,14 +17,17 @@ function updateTheme() {
         document.head.appendChild(el);
     }
 
-    el.innerHTML = `
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');
-@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');
-@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');
-@import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/ServerColumns/ServerColumns.css');
-@import url('https://discordstyles.github.io/RadialStatus/dist/RadialStatus.css');
-@import url('https://nyri4.github.io/Discolored/main.css');
+    const imports: string[] = [];
 
+    // Ozel CSS kurali: @import satirlari her zaman en ustte olmak zorundadir!
+    if (settings.store.fontQuicksand) imports.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
+    if (settings.store.themeFrostedGlass) imports.push("@import url('https://discordstyles.github.io/FrostedGlass/dist/FrostedGlass.css');");
+    if (settings.store.themeWindowsTitlebar) imports.push("@import url('https://discordstyles.github.io/Addons/windows-titlebar.css');");
+    if (settings.store.themeServerColumns) imports.push("@import url('https://mwittrien.github.io/BetterDiscordAddons/Themes/ServerColumns/ServerColumns.css');");
+    if (settings.store.themeRadialStatus) imports.push("@import url('https://discordstyles.github.io/RadialStatus/dist/RadialStatus.css');");
+    if (settings.store.themeDiscolored) imports.push("@import url('https://nyri4.github.io/Discolored/main.css');");
+
+    const rootBlock = `
 :root {
   --background-image: ${settings.store.backgroundImage};
   --background-image-blur: ${settings.store.backgroundImageBlur};
@@ -69,9 +72,21 @@ function updateTheme() {
   --rs-phone-visible: ${settings.store.rsPhoneVisible};
 }
 `;
+
+    // Tum stringi guvenli sekilde tek parca birlestiriyoruz
+    el.innerHTML = imports.join("\n") + rootBlock;
 }
 
 export const settings = definePluginSettings({
+    // --- TEMA AÇMA / KAPATMA BUTONLARI ---
+    fontQuicksand: { type: OptionType.BOOLEAN, description: "Quicksand Font Kullan", default: true, onChange: () => updateTheme() },
+    themeFrostedGlass: { type: OptionType.BOOLEAN, description: "Frosted Glass Aktifleştir", default: true, onChange: () => updateTheme() },
+    themeWindowsTitlebar: { type: OptionType.BOOLEAN, description: "Windows Uyumlu Üst Bar", default: true, onChange: () => updateTheme() },
+    themeServerColumns: { type: OptionType.BOOLEAN, description: "Sunucu Sütunları", default: true, onChange: () => updateTheme() },
+    themeRadialStatus: { type: OptionType.BOOLEAN, description: "Yuvarlak Durum Çizgileri", default: true, onChange: () => updateTheme() },
+    themeDiscolored: { type: OptionType.BOOLEAN, description: "Discolored Eklentisi", default: true, onChange: () => updateTheme() },
+
+    // --- DEĞİŞKENLER (VARIABLES) ---
     backgroundImage: { type: OptionType.STRING, description: "Arkaplan Görseli (Background Image)", default: "url('https://i.imgur.com/OHStaWu.png')", onChange: () => updateTheme() },
     backgroundImageBlur: { type: OptionType.STRING, description: "Arkaplan Bulanıklığı (Image Blur)", default: "0px", onChange: () => updateTheme() },
     backgroundImageSize: { type: OptionType.STRING, description: "Arkaplan Boyutu (Image Size)", default: "cover", onChange: () => updateTheme() },
