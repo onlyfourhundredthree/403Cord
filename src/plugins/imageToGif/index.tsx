@@ -7,11 +7,8 @@
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import { showNotification } from "@api/Notifications";
 import definePlugin from "@utils/types";
-import { findByPropsLazy } from "@webpack";
-import { Menu } from "@webpack/common";
+import { Menu,MessageActions, SelectedChannelStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
-
-const FavoriteGifActions = findByPropsLazy("addFavoriteGif");
 
 const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
     // Only show if we have a src and it's not a link to another page
@@ -22,7 +19,7 @@ const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => 
             <Menu.MenuItem
                 id="convert-to-gif"
                 label="Görselden Gif"
-                action={() => convertToGifAndFavorite(props.src)}
+                action={() => convertToGifAndSend(props.src)}
             />
         </Menu.MenuGroup>
     );
@@ -45,10 +42,10 @@ async function uploadToCatbox(uint8Array: Uint8Array): Promise<string> {
     });
 
     if (!response.ok) throw new Error("Görsel Catbox'a yüklenemedi.");
-    return await response.text();
+    return (await response.text()).trim();
 }
 
-async function convertToGifAndFavorite(url: string) {
+async function convertToGifAndSend(url: string) {
     let objUrl: string | null = null;
     try {
         showNotification({
@@ -83,7 +80,7 @@ async function convertToGifAndFavorite(url: string) {
         const index = applyPalette(data, palette);
 
         // Encode to GIF
-        const gif = new (GIFEncoder as any)();
+        const gif = GIFEncoder();
         gif.writeFrame(index, canvas.width, canvas.height, { palette });
         gif.finish();
 
@@ -96,22 +93,19 @@ async function convertToGifAndFavorite(url: string) {
 
         const catboxUrl = await uploadToCatbox(uint8Array);
 
-        if (FavoriteGifActions?.addFavoriteGif) {
-            FavoriteGifActions.addFavoriteGif({
-                url: catboxUrl,
-                proxy_url: catboxUrl,
-                width: img.width,
-                height: img.height,
-                format: "gif"
-            });
-
+        const channelId = SelectedChannelStore.getChannelId();
+        if (channelId) {
+            MessageActions.sendMessage(channelId, { content: catboxUrl });
             showNotification({
-                title: "Görselden Gif",
-                body: "Görsel başarıyla yüklendi ve favorilere eklendi!",
+                title: "Başarılı!",
+                body: "GIF oluşturuldu ve kanala gönderildi. Artık gife sağ tıklayıp favorileyebilirsin.",
                 image: catboxUrl
             });
         } else {
-            throw new Error("Discord favori sistemi bulunamadı.");
+            showNotification({
+                title: "Hata",
+                body: "Kanal bulunamadı, GIF gönderilemedi.",
+            });
         }
 
     } catch (err: any) {
@@ -127,7 +121,7 @@ async function convertToGifAndFavorite(url: string) {
 
 export default definePlugin({
     name: "ImageToGif",
-    description: "Görseli GIF'e dönüştürüp Catbox'a yükler ve otomatik favoriler.",
+    description: "Görseli GIF'e dönüştürüp Catbox'a yükler ve mevcut kanala mesaj olarak gönderir.",
     authors: [{ name: "antigravity", id: 0n }],
     contextMenus: {
         "image-context": imageContextMenuPatch
