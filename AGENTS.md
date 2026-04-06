@@ -71,6 +71,17 @@ Bu projede aşağıdaki performans optimizasyonları uygulanmıştır:
 - `WorkerPool` - Paralel işleme için worker havuzu
 - Ağır işlemler için main thread bloke olmaz
 
+### BackgroundOptimizer Plugin
+- **Ultra Agresif Mod**: Discord arka plandayken neredeyse her şeyi durdurur
+- **4 Mod Seçeneği**: Hafif, Orta, Agresif, Ultra
+- **CSS Animasyon Dondurma**: Tüm animasyonları durdurur
+- **Flux Event Filtreleme**: Gereksiz event'leri bloklar (ses hariç)
+- **Interval/Timeout Patch**: Arka planda çalışan timer'ları durdurur
+- **requestAnimationFrame Patch**: RAF'leri durdurur
+- **DOM Freeze**: Ultra modda DOM'u dondurur
+- **GC Trigger**: Belirli aralıklarla garbage collection
+- **Voice Protection**: Ses bağlantısını korur
+
 ## Dosya Yapısı
 
 ```
