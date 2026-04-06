@@ -46,9 +46,10 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                // Patch into the Children.count check which is where status icons are rendered
-                match: /\.Children\.count.{0,10}?:null(?<=,channel:(\i).+?)/,
-                replace: (m, channel) => `${m},$self.VoicePing({channelId:${channel}.id})`
+                // Match the end of the destructuring block where channel and name are extracted
+                // and inject our name modification right after the statement finishes.
+                match: /({channel:(\i),name:(\i).+?;)/,
+                replace: "$1 $3=$self.patchName($3, $2);"
             }
         }
     ],
@@ -60,7 +61,9 @@ export default definePlugin({
         return (
             <React.Fragment>
                 <VoicePing channelId={channel.id} />
-                {name}
+                <span className="vc-voice-ping-name-wrapper" style={{ display: "inline" }}>
+                    {name}
+                </span>
             </React.Fragment>
         );
     },
