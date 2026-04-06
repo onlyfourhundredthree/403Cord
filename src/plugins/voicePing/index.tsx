@@ -46,10 +46,9 @@ export default definePlugin({
         {
             find: "UNREAD_IMPORTANT:",
             replacement: {
-                // In ChannelItem, we patch the name prop assignment
-                // We use a regex that matches the start of the component where channel and name are extracted
-                match: /(?<=channel:(\i),name:)(\i)/,
-                replace: (m, channel, name) => `$self.patchName(${name}, ${channel})`
+                // Patch into the Children.count check which is where status icons are rendered
+                match: /\.Children\.count.{0,10}?:null(?<=,channel:(\i).+?)/,
+                replace: (m, channel) => `${m},$self.VoicePing({channelId:${channel}.id})`
             }
         }
     ],

@@ -158,7 +158,7 @@ export default definePlugin({
                 },
                 {
                     match: /(?<=null!=(\i)\?.{0,20})\i\.\i,{children:\1/,
-                    replace: "'div',{onClick:e=>{if(e.detail<2)e.stopPropagation()},onMouseDown:e=>{if(e.detail<2)e.stopPropagation()},children:$1"
+                    replace: "$&"
                 }
             ]
         },
@@ -212,8 +212,17 @@ export default definePlugin({
         return {
             onMouseOver: () => this.onMouseOver(instance),
             onMouseOut: () => this.onMouseOut(instance),
-            onMouseDown: (e: React.MouseEvent) => this.onMouseDown(e, instance),
-            onMouseUp: () => this.onMouseUp(instance),
+            onMouseDown: (e: React.MouseEvent) => {
+                this.onMouseDown(e, instance);
+                if (e.detail < 2) e.stopPropagation();
+            },
+            onMouseUp: (e: React.MouseEvent) => {
+                this.onMouseUp(instance);
+                if (e.detail < 2) e.stopPropagation();
+            },
+            onClick: (e: React.MouseEvent) => {
+                if (e.detail < 2) e.stopPropagation();
+            },
             id: instance.props.id,
         };
     },
