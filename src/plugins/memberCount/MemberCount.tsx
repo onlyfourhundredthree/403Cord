@@ -6,7 +6,7 @@
 
 import { getCurrentChannel } from "@utils/discord";
 import { isObjectEmpty } from "@utils/misc";
-import { ChannelStore, GuildMemberCountStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useStateFromStores, VoiceStateStore } from "@webpack/common";
+import { ChannelStore, GuildMemberCountStore, PermissionsBits, PermissionStore, SelectedChannelStore, Tooltip, useEffect, useMemo, useStateFromStores, VoiceStateStore } from "@webpack/common";
 
 import { ChannelMemberStore, cl, numberFormat, settings, ThreadMemberListStore } from ".";
 import { CircleIcon } from "./CircleIcon";
@@ -35,46 +35,55 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                     return channel && PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel);
                 })
                 .length;
-        }
+        },
+        [guildId, includeVoice]
     );
 
     const totalCount = useStateFromStores(
         [GuildMemberCountStore],
-        () => GuildMemberCountStore.getMemberCount(guildId!)
-    );
-
-    let onlineCount = useStateFromStores(
-        [OnlineMemberCountStore],
-        () => OnlineMemberCountStore.getCount(guildId)
+        () => GuildMemberCountStore.getMemberCount(guildId!),
+        [guildId]
     );
 
     const { groups } = useStateFromStores(
         [ChannelMemberStore],
-        () => ChannelMemberStore.getProps(guildId, currentChannel?.id)
+        () => ChannelMemberStore.getProps(guildId, currentChannel?.id),
+        [guildId, currentChannel?.id]
     );
 
     const threadGroups = useStateFromStores(
         [ThreadMemberListStore],
-        () => ThreadMemberListStore.getMemberListSections(currentChannel?.id)
+        () => ThreadMemberListStore.getMemberListSections(currentChannel?.id),
+        [currentChannel?.id]
     );
 
-    if (!isTooltip && (groups.length >= 1 || groups[0].id !== "unknown")) {
-        onlineCount = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
-    }
+    const onlineCount = useMemo(() => {
+        let count = useStateFromStores(
+            [OnlineMemberCountStore],
+            () => OnlineMemberCountStore.getCount(guildId),
+            [guildId]
+        );
 
-    if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
-        onlineCount = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
-    }
+        if (!isTooltip && groups.length >= 1 && groups[0].id !== "unknown") {
+            count = groups.reduce((total, curr) => total + (curr.id === "offline" ? 0 : curr.count), 0);
+        }
+
+        if (!isTooltip && threadGroups && !isObjectEmpty(threadGroups)) {
+            count = Object.values(threadGroups).reduce((total, curr) => total + (curr.sectionId === "offline" ? 0 : curr.userIds.length), 0);
+        }
+
+        return count;
+    }, [isTooltip, groups, threadGroups, guildId]);
 
     useEffect(() => {
         OnlineMemberCountStore.ensureCount(guildId);
     }, [guildId]);
 
+    const formattedVoiceCount = useMemo(() => numberFormat(voiceActivityCount ?? 0), [voiceActivityCount]);
+    const formattedOnlineCount = useMemo(() => onlineCount != null ? numberFormat(onlineCount) : "?", [onlineCount]);
+
     if (totalCount == null)
         return null;
-
-    const formattedVoiceCount = numberFormat(voiceActivityCount ?? 0);
-    const formattedOnlineCount = onlineCount != null ? numberFormat(onlineCount) : "?";
 
     return (
         <div className={cl("widget", { tooltip: isTooltip, "member-list": !isTooltip })}>

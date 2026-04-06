@@ -4,27 +4,51 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { IntervalManager } from "@utils/IntervalManager";
 import definePlugin from "@utils/types";
 import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
 
+const intervalManager = new IntervalManager();
+
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
+    const [isVisible, setIsVisible] = React.useState(!document.hidden);
     const currentVoiceChannelId = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId());
 
     const inChannel = currentVoiceChannelId === channelId;
 
     React.useEffect(() => {
-        if (!inChannel) return;
+        const handleVisibilityChange = () => {
+            setIsVisible(!document.hidden);
+        };
+
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    }, []);
+
+    React.useEffect(() => {
+        if (!inChannel || !isVisible) return;
 
         const update = () => {
-            const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
-            if (typeof val === "number") setPing(val);
+            try {
+                const rtcStore = RTCConnectionStore as any;
+                const val = rtcStore?.getAveragePing?.() ?? rtcStore?.getRTT?.() ?? null;
+
+                if (typeof val === "number" && !isNaN(val) && val >= 0) {
+                    setPing(val);
+                }
+            } catch (e) {
+                console.error("[VoicePing] Failed to get ping:", e);
+            }
         };
 
         update();
-        const interval = setInterval(update, 2000);
-        return () => clearInterval(interval);
-    }, [inChannel, channelId]);
+        intervalManager.setInterval("voicePing", update, 2000);
+
+        return () => {
+            intervalManager.clearInterval("voicePing");
+        };
+    }, [inChannel, channelId, isVisible]);
 
     if (!inChannel) return null;
 
@@ -47,7 +71,7 @@ function VoicePing({ channelId }: { channelId: string; }) {
                 alignSelf: "center"
             }}
         >
-            {ping && ping > 0 ? Math.round(ping) : "---"}ms
+            {ping !== null && ping > 0 ? Math.round(ping) : "---"}ms
         </div>
     );
 }
@@ -59,7 +83,6 @@ export default definePlugin({
 
     patches: [
         {
-            // peak working module version (from v403.044.044.044.044)
             find: "VoiceChannel.renderPopout: There must always be something to render",
             replacement: [
                 {

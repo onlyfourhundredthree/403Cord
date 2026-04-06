@@ -9,6 +9,7 @@ import "./styles.css";
 import { showNotification } from "@api/Notifications";
 import { definePluginSettings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { IntervalManager } from "@utils/IntervalManager";
 import definePlugin, { OptionType } from "@utils/types";
 import { findComponentByCodeLazy, findCssClassesLazy, findStoreLazy } from "@webpack";
 import { Constants, React, RestAPI, SettingsRouter, Tooltip } from "@webpack/common";
@@ -23,6 +24,8 @@ const TimestampClasses = findCssClassesLazy("timestamp", "blockquoteContainer");
 const SessionIconClasses = findCssClassesLazy("sessionIcon");
 
 const BlobMask = findComponentByCodeLazy("!1,lowerBadgeSize:");
+
+const intervalManager = new IntervalManager();
 
 const settings = definePluginSettings({
     backgroundCheck: {
@@ -199,11 +202,11 @@ export default definePlugin({
 
         this.checkNewSessions();
         if (settings.store.backgroundCheck) {
-            this.checkInterval = setInterval(this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
+            intervalManager.setInterval("betterSessions", this.checkNewSessions, settings.store.checkInterval * 60 * 1000);
         }
     },
 
     stop() {
-        clearInterval(this.checkInterval);
+        intervalManager.clearAll();
     }
 });

@@ -4,11 +4,14 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { IntervalManager } from "@utils/IntervalManager";
 import definePlugin from "@utils/types";
 
 import { onChannelDelete, onGuildDelete, onRelationshipRemove, removeFriend, removeGroup, removeGuild } from "./functions";
 import settings from "./settings";
 import { syncAndRunChecks, syncFriends, syncGroups, syncGuilds } from "./utils";
+
+const intervalManager = new IntervalManager();
 
 export default definePlugin({
     name: "RelationshipNotifier",
@@ -54,10 +57,12 @@ export default definePlugin({
         CONNECTION_OPEN: syncAndRunChecks
     },
 
-    async start() {
-        setTimeout(() => {
-            syncAndRunChecks();
-        }, 5000);
+    start() {
+        intervalManager.setTimeout("relationshipNotifier", syncAndRunChecks, 5000);
+    },
+
+    stop() {
+        intervalManager.clearAll();
     },
 
     removeFriend,
