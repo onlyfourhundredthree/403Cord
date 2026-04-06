@@ -14,6 +14,7 @@ import { Span } from "@components/Span";
 import { debounce } from "@shared/debounce";
 import { classNameFactory } from "@utils/css";
 import { copyWithToast, openImageModal } from "@utils/discord";
+import { IntervalManager } from "@utils/IntervalManager";
 import { classes } from "@utils/misc";
 import { ContextMenuApi, FluxDispatcher, Menu, Popout, React, useEffect, useState, useStateFromStores } from "@webpack/common";
 
@@ -212,11 +213,12 @@ function SpotifySeekBar() {
     useEffect(() => {
         if (isPlaying && !isSettingPosition) {
             setPosition(SpotifyStore.position);
-            const interval = setInterval(() => {
+            const intervalManager = new IntervalManager();
+            intervalManager.setInterval("spotifyPosition", () => {
                 setPosition(p => p + 1000);
             }, 1000);
 
-            return () => clearInterval(interval);
+            return () => intervalManager.clearAll();
         }
     }, [storePosition, isSettingPosition, isPlaying]);
 

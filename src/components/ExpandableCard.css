@@ -9,6 +9,11 @@
     margin: 4px;
     border-radius: var(--radius-xs);
 
+    /* GPU Acceleration */
+    will-change: background;
+    contain: layout style;
+    transition: background 0.15s ease-out;
+
     .vc-expandable-card[data-expanded="true"] & {
         background: var(--card-secondary-bg);
     }

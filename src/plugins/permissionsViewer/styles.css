@@ -67,6 +67,9 @@
 
 .vc-permviewer-modal-list-item:hover {
     background-color: var(--background-mod-subtle);
+
+    /* GPU Acceleration */
+    transition: background-color 0.15s ease-out;
 }
 
 .vc-permviewer-modal-list-item-active {
@@ -131,7 +134,10 @@
     color: var(--interactive-muted);
     margin-left: auto;
     cursor: pointer;
-    transition: color ease-in 0.1s;
+    transition: color 0.15s ease-out;
+
+    /* GPU Acceleration */
+    will-change: color;
 }
 
 .vc-permviewer-modal-perms-item .vc-info-icon:hover {
@@ -152,6 +158,9 @@
 
 .vc-permviewer-role-button:hover {
     background-color: var(--user-profile-background-hover);
+
+    /* GPU Acceleration */
+    transition: background-color 0.15s ease-out;
 }
 
 .vc-permviewer-granted-by-container {

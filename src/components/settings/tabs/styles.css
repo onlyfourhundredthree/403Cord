@@ -37,6 +37,9 @@
 
 .vc-settings-theme-links:focus {
     background-color: var(--background-base-lowest);
+
+    /* GPU Acceleration */
+    transition: background-color 0.15s ease-out;
 }
 
 .vc-cloud-settings-sync-grid {

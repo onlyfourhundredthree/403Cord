@@ -51,6 +51,11 @@
     color: var(--interactive-icon-default);
     cursor: pointer;
     line-height: 14px;
+
+    /* GPU Acceleration */
+    will-change: border-color;
+    contain: layout style;
+    transition: border-color 0.15s ease-out;
 }
 
 .vc-gp-tab-content {
@@ -98,4 +103,5 @@
 
 .vc-gp-scroller [class*="listRow"]:hover {
     background-color: var(--background-mod-subtle);
+    transition: background-color 0.15s ease-out;
 }

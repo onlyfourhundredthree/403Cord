@@ -41,7 +41,7 @@ const isBotOrSelf = (user: User) => user.bot || user.id === UserStore.getCurrent
 
 function getMutualGDMCountText(user: User) {
     const count = getMutualGroupDms(user.id).length;
-    return `${count === 0 ? "No" : count} Mutual Group${count !== 1 ? "s" : ""}`;
+    return `${count} Ortak Grup`;
 }
 
 function renderClickableGDMs(mutualDms: Channel[], onClose: () => void) {
@@ -188,7 +188,7 @@ export default definePlugin({
                 {hasDivider && Divider}
                 <ExpandableList
                     listClassName={listStyle}
-                    header={"Mutual Groups"}
+                    header={"Ortak Gruplar"}
                     isLoading={false}
                     items={renderClickableGDMs(mutualGDms, () => { })}
                 />

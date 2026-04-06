@@ -10,6 +10,7 @@ import { _getBadges, BadgePosition, BadgeUserArgs, ProfileBadge } from "@api/Bad
 import ErrorBoundary from "@components/ErrorBoundary";
 import { DONOR_ROLE_ID, VENCORD_GUILD_ID } from "@utils/constants";
 import { copyWithToast } from "@utils/discord";
+import { IntervalManager } from "@utils/IntervalManager";
 import { Logger } from "@utils/Logger";
 import { shouldShowContributorBadge } from "@utils/misc";
 import definePlugin from "@utils/types";
@@ -27,6 +28,8 @@ const ContributorBadge: ProfileBadge = {
 // Removed MemberBadges
 let DonorBadges = {} as Record<string, Array<Record<"tooltip" | "badge", string>>>;
 
+const intervalManager = new IntervalManager();
+
 async function loadBadges(noCache = false) {
     const init = {} as RequestInit;
     if (noCache)
@@ -37,8 +40,6 @@ async function loadBadges(noCache = false) {
 
     // YENI UYELER (SPECIAL MEMBERS) artık sunucu rolünden kontrol ediliyor.
 }
-
-let intervalId: any;
 
 function BadgeContextMenu({ badge }: { badge: ProfileBadge & BadgeUserArgs; }) {
     return (
@@ -119,12 +120,11 @@ export default definePlugin({
     async start() {
         await loadBadges();
 
-        clearInterval(intervalId);
-        intervalId = setInterval(loadBadges, 1000 * 60 * 30); // 30 minutes
+        intervalManager.setInterval("loadBadges", loadBadges, 1000 * 60 * 30); // 30 minutes
     },
 
     async stop() {
-        clearInterval(intervalId);
+        intervalManager.clearAll();
     },
 
     getBadges(profile: { userId: string; guildId: string; }) {

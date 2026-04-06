@@ -25,7 +25,11 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    transition: background 0.2s ease-in-out;
+    transition: background 0.15s ease-out;
+
+    /* GPU Acceleration */
+    will-change: background;
+    contain: layout style;
 }
 
 .vc-vmsg-preview-recording .vc-vmsg-preview-indicator {

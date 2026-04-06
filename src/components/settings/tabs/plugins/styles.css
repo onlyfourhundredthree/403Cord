@@ -30,7 +30,11 @@
     background: transparent;
     margin-right: 8px;
     color: var(--icon-muted);
-    transition: background-color .2s ease;
+    transition: background-color 0.15s ease-out, color 0.15s ease-out;
+
+    /* GPU Acceleration */
+    will-change: color, background-color;
+    contain: layout style;
 
     &:hover {
         color: var(--interactive-icon-hover)
@@ -39,6 +43,9 @@
 
 .vc-plugins-settings-button:hover {
     color: var(--interactive-icon-hover);
+
+    /* GPU Acceleration */
+    transition: color 0.15s ease-out;
 }
 
 .vc-plugins-filter-controls {

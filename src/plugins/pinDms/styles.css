@@ -29,7 +29,12 @@
     width: 16px;
     height: 16px;
     color: var(--interactive-icon-default);
-    transform: rotate(90deg)
+    transform: rotate(90deg);
+
+    /* GPU Acceleration */
+    will-change: transform;
+    contain: layout style;
+    transition: transform 0.15s ease-out;
 }
 
 .vc-pindms-collapsed .vc-pindms-collapse-icon {
