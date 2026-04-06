@@ -243,8 +243,8 @@ function patchInterval() {
     if (originalSetInterval) return;
 
     originalSetInterval = window.setInterval;
-    (window as any).setInterval = function (fn: TimerHandler, delay?: number, ...args: any[]) {
-        const id = originalSetInterval!.call(window, fn, delay, ...args);
+    (window as any).setInterval = function (fn: any, delay?: number) {
+        const id = (originalSetInterval as any).call(window, fn, delay);
 
         if (isBackground && settings.store.mode !== "light") {
             const fnStr = typeof fn === "function" ? fn.toString() : String(fn);
@@ -272,8 +272,8 @@ function patchTimeout() {
     if (originalSetTimeout) return;
 
     originalSetTimeout = window.setTimeout;
-    (window as any).setTimeout = function (fn: TimerHandler, delay?: number, ...args: any[]) {
-        const id = originalSetTimeout!.call(window, fn, delay, ...args);
+    (window as any).setTimeout = function (fn: any, delay?: number) {
+        const id = (originalSetTimeout as any).call(window, fn, delay);
 
         if (isBackground && settings.store.mode === "ultra") {
             const fnStr = typeof fn === "function" ? fn.toString() : String(fn);
@@ -328,14 +328,14 @@ function unpatchRAF() {
 
 function restoreIntervals() {
     activeIntervals.forEach(({ fn, delay }, _id) => {
-        originalSetInterval?.call(window, fn, delay);
+        (originalSetInterval as any)?.call(window, fn, delay);
     });
     activeIntervals.clear();
 }
 
 function restoreTimeouts() {
     activeTimeouts.forEach(({ fn, delay }, _id) => {
-        originalSetTimeout?.call(window, fn, delay);
+        (originalSetTimeout as any)?.call(window, fn, delay);
     });
     activeTimeouts.clear();
 }

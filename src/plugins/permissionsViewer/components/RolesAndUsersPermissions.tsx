@@ -176,15 +176,15 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
 
                                             if (permissions)
                                                 return (permissions & bit) === bit
-                                                    ? PermissionAllowedIcon()
-                                                    : PermissionDeniedIcon();
+                                                    ? <PermissionAllowedIcon />
+                                                    : <PermissionDeniedIcon />;
 
                                             if (overwriteAllow && (overwriteAllow & bit) === bit)
-                                                return PermissionAllowedIcon();
+                                                return <PermissionAllowedIcon />;
                                             if (overwriteDeny && (overwriteDeny & bit) === bit)
-                                                return PermissionDeniedIcon();
+                                                return <PermissionDeniedIcon />;
 
-                                            return PermissionDefaultIcon();
+                                            return <PermissionDefaultIcon />;
                                         })()}
                                     </div>
                                     <Text variant="text-md/normal">{guildPermissionSpecMap[String(bit)].title}</Text>
