@@ -121,7 +121,7 @@ export function NotificationLog({ log, pending }: { log: PersistentNotificationD
             <div className={cl("container")}>
                 <div className={cl("empty")} />
                 <Forms.FormText style={{ textAlign: "center" }}>
-                    No notifications yet
+                    Henüz bildirim yok
                 </Forms.FormText>
             </div>
         );
@@ -144,7 +144,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE} className={cl("modal")}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Notification Log</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Bildirim Geçmişi</Text>
                 <ModalCloseButton onClick={close} />
             </ModalHeader>
 
@@ -155,7 +155,7 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
             <ModalFooter>
                 <Flex>
                     <Button onClick={openNotificationSettingsModal}>
-                        Notification Settings
+                        Bildirim Ayarları
                     </Button>
 
                     <Button
@@ -163,19 +163,19 @@ function LogModal({ modalProps, close }: { modalProps: ModalProps; close(): void
                         color={Button.Colors.RED}
                         onClick={() => {
                             Alerts.show({
-                                title: "Are you sure?",
-                                body: `This will permanently remove ${log.length} notification${log.length === 1 ? "" : "s"}. This action cannot be undone.`,
+                                title: "Emin misiniz?",
+                                body: `${log.length} bildirim kalıcı olarak silinecek. Bu işlem geri alınamaz.`,
                                 async onConfirm() {
                                     await DataStore.set(KEY, []);
                                     signals.forEach(x => x());
                                 },
-                                confirmText: "Do it!",
+                                confirmText: "Sil!",
                                 confirmColor: "vc-notification-log-danger-btn",
-                                cancelText: "Nevermind"
+                                cancelText: "Vazgeç"
                             });
                         }}
                     >
-                        Clear Notification Log
+                        Bildirim Geçmişini Temizle
                     </Button>
                 </Flex>
             </ModalFooter>

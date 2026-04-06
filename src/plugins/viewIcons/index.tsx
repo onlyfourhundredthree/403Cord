@@ -121,7 +121,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
             {icon ? (
                 <Menu.MenuItem
                     id="view-icon"
-                    label="View Icon"
+                    label="Avatarı Görüntüle"
                     action={() =>
                         openAvatar(IconUtils.getGuildIconURL({
                             id,
@@ -135,7 +135,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
             {banner ? (
                 <Menu.MenuItem
                     id="view-banner"
-                    label="View Banner"
+                    label="Banneri Görüntüle"
                     action={() =>
                         openBanner(IconUtils.getGuildBannerURL(guild, true)!)
                     }
@@ -153,7 +153,7 @@ const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: Grou
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="view-group-channel-icon"
-                label="View Icon"
+                label="Avatarı Görüntüle"
                 action={() =>
                     openAvatar(IconUtils.getChannelIconURL(channel)!)
                 }

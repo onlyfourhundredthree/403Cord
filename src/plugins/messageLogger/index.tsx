@@ -60,7 +60,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
             <Menu.MenuItem
                 id={TOGGLE_DELETE_STYLE_ID}
                 key={TOGGLE_DELETE_STYLE_ID}
-                label="Toggle Deleted Highlight"
+                label="Silinen Vurgusunu Aç/Kapat"
                 action={() => domElement.classList.toggle("messagelogger-deleted")}
             />
         ));
@@ -70,7 +70,7 @@ const patchMessageContextMenu: NavContextMenuPatchCallback = (children, props) =
         <Menu.MenuItem
             id={REMOVE_HISTORY_ID}
             key={REMOVE_HISTORY_ID}
-            label="Remove Message History"
+            label="Mesaj Geçmişini Kaldır"
             color="danger"
             action={() => {
                 if (deleted) {
@@ -96,7 +96,7 @@ const patchChannelContextMenu: NavContextMenuPatchCallback = (children, { channe
     group.push(
         <Menu.MenuItem
             id="vc-ml-clear-channel"
-            label="Clear Message Log"
+            label="Mesaj Günlüğünü Temizle"
             color="danger"
             action={() => {
                 messages.forEach(msg => {
@@ -131,7 +131,7 @@ export function parseEditContent(content: string, message: Message) {
 
 export default definePlugin({
     name: "MessageLogger",
-    description: "Temporarily logs deleted and edited messages.",
+    description: "Silinen ve düzenlenen mesajları geçici olarak kaydeder.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     dependencies: ["MessageUpdaterAPI"],
 
@@ -183,60 +183,60 @@ export default definePlugin({
     options: {
         deleteStyle: {
             type: OptionType.SELECT,
-            description: "The style of deleted messages",
+            description: "Silinen mesajların stili",
             default: "text",
             options: [
-                { label: "Red text", value: "text", default: true },
-                { label: "Red overlay", value: "overlay" }
+                { label: "Kırmızı metin", value: "text", default: true },
+                { label: "Kırmızı katman", value: "overlay" }
             ],
             onChange: () => addDeleteStyle()
         },
         logDeletes: {
             type: OptionType.BOOLEAN,
-            description: "Whether to log deleted messages",
+            description: "Silinen mesajlar kaydedilsin mi",
             default: true,
         },
         collapseDeleted: {
             type: OptionType.BOOLEAN,
-            description: "Whether to collapse deleted messages, similar to blocked messages",
+            description: "Silinen mesajlar, engellenen mesajlar gibi daraltılsın mı",
             default: false,
             restartNeeded: true,
         },
         logEdits: {
             type: OptionType.BOOLEAN,
-            description: "Whether to log edited messages",
+            description: "Düzenlenen mesajlar kaydedilsin mi",
             default: true,
         },
         inlineEdits: {
             type: OptionType.BOOLEAN,
-            description: "Whether to display edit history as part of message content",
+            description: "Düzenleme geçmişi mesaj içeriğinin bir parçası olarak gösterilsin mi",
             default: true
         },
         ignoreBots: {
             type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by bots",
+            description: "Botlardan gelen mesajlar yoksayılsın mı",
             default: false
         },
         ignoreSelf: {
             type: OptionType.BOOLEAN,
-            description: "Whether to ignore messages by yourself",
+            description: "Kendi mesajlarınız yoksayılsın mı",
             default: false
         },
         ignoreUsers: {
             type: OptionType.STRING,
-            description: "Comma-separated list of user IDs to ignore",
+            description: "Yoksayılacak kullanıcı ID'lerinin virgülle ayrılmış listesi",
             default: "",
             multiline: true
         },
         ignoreChannels: {
             type: OptionType.STRING,
-            description: "Comma-separated list of channel IDs to ignore",
+            description: "Yoksayılacak kanal ID'lerinin virgülle ayrılmış listesi",
             default: "",
             multiline: true
         },
         ignoreGuilds: {
             type: OptionType.STRING,
-            description: "Comma-separated list of guild IDs to ignore",
+            description: "Yoksayılacak sunucu ID'lerinin virgülle ayrılmış listesi",
             default: "",
             multiline: true
         },
@@ -314,20 +314,20 @@ export default definePlugin({
             6,
             "count",
             {
-                "=0": ["No deleted messages"],
+                "=0": ["Silinen mesaj yok"],
                 one: [
                     [
                         1,
                         "count"
                     ],
-                    " deleted message"
+                    " silinen mesaj"
                 ],
                 other: [
                     [
                         1,
                         "count"
                     ],
-                    " deleted messages"
+                    " silinen mesaj"
                 ]
             },
             0,

@@ -12,7 +12,7 @@ import { syncAndRunChecks, syncFriends, syncGroups, syncGuilds } from "./utils";
 
 export default definePlugin({
     name: "RelationshipNotifier",
-    description: "Notifies you when a friend, group chat, or server removes you.",
+    description: "Bir arkadaşınız, grup sohbeti veya sunucu sizi çıkardığında bildirim gönderir.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
 

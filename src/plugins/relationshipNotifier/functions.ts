@@ -34,7 +34,7 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
         case RelationshipType.FRIEND:
             if (settings.store.friends)
                 notify(
-                    `${getUniqueUsername(user)} removed you as a friend.`,
+                    `${getUniqueUsername(user)} sizi arkadaşlıktan çıkardı.`,
                     user.getAvatarURL(undefined, undefined, false),
                     () => openUserProfile(user.id)
                 );
@@ -42,7 +42,7 @@ export async function onRelationshipRemove({ relationship: { type, id } }: Relat
         case RelationshipType.INCOMING_REQUEST:
             if (settings.store.friendRequestCancels)
                 notify(
-                    `A friend request from ${getUniqueUsername(user)} has been removed.`,
+                    `${getUniqueUsername(user)} tarafından gönderilen arkadaşlık isteği kaldırıldı.`,
                     user.getAvatarURL(undefined, undefined, false),
                     () => openUserProfile(user.id)
                 );
@@ -63,7 +63,7 @@ export function onGuildDelete({ guild: { id, unavailable } }: GuildDelete) {
     const guild = getGuild(id);
     if (guild) {
         deleteGuild(id);
-        notify(`You were removed from the server ${guild.name}.`, guild.iconURL);
+        notify(`${guild.name} sunucusundan çıkarıldınız.`, guild.iconURL);
     }
 }
 
@@ -80,6 +80,6 @@ export function onChannelDelete({ channel: { id, type } }: ChannelDelete) {
     const group = getGroup(id);
     if (group) {
         deleteGroup(id);
-        notify(`You were removed from the group ${group.name}.`, group.iconURL);
+        notify(`${group.name} grubundan çıkarıldınız.`, group.iconURL);
     }
 }

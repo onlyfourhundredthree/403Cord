@@ -39,7 +39,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
     return (
         <ModalRoot {...modalProps} size={ModalSize.LARGE}>
             <ModalHeader className={cl("head")}>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Message Edit History</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>Mesaj Düzenleme Geçmişi</Text>
                 <ModalCloseButton onClick={modalProps.onClose} />
             </ModalHeader>
 
@@ -52,7 +52,7 @@ export function HistoryModal({ modalProps, message }: { modalProps: ModalProps; 
                     onItemSelect={setCurrentTab}
                 >
                     {message.firstEditTimestamp.getTime() !== message.timestamp.getTime() && (
-                        <TooltipContainer text="This edit state was not logged so it can't be displayed.">
+                        <TooltipContainer text="Bu düzenleme durumu kaydedilmediği için görüntülenemez.">
                             <TabBar.Item
                                 className="vc-settings-tab-bar-item"
                                 id={-1}
