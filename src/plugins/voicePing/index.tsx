@@ -5,27 +5,22 @@
  */
 
 import definePlugin from "@utils/types";
-import { React, RTCConnectionStore, SelectedChannelStore } from "@webpack/common";
+import { React, RTCConnectionStore, SelectedChannelStore, useStateFromStores } from "@webpack/common";
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
-    const [inChannel, setInChannel] = React.useState(false);
+    const inChannel = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId() === channelId);
 
     React.useEffect(() => {
+        if (!inChannel) return;
         const update = () => {
-            const currentId = SelectedChannelStore.getVoiceChannelId();
-            const isIn = currentId === channelId;
-            setInChannel(isIn);
-            if (isIn) {
-                const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
-                if (typeof val === "number" && val > 0) setPing(Math.round(val));
-            }
+            const val = (RTCConnectionStore as any).getAveragePing?.() ?? (RTCConnectionStore as any).getRTT?.() ?? 0;
+            if (val > 0) setPing(Math.round(val));
         };
-
         update();
         const interval = setInterval(update, 2000);
         return () => clearInterval(interval);
-    }, [channelId]);
+    }, [inChannel, channelId]);
 
     if (!inChannel) return null;
 
@@ -55,17 +50,22 @@ export default definePlugin({
     description: "Bulunduğunuz ses kanalında anlık ortalama ping değerini kanal isminin yanında gösterir.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
 
+    vcp: null as any,
+
     patches: [
         {
-            // UNREAD_IMPORTANT is the most stable module for channel items
             find: "UNREAD_IMPORTANT:",
             replacement: [
                 {
-                    // Safely inject the ping component into the children array of the main component.
-                    // We use the Children.count anchor which is where status icons are rendered.
-                    // We use (a, b) comma syntax or direct insertion to be safe.
-                    match: /\.Children\.count.{0,10}?:null(?<=,channel:(\i).+?)/,
-                    replace: (m, channel) => `${m}, $self.VoicePing({channelId:${channel}.id})`
+                    // Injection 1: Capture the channel and prepare the ping component
+                    match: /({channel:(\i),name:(\i).+?;)/,
+                    replace: "$1 $self.vcp = $self.VoicePing({channelId:$2.id});"
+                },
+                {
+                    // Injection 2: Put the ping component into the status icons array.
+                    // Using comma syntax inside the array [..., $self.vcp, original, ...]
+                    match: /\.Children\.count.+?:null(?<=,channel:\i.+?)/,
+                    replace: "$self.vcp, $&"
                 }
             ]
         }
