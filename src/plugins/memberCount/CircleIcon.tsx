@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { React } from "@webpack/common";
-
-export const CircleIcon = React.memo(function CircleIcon({ className }: { className?: string; }) {
+export function CircleIcon({ className }: { className?: string; }) {
     return (
         <svg viewBox="0 0 24 24" className={className}>
             <circle
@@ -16,4 +14,4 @@ export const CircleIcon = React.memo(function CircleIcon({ className }: { classN
             />
         </svg>
     );
-});
+}

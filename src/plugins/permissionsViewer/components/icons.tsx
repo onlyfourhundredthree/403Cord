@@ -4,9 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { React } from "@webpack/common";
-
-export const PermissionDeniedIcon = React.memo(function PermissionDeniedIcon() {
+export function PermissionDeniedIcon() {
     return (
         <svg
             height="24"
@@ -17,9 +15,9 @@ export const PermissionDeniedIcon = React.memo(function PermissionDeniedIcon() {
             <path fill="var(--status-danger)" d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z" />
         </svg>
     );
-});
+}
 
-export const PermissionAllowedIcon = React.memo(function PermissionAllowedIcon() {
+export function PermissionAllowedIcon() {
     return (
         <svg
             height="24"
@@ -30,9 +28,9 @@ export const PermissionAllowedIcon = React.memo(function PermissionAllowedIcon()
             <path fill="var(--status-positive)" d="M8.99991 16.17L4.82991 12L3.40991 13.41L8.99991 19L20.9999 7.00003L19.5899 5.59003L8.99991 16.17ZZ" />
         </svg>
     );
-});
+}
 
-export const PermissionDefaultIcon = React.memo(function PermissionDefaultIcon() {
+export function PermissionDefaultIcon() {
     return (
         <svg
             height="24"
@@ -45,4 +43,4 @@ export const PermissionDefaultIcon = React.memo(function PermissionDefaultIcon()
             </g>
         </svg>
     );
-});
+}
