@@ -11,6 +11,7 @@ import definePlugin, { OptionType } from "@utils/types";
 
 import hoverOnlyStyle from "./hoverOnly.css?managed";
 import { Player } from "./PlayerComponent";
+import spotifyStyle from "./spotifyStyles.css?managed";
 
 function toggleHoverControls(value: boolean) {
     (value ? enableStyle : disableStyle)(hoverOnlyStyle);
@@ -78,7 +79,15 @@ export default definePlugin({
         },
     ],
 
-    start: () => toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls),
+    start: () => {
+        enableStyle(spotifyStyle);
+        toggleHoverControls(Settings.plugins.SpotifyControls.hoverControls);
+    },
+
+    stop: () => {
+        disableStyle(spotifyStyle);
+        disableStyle(hoverOnlyStyle);
+    },
 
     PanelWrapper({ VencordOriginal, ...props }) {
         return (

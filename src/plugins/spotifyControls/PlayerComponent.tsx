@@ -4,8 +4,6 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import "./spotifyStyles.css";
-
 import { Settings } from "@api/Settings";
 import { Flex } from "@components/Flex";
 import { CopyIcon, ImageIcon, LinkIcon, OpenExternalIcon } from "@components/Icons";
