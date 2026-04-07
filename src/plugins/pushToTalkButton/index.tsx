@@ -6,7 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import definePlugin from "@utils/types";
-import { MediaEngineStore,Menu } from "@webpack/common";
+import { FluxDispatcher, MediaEngineStore, Menu } from "@webpack/common";
 
 function MicIcon() {
     return (
@@ -43,16 +43,24 @@ function togglePTT() {
         shortcut: currentModeOptions?.shortcut ?? []
     };
 
+    FluxDispatcher.dispatch({
+        type: "MEDIA_ENGINE_SET_INPUT_MODE",
+        mode: newMode,
+        options: inputModeOptions
+    });
+
     const settings = MediaEngineStore.getSettings();
     if (settings) {
         settings.mode = newMode;
     }
 
-    const connections = mediaEngine?.connections;
-    if (connections && connections.size > 0) {
-        connections.forEach((conn: any) => {
-            conn.setInputMode(newMode, inputModeOptions);
-        });
+    if (mediaEngine) {
+        const { connections } = mediaEngine;
+        if (connections && connections.size > 0) {
+            connections.forEach((conn: any) => {
+                conn.setInputMode(newMode, inputModeOptions);
+            });
+        }
     }
 
     MediaEngineStore.emitChange();
