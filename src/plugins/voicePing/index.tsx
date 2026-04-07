@@ -75,11 +75,13 @@ export default definePlugin({
 
     patches: [
         {
-            find: "renderPopout:()=>{if(null!=n",
-            replacement: {
-                match: /children:t,participants:n,channel:a/,
-                replace: "children:[t,$self.VoicePing({channelId:a.id})],participants:n,channel:a"
-            }
+            find: "One of participant or participants",
+            replacement: [
+                {
+                    match: /\{children:t,participants:n,channel:a,onPopoutClosed/,
+                    replace: "{children:[$self.VoicePing({channelId:a.id}),t],participants:n,channel:a,onPopoutClosed"
+                }
+            ]
         }
     ],
 
