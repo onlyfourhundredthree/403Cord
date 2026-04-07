@@ -75,3 +75,21 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   VERSION: ${{ env.version }}
+
+            - name: Discord Notification
+              if: github.repository == 'onlyfourhundredthree/403Cord' && success()
+              run: |
+                  curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                      "embeds": [{
+                        "title": "✅ 403Cord v${{ env.version }} Released!",
+                        "description": "Yeni versiyon hazır! Discord üzerinden otomatik güncelleme yapabilirsin.",
+                        "color": 5763719,
+                        "fields": [
+                          {"name": "📦 Versiyon", "value": "v${{ env.version }}", "inline": true},
+                          {"name": "🔧 Build", "value": "Standalone", "inline": true}
+                        ],
+                        "url": "https://github.com/onlyfourhundredthree/403Cord/releases/tag/v${{ env.version }}"
+                      }]
+                    }'
