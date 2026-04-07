@@ -76,19 +76,30 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   VERSION: ${{ env.version }}
 
+            - name: Trigger Installer Build
+              if: github.repository == 'onlyfourhundredthree/403Cord' && success()
+              run: |
+                  curl -X POST \
+                    -H "Authorization: token ${{ secrets.INSTALLER_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/onlyfourhundredthree/403Installer/dispatches \
+                    -d '{"event_type": "build-installer", "client_payload": {"version": "${{ env.version }}"}}'
+
             - name: Discord Notification
               if: github.repository == 'onlyfourhundredthree/403Cord' && success()
               run: |
                   curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
                     -H "Content-Type: application/json" \
                     -d '{
+                      "content": "@everyone",
                       "embeds": [{
                         "title": "✅ 403Cord v${{ env.version }} Released!",
-                        "description": "Yeni versiyon hazır! Discord üzerinden otomatik güncelleme yapabilirsin.",
+                        "description": "Yeni versiyon hazır!",
                         "color": 5763719,
                         "fields": [
-                          {"name": "📦 Versiyon", "value": "v${{ env.version }}", "inline": true},
-                          {"name": "🔧 Build", "value": "Standalone", "inline": true}
+                          {"name": "📦 403Cord ASAR", "value": "[Download](https://github.com/onlyfourhundredthree/403Cord/releases/download/v${{ env.version }}/403Cord.asar)", "inline": true},
+                          {"name": "🪟 Windows Installer", "value": "[Download](https://github.com/onlyfourhundredthree/403Installer/releases/latest)", "inline": true},
+                          {"name": "🐧 Linux/macOS", "value": "[Download](https://github.com/onlyfourhundredthree/403Installer/releases/latest)", "inline": true}
                         ],
                         "url": "https://github.com/onlyfourhundredthree/403Cord/releases/tag/v${{ env.version }}"
                       }]
