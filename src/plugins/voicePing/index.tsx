@@ -37,7 +37,7 @@ function VoicePing({ channelId }: { channelId: string; }) {
         const update = () => {
             try {
                 const rtcStore = RTCConnectionStore as any;
-                const val = rtcStore?.getAveragePing?.() ?? rtcStore?.getRTT?.() ?? null;
+                const val = rtcStore?.getAveragePing?.() ?? null;
 
                 if (typeof val === "number" && !isNaN(val) && val >= 0) {
                     setPing(val);
@@ -75,17 +75,10 @@ export default definePlugin({
 
     patches: [
         {
-            find: ".channelInfo",
+            find: "renderPopout:()=>{if(null!=n",
             replacement: {
-                match: /(?<=children:\[)/,
-                replace: "$self.VoicePing({channelId:this.props.channel.id}),"
-            }
-        },
-        {
-            find: "VoiceChannel.renderPopout: There must always be something to render",
-            replacement: {
-                match: /(?<=children:\[)(?=\S)/,
-                replace: "$self.VoicePing({channelId:this.props.channel.id}),"
+                match: /children:t,participants:n,channel:a/,
+                replace: "children:[t,$self.VoicePing({channelId:a.id})],participants:n,channel:a"
             }
         }
     ],
