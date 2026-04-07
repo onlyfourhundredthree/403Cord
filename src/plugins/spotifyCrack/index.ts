@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { Settings } from "@api/Settings";
 import { definePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
@@ -30,9 +31,9 @@ export default definePlugin({
 
     patches: [
         {
-
-            find: 'dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
+            find: '.dispatch({type:"SPOTIFY_PROFILE_UPDATE"',
             replacement: {
+                predicate: () => Settings.plugins.SpotifyControls?.enabled,
                 match: /SPOTIFY_PROFILE_UPDATE.+?isPremium:(?="premium"===(\i)\.body\.product)/,
                 replace: (m, req) => `${m}(${req}.body.product="premium")&&`
             },
