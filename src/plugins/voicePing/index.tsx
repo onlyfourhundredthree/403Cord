@@ -12,59 +12,48 @@ const intervalManager = new IntervalManager();
 
 function VoicePing({ channelId }: { channelId: string; }) {
     const [ping, setPing] = React.useState<number | null>(null);
-    const [isVisible, setIsVisible] = React.useState(!document.hidden);
-
-    const currentVoiceChannelId = useStateFromStores(
-        [SelectedChannelStore],
-        () => SelectedChannelStore.getVoiceChannelId(),
-        []
-    );
-
-    const inChannel = currentVoiceChannelId === channelId;
+    const inChannel = useStateFromStores([SelectedChannelStore], () => SelectedChannelStore.getVoiceChannelId() === channelId);
 
     React.useEffect(() => {
-        const handleVisibilityChange = () => {
-            setIsVisible(!document.hidden);
-        };
-
-        document.addEventListener("visibilitychange", handleVisibilityChange);
-        return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
-    }, []);
-
-    React.useEffect(() => {
-        if (!inChannel || !isVisible) return;
+        if (!inChannel) return;
 
         const update = () => {
-            try {
-                const rtcStore = RTCConnectionStore as any;
-                const val = rtcStore?.getAveragePing?.() ?? null;
-
-                if (typeof val === "number" && !isNaN(val) && val >= 0) {
-                    setPing(val);
-                }
-            } catch (e) {
-                console.error("[VoicePing] Failed to get ping:", e);
-            }
+            const val = RTCConnectionStore.getAveragePing();
+            setPing(typeof val === "number" ? val : null);
         };
 
         update();
         intervalManager.setInterval("voicePing", update, 2000);
 
-        return () => { intervalManager.clearInterval("voicePing"); };
-    }, [inChannel, channelId, isVisible]);
+        return () => {
+            intervalManager.clearInterval("voicePing");
+        };
+    }, [inChannel]);
 
     if (!inChannel) return null;
 
     return (
-        <span style={{
-            color: "var(--text-positive)",
-            fontSize: "11px",
-            fontWeight: 600,
-            fontFamily: "var(--font-code)",
-            marginLeft: "4px"
-        }}>
+        <div
+            className="vc-voice-ping"
+            style={{
+                color: "var(--text-positive)",
+                fontSize: "11px",
+                fontWeight: "700",
+                display: "inline-flex",
+                alignItems: "center",
+                marginLeft: "8px",
+                fontFamily: "var(--font-code)",
+                backgroundColor: "rgba(0, 0, 0, 0.15)",
+                padding: "1px 6px",
+                borderRadius: "4px",
+                height: "18px",
+                lineHeight: "18px",
+                alignSelf: "center",
+                cursor: "default"
+            }}
+        >
             {ping !== null && ping > 0 ? Math.round(ping) : "---"}ms
-        </span>
+        </div>
     );
 }
 
@@ -75,11 +64,11 @@ export default definePlugin({
 
     patches: [
         {
-            find: "One of participant or participants",
+            find: "UNREAD_IMPORTANT:",
             replacement: [
                 {
-                    match: /\{children:t,participants:n,channel:a,onPopoutClosed/,
-                    replace: "{children:[$self.VoicePing({channelId:a.id}),t],participants:n,channel:a,onPopoutClosed"
+                    match: /\.Children\.count.+?:null(?<=,channel:(\i).+?)/,
+                    replace: (m, channel) => `${m},$self.VoicePing({channelId:${channel}.id})`
                 }
             ]
         }
