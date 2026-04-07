@@ -91,7 +91,6 @@ jobs:
                   curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
                     -H "Content-Type: application/json" \
                     -d '{
-                      "content": "@everyone",
                       "embeds": [{
                         "title": "✅ 403Cord v${{ env.version }} Released!",
                         "description": "Yeni versiyon hazır!",
