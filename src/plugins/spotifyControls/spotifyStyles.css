@@ -124,7 +124,6 @@
     position: absolute !important;
     right: 12px !important;
     top: 14px !important;
-
     pointer-events: auto !important;
     transform: scale(0.9);
     transform-origin: top right;
