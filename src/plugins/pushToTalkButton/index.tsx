@@ -6,7 +6,7 @@
 
 import { NavContextMenuPatchCallback } from "@api/ContextMenu";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, MediaEngineStore,Menu } from "@webpack/common";
+import { MediaEngineStore,Menu } from "@webpack/common";
 
 function MicIcon() {
     return (
@@ -29,25 +29,24 @@ function togglePTT() {
     const isPTT = currentMode === "PUSH_TO_TALK";
     const newMode: "PUSH_TO_TALK" | "VOICE_ACTIVITY" = isPTT ? "VOICE_ACTIVITY" : "PUSH_TO_TALK";
 
-    const modeOptions = MediaEngineStore.getModeOptions();
+    const currentModeOptions = MediaEngineStore.getModeOptions();
     const mediaEngine = MediaEngineStore.getMediaEngine();
 
     const inputModeOptions = {
-        threshold: modeOptions?.threshold ?? -60,
-        autoThreshold: modeOptions?.autoThreshold ?? true,
-        vadUseKrisp: modeOptions?.vadUseKrisp ?? true,
-        vadKrispActivationThreshold: modeOptions?.vadKrispActivationThreshold ?? 0.8,
-        vadLeading: modeOptions?.vadLeading ?? 5,
-        vadTrailing: modeOptions?.vadTrailing ?? 25,
-        delay: modeOptions?.delay ?? 20,
-        shortcut: modeOptions?.shortcut ?? []
+        threshold: currentModeOptions?.threshold ?? -60,
+        autoThreshold: currentModeOptions?.autoThreshold ?? true,
+        vadUseKrisp: currentModeOptions?.vadUseKrisp ?? true,
+        vadKrispActivationThreshold: currentModeOptions?.vadKrispActivationThreshold ?? 0.8,
+        vadLeading: currentModeOptions?.vadLeading ?? 5,
+        vadTrailing: currentModeOptions?.vadTrailing ?? 25,
+        delay: currentModeOptions?.delay ?? 20,
+        shortcut: currentModeOptions?.shortcut ?? []
     };
 
-    FluxDispatcher.dispatch({
-        type: "AUDIO_SET_MODE",
-        mode: newMode,
-        modeOptions: inputModeOptions
-    });
+    const settings = MediaEngineStore.getSettings();
+    if (settings) {
+        settings.mode = newMode;
+    }
 
     const connections = mediaEngine?.connections;
     if (connections && connections.size > 0) {
@@ -55,6 +54,8 @@ function togglePTT() {
             conn.setInputMode(newMode, inputModeOptions);
         });
     }
+
+    MediaEngineStore.emitChange();
 }
 
 const audioDeviceContextPatch: NavContextMenuPatchCallback = children => {
