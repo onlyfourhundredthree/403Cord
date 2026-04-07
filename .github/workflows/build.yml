@@ -84,14 +84,9 @@ jobs:
                     -H "Content-Type: application/json" \
                     -d '{
                       "embeds": [{
-                        "title": "✅ 403Cord v${{ env.version }} Released!",
-                        "description": "Yeni versiyon hazır!",
+                        "title": "✅ 403Cord v${{ env.version }} Güncellendi!",
+                        "description": "Yeni versiyon hazır, güncelleyici sekmesinden güncellemeyi alabilir veya ilk defa yükleyecekseniz kurulum dosyasını indirebilirsiniz.",
                         "color": 5763719,
-                        "fields": [
-                          {"name": "📦 403Cord ASAR", "value": "[Download](https://github.com/onlyfourhundredthree/403Cord/releases/download/v${{ env.version }}/403Cord.asar)", "inline": true},
-                          {"name": "🪟 Windows Installer", "value": "[Download](https://github.com/onlyfourhundredthree/403Installer/releases/latest)", "inline": true},
-                          {"name": "🐧 Linux/macOS", "value": "[Download](https://github.com/onlyfourhundredthree/403Installer/releases/latest)", "inline": true}
-                        ],
                         "url": "https://github.com/onlyfourhundredthree/403Cord/releases/tag/v${{ env.version }}"
                       }]
                     }'
