@@ -33,27 +33,15 @@ function VoicePing({ channelId }: { channelId: string; }) {
     if (!inChannel) return null;
 
     return (
-        <div
-            className="vc-voice-ping"
-            style={{
-                color: "var(--text-positive)",
-                fontSize: "11px",
-                fontWeight: "700",
-                display: "inline-flex",
-                alignItems: "center",
-                marginLeft: "8px",
-                fontFamily: "var(--font-code)",
-                backgroundColor: "rgba(0, 0, 0, 0.15)",
-                padding: "1px 6px",
-                borderRadius: "4px",
-                height: "18px",
-                lineHeight: "18px",
-                alignSelf: "center",
-                cursor: "default"
-            }}
-        >
+        <span style={{
+            color: "#57F287",
+            fontSize: "11px",
+            fontWeight: "700",
+            marginLeft: "8px",
+            fontFamily: "var(--font-code)"
+        }}>
             {ping !== null && ping > 0 ? Math.round(ping) : "---"}ms
-        </div>
+        </span>
     );
 }
 
