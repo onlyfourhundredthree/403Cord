@@ -50,33 +50,21 @@ function VoicePing({ channelId }: { channelId: string; }) {
         update();
         intervalManager.setInterval("voicePing", update, 2000);
 
-        return () => { intervalManager.clearInterval("voicePing");
-        };
+        return () => { intervalManager.clearInterval("voicePing"); };
     }, [inChannel, channelId, isVisible]);
 
     if (!inChannel) return null;
 
     return (
-        <div
-            className="vc-voice-ping"
-            style={{
-                color: "var(--text-positive)",
-                fontSize: "11px",
-                fontWeight: 700,
-                display: "inline-flex",
-                alignItems: "center",
-                marginRight: "6px",
-                fontFamily: "var(--font-code)",
-                backgroundColor: "rgba(0, 0, 0, 0.15)",
-                padding: "0 4px",
-                borderRadius: "4px",
-                height: "16px",
-                lineHeight: "16px",
-                alignSelf: "center"
-            }}
-        >
+        <span style={{
+            color: "var(--text-positive)",
+            fontSize: "11px",
+            fontWeight: 600,
+            fontFamily: "var(--font-code)",
+            marginLeft: "4px"
+        }}>
             {ping !== null && ping > 0 ? Math.round(ping) : "---"}ms
-        </div>
+        </span>
     );
 }
 
@@ -87,13 +75,18 @@ export default definePlugin({
 
     patches: [
         {
+            find: ".channelInfo",
+            replacement: {
+                match: /(?<=children:\[)/,
+                replace: "$self.VoicePing({channelId:this.props.channel.id}),"
+            }
+        },
+        {
             find: "VoiceChannel.renderPopout: There must always be something to render",
-            replacement: [
-                {
-                    match: /this\.renderEditButton\(\)/,
-                    replace: "[$self.VoicePing({channelId:this.props.channel.id}), this.renderEditButton()]"
-                }
-            ]
+            replacement: {
+                match: /(?<=children:\[)(?=\S)/,
+                replace: "$self.VoicePing({channelId:this.props.channel.id}),"
+            }
         }
     ],
 
