@@ -14,10 +14,10 @@ writeFileSync("package.json", JSON.stringify(pkg, null, 4) + "\n");
 console.log(`Version bumped: ${currentVersion} -> ${newVersion}`);
 
 console.log("\nRunning lint fix...");
-execSync("pnpm lint -- --fix", { stdio: "inherit" });
+execSync("pnpm lint --fix", { stdio: "inherit" });
 
 console.log("\nRunning stylelint fix...");
-execSync("pnpm lint-styles -- --fix", { stdio: "inherit" });
+execSync("pnpm lint-styles --fix", { stdio: "inherit" });
 
 console.log("\nCommitting changes...");
 execSync("git add -A", { stdio: "inherit" });
