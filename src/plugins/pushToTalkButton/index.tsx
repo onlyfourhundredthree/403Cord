@@ -30,7 +30,6 @@ function togglePTT() {
     const newMode: "PUSH_TO_TALK" | "VOICE_ACTIVITY" = isPTT ? "VOICE_ACTIVITY" : "PUSH_TO_TALK";
 
     const currentModeOptions = MediaEngineStore.getModeOptions();
-    const mediaEngine = MediaEngineStore.getMediaEngine();
 
     const inputModeOptions = {
         threshold: currentModeOptions?.threshold ?? -60,
@@ -44,26 +43,11 @@ function togglePTT() {
     };
 
     FluxDispatcher.dispatch({
-        type: "MEDIA_ENGINE_SET_INPUT_MODE",
+        type: "AUDIO_SET_MODE",
+        context: "default",
         mode: newMode,
         options: inputModeOptions
     });
-
-    const settings = MediaEngineStore.getSettings();
-    if (settings) {
-        settings.mode = newMode;
-    }
-
-    if (mediaEngine) {
-        const { connections } = mediaEngine;
-        if (connections && connections.size > 0) {
-            connections.forEach((conn: any) => {
-                conn.setInputMode(newMode, inputModeOptions);
-            });
-        }
-    }
-
-    MediaEngineStore.emitChange();
 }
 
 const audioDeviceContextPatch: NavContextMenuPatchCallback = children => {
