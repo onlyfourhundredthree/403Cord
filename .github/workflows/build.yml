@@ -1,0 +1,97 @@
+name: 403Cord CI/CD
+on:
+    push:
+        tags:
+            - v*
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+    Build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: pnpm/action-setup@v3
+
+            - name: Use Node.js 20
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: "pnpm"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Lint and Test
+              run: pnpm test
+
+            - name: Build web
+              run: pnpm buildWebStandalone
+
+            - name: Build
+              run: pnpm build --standalone
+
+            - name: Generate plugin list
+              run: pnpm generatePluginJson dist/plugins.json dist/plugin-readmes.json
+
+            - name: Clean up obsolete files
+              run: |
+                  rm -rf dist/*-unpacked dist/vendor Vencord.user.css vencordDesktopRenderer.css vencordDesktopRenderer.css.map
+
+            - name: Get version from package.json
+              id: get_version
+              run: |
+                  VERSION=$(node -p "require('./package.json').version")
+                  echo "version=$VERSION" >> $GITHUB_ENV
+
+            - name: Prepare ASAR package
+              run: |
+                  echo 'require("./patcher.js");' > dist/index.js
+                  echo '{"name":"403cord","main":"index.js"}' > dist/package.json
+
+            - name: Package ASAR
+              run: npx -y @electron/asar pack dist 403Cord.asar
+
+            - name: Upload release
+              if: github.repository == 'onlyfourhundredthree/403Cord'
+              run: |
+                  gh release delete "v$VERSION" --yes --cleanup-tag > /dev/null 2>&1 || true
+                  gh release create "v$VERSION" 403Cord.asar \
+                    --title "403Cord v$VERSION" \
+                    --notes "403Cord Core Initialized" \
+                    --latest
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  VERSION: ${{ env.version }}
+
+            - name: Trigger Installer Build
+              if: github.repository == 'onlyfourhundredthree/403Cord' && success()
+              run: |
+                  curl -X POST \
+                    -H "Authorization: token ${{ secrets.INSTALLER_TOKEN }}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    https://api.github.com/repos/onlyfourhundredthree/403Installer/dispatches \
+                    -d '{"event_type": "build-installer", "client_payload": {"version": "${{ env.version }}"}}'
+
+            - name: Discord Notification
+              if: github.repository == 'onlyfourhundredthree/403Cord' && success()
+              run: |
+                  curl -X POST "${{ secrets.DISCORD_WEBHOOK_URL }}" \
+                    -H "Content-Type: application/json" \
+                    -d '{
+                      "embeds": [{
+                        "title": "✅ 403Cord v${{ env.version }} Released!",
+                        "description": "Yeni versiyon hazır!",
+                        "color": 5763719,
+                        "fields": [
+                          {"name": "📦 403Cord ASAR", "value": "[Download](https://github.com/onlyfourhundredthree/403Cord/releases/download/v${{ env.version }}/403Cord.asar)", "inline": true},
+                          {"name": "🪟 Windows Installer", "value": "[Download](https://github.com/onlyfourhundredthree/403Installer/releases/latest)", "inline": true},
+                          {"name": "🐧 Linux/macOS", "value": "[Download](https://github.com/onlyfourhundredthree/403Installer/releases/latest)", "inline": true}
+                        ],
+                        "url": "https://github.com/onlyfourhundredthree/403Cord/releases/tag/v${{ env.version }}"
+                      }]
+                    }'

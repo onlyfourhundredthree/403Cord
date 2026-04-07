@@ -1,0 +1,310 @@
+{
+  "alwaysAnimate": {
+    "name": "AlwaysAnimate",
+    "description": "Animates anything that can be animated"
+  },
+  "alwaysExpandRoles": {
+    "name": "AlwaysExpandRoles",
+    "description": "Always expands the role list in profile popouts"
+  },
+  "betterFolders": {
+    "name": "BetterFolders",
+    "description": "Display servers from folder on dedicated sidebar"
+  },
+  "betterGifPicker": {
+    "name": "BetterGifPicker",
+    "description": "Makes the gif picker open the favourite category by default"
+  },
+  "betterRoleContext": {
+    "name": "BetterRoleContext",
+    "description": "File format to use when viewing role icons"
+  },
+  "betterSessions": {
+    "name": "BetterSessions",
+    "description": "Check for new sessions in the background, and display notifications when they are detected"
+  },
+  "betterSettings": {
+    "name": "BetterSettings",
+    "description": "Disable the crossfade animation"
+  },
+  "biggerStreamPreview": {
+    "name": "BiggerStreamPreview",
+    "description": "This plugin allows you to enlarge stream previews"
+  },
+  "callTimer": {
+    "name": "CallTimer",
+    "description": "Adds a timer to vcs"
+  },
+  "clearURLs": {
+    "name": "ClearURLs",
+    "description": "Automatically removes tracking elements from URLs you send"
+  },
+  "consoleJanitor": {
+    "name": "ConsoleJanitor",
+    "description": "Disables Discords loggers"
+  },
+  "copyEmojiMarkdown": {
+    "name": "CopyEmojiMarkdown",
+    "description": "Copy the raw unicode character instead of :name: for default emojis (👽)"
+  },
+  "copyFileContents": {
+    "name": "CopyFileContents",
+    "description": "Adds a button to text file attachments to copy their contents"
+  },
+  "copyStickerLinks": {
+    "name": "CopyStickerLinks",
+    "description": "Adds the ability to copy & open Sticker links"
+  },
+  "copyUserURLs": {
+    "name": "CopyUserURLs",
+    "description": "Adds a "
+  },
+  "crashHandler": {
+    "name": "CrashHandler",
+    "description": "Whether to attempt to prevent Discord crashes."
+  },
+  "customIdle": {
+    "name": "CustomIdle",
+    "description": "Minutes before Discord goes idle (0 to disable auto-idle)"
+  },
+  "decor": {
+    "name": "Decor",
+    "description": "Create and use your own custom avatar decorations, or pick your favorite from the presets."
+  },
+  "devCompanion.dev": {
+    "name": "DevCompanion",
+    "description": "Whether to notify when Dev Companion has automatically connected."
+  },
+  "expressionCloner": {
+    "name": "ExpressionCloner",
+    "description": "Allows you to clone Emotes & Stickers to your own server (right click them)"
+  },
+  "fakeNitro": {
+    "name": "FakeNitro",
+    "description": "Allows sending fake emojis (also bypasses missing permission to use custom emojis)"
+  },
+  "favEmojiFirst": {
+    "name": "FavoriteEmojiFirst",
+    "description": "Puts your favorite emoji first in the emoji autocomplete."
+  },
+  "favGifSearch": {
+    "name": "FavoriteGifSearch",
+    "description": "The part of the url you want to search"
+  },
+  "fixCodeblockGap": {
+    "name": "FixCodeblockGap",
+    "description": "Removes the gap between codeblocks and text below it"
+  },
+  "fixImagesQuality": {
+    "name": "FixImagesQuality",
+    "description": "Also load the original image in Chat. WARNING: Read the caveats above"
+  },
+  "forceOwnerCrown": {
+    "name": "ForceOwnerCrown",
+    "description": "Force the owner crown next to usernames even if the server is large."
+  },
+  "friendInvites": {
+    "name": "FriendInvites",
+    "description": "Create and manage friend invite links via slash commands (/create friend invite, /view friend invites, /revoke friend invites)."
+  },
+  "friendsSince": {
+    "name": "FriendsSince",
+    "description": "Shows when you became friends with someone in the user popout"
+  },
+  "gameActivityToggle": {
+    "name": "GameActivityToggle",
+    "description": "Use the old icon style before Discord icon redesign"
+  },
+  "iLoveSpam": {
+    "name": "iLoveSpam",
+    "description": "Do not hide messages from "
+  },
+  "imageZoom": {
+    "name": "ImageZoom",
+    "description": "Whether to save zoom and lens size values"
+  },
+  "keepCurrentChannel": {
+    "name": "KeepCurrentChannel",
+    "description": "Attempt to navigate to the channel you were in before switching accounts or loading Discord."
+  },
+  "memberCount": {
+    "name": "MemberCount",
+    "description": "Show member count on the server tooltip"
+  },
+  "mentionAvatars": {
+    "name": "MentionAvatars",
+    "description": "Whether the the @ symbol should be displayed on user mentions"
+  },
+  "messageLogger": {
+    "name": "MessageLogger",
+    "description": "Temporarily logs deleted and edited messages."
+  },
+  "mutualGroupDMs": {
+    "name": "MutualGroupDMs",
+    "description": "Shows mutual group dms in profiles"
+  },
+  "noBlockedMessages": {
+    "name": "NoBlockedMessages",
+    "description": "Completely ignores incoming messages from blocked and ignored (if enabled) users"
+  },
+  "noDevtoolsWarning": {
+    "name": "NoDevtoolsWarning",
+    "description": "Disables the "
+  },
+  "noF1": {
+    "name": "NoF1",
+    "description": "Disables F1 help bind."
+  },
+  "noOnboardingDelay": {
+    "name": "NoOnboardingDelay",
+    "description": "Skips the slow and annoying onboarding delay"
+  },
+  "noSystemBadge.discordDesktop": {
+    "name": "NoSystemBadge",
+    "description": "Disables the taskbar and system tray unread count badge."
+  },
+  "notificationVolume": {
+    "name": "NotificationVolume",
+    "description": "Notification volume"
+  },
+  "noTypingAnimation": {
+    "name": "NoTypingAnimation",
+    "description": "Disables the CPU-intensive typing dots animation"
+  },
+  "noUnblockToJump": {
+    "name": "NoUnblockToJump",
+    "description": "Allows you to jump to messages of blocked or ignored users and likely spammers without unblocking them"
+  },
+  "onePingPerDM": {
+    "name": "OnePingPerDM",
+    "description": "Select the type of DM for the plugin to affect"
+  },
+  "openInApp": {
+    "name": "OpenInApp",
+    "description": "Open Spotify links in the Spotify app"
+  },
+  "permissionsViewer": {
+    "name": "PermissionsViewer",
+    "description": "The sort method used for defining which role grants an user a certain permission"
+  },
+  "pinDms": {
+    "name": "PinDMs",
+    "description": "Which order should pinned DMs be displayed in?"
+  },
+  "plainFolderIcon": {
+    "name": "PlainFolderIcon",
+    "description": "Dont show the small guild icons in folders"
+  },
+  "platformIndicators": {
+    "name": "PlatformIndicators",
+    "description": "In the member list"
+  },
+  "reactErrorDecoder": {
+    "name": "ReactErrorDecoder",
+    "description": "Replaces "
+  },
+  "readAllNotificationsButton": {
+    "name": "ReadAllNotificationsButton",
+    "description": "Read all server notifications with a single button click!"
+  },
+  "relationshipNotifier": {
+    "name": "RelationshipNotifier",
+    "description": "Notifies you when a friend, group chat, or server removes you."
+  },
+  "revealAllSpoilers": {
+    "name": "RevealAllSpoilers",
+    "description": "Reveal all spoilers in a message by Ctrl-clicking a spoiler, or in the chat with Ctrl+Shift-click"
+  },
+  "roleColorEverywhere": {
+    "name": "RoleColorEverywhere",
+    "description": "Show role colors in chat mentions (including in the message box)"
+  },
+  "seeSummaries": {
+    "name": "Summaries",
+    "description": "The time in days before a summary is removed. Note that only up to 50 summaries are kept per channel"
+  },
+  "serverInfo": {
+    "name": "ServerInfo",
+    "description": "Allows you to view info about a server"
+  },
+  "serverListIndicators": {
+    "name": "ServerListIndicators",
+    "description": "Add online friend count or server count in the server list"
+  },
+  "showAllMessageButtons": {
+    "name": "ShowAllMessageButtons",
+    "description": "Always show all message buttons no matter if you are holding the shift key or not."
+  },
+  "showHiddenChannels": {
+    "name": "ShowHiddenChannels",
+    "description": "Hide Unreads"
+  },
+  "showHiddenThings": {
+    "name": "ShowHiddenThings",
+    "description": "Displays various hidden & moderator-only things regardless of permissions."
+  },
+  "showTimeoutDuration": {
+    "name": "ShowTimeoutDuration",
+    "description": "How to display the timeout duration"
+  },
+  "sortFriendRequests": {
+    "name": "SortFriendRequests",
+    "description": "Show dates on friend requests"
+  },
+  "spotifyControls": {
+    "name": "SpotifyControls",
+    "description": "Adds a Spotify player above the account panel"
+  },
+  "spotifyCrack": {
+    "name": "SpotifyCrack",
+    "description": "Disable Spotify auto-pause"
+  },
+  "streamerModeOnStream": {
+    "name": "StreamerModeOnStream",
+    "description": "Automatically enables streamer mode when you start streaming in Discord"
+  },
+  "themeAttributes": {
+    "name": "ThemeAttributes",
+    "description": "Adds data attributes to various elements for theming purposes"
+  },
+  "userMessagesPronouns": {
+    "name": "UserMessagesPronouns",
+    "description": "Adds pronouns to chat user messages"
+  },
+  "userVoiceShow": {
+    "name": "UserVoiceShow",
+    "description": "Show a user"
+  },
+  "validReply": {
+    "name": "ValidReply",
+    "description": "Fixes "
+  },
+  "validUser": {
+    "name": "ValidUser",
+    "description": "Active Developer"
+  },
+  "vcDoubleClick": {
+    "name": "VoiceChatDoubleClick",
+    "description": "Join voice chats via double click instead of single click"
+  },
+  "vencordToolbox": {
+    "name": "VencordToolbox",
+    "description": "Show the plugins menu in the toolbox"
+  },
+  "viewIcons": {
+    "name": "ViewIcons",
+    "description": "Choose the image format to use for non animated images. Animated images will always use .gif"
+  },
+  "viewRaw": {
+    "name": "Guild",
+    "description": "Change the button to view the raw content/data of any message."
+  },
+  "voiceDownload": {
+    "name": "VoiceDownload",
+    "description": "Adds a download to voice messages. (Opens a new browser tab)"
+  },
+  "voiceMessages": {
+    "name": "VoiceMessages",
+    "description": "Allows you to send voice messages like on mobile. To do so, right click the upload button and click Send Voice Message"
+  }
+}
