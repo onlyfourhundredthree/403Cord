@@ -26,8 +26,8 @@ export const PluginTranslationMap: Record<string, { name: string, description: s
         description: "Rol simgelerini görüntülerken kullanılacak arka plan dosya biçimi uyumluluğu."
     },
     BetterSessions: {
-        name: "Gelişmiş Oturumlar",
-        description: "Arka planda yeni oturumları kontrol eder ve tespit edildiğinde bildirim gösterir."
+        name: "Cihaz Geçmişi & Bildirimi",
+        description: "Arka planda yeni cihazları kontrol eder ve tespit edildiğinde bildirim gösterir."
     },
     BetterSettings: {
         name: "Gelişmiş Ayarlar",
