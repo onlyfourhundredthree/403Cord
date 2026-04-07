@@ -119,15 +119,14 @@
     display: none !important;
 }
 
-/* Position avatars strictly above the buttons */
+/* Position avatars above the buttons, aligned properly */
 [class^="listeningAlong_"] [class*="party_"] {
     position: absolute !important;
     right: 12px !important;
-    top: 8px !important;
+    top: 14px !important;
 
-    /* Will now drop exactly 8px into the player boundaries */
     pointer-events: auto !important;
-    transform: scale(0.85);
+    transform: scale(0.9);
     transform-origin: top right;
 }
 
@@ -144,9 +143,7 @@
     cursor: pointer;
     border: none;
     transition: background-color 0.1s;
-    margin-top: 18px;
-
-    /* Leave breathing room above for the avatars */
+    margin-top: 8px;
 }
 
 #vc-spotify-player .vc-spotify-button:hover {
