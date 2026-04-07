@@ -80,7 +80,7 @@ const audioDeviceContextPatch: NavContextMenuPatchCallback = children => {
             <Menu.MenuItem
                 key="ptt-info"
                 id="ptt-info"
-                label={`Bas Konuş: ${shortcut} (${delay}ms gecikme)`}
+                label={`${shortcut} (${delay}ms gecikme)`}
                 disabled
             />
         );
