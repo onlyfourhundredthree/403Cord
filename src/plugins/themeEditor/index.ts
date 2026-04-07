@@ -76,13 +76,9 @@ function updateTheme() {
 .sliderContainer-2j7VOO {
     opacity: 1 !important;
 }
-/* Hide Back Buttons in Settings */
-[aria-label="Geri dön"],
-[aria-label="Go back"],
-.button__63abb.back__63abb {
+/* Hide Back/Forward Buttons in Settings */
+.backForwardButtons__63abb {
     display: none !important;
-    pointer-events: none !important;
-    visibility: hidden !important;
 }
 `;
 
