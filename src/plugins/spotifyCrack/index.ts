@@ -4,8 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Settings } from "@api/Settings";
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings,Settings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
 const settings = definePluginSettings({
