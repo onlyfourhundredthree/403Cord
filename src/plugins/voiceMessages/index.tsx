@@ -49,7 +49,7 @@ const ctxMenuPatch: NavContextMenuPatchCallback = (children, props) => {
                 type: "icon",
                 icon: Microphone
             }}
-            label="Send Voice Message"
+            label="Sesli Mesaj Gönder"
             action={() => openModal(modalProps => <Modal modalProps={modalProps} />)}
         />
     );
@@ -175,7 +175,7 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Forms.FormTitle>Record Voice Message</Forms.FormTitle>
+                <Forms.FormTitle>Sesli Mesaj Kaydet</Forms.FormTitle>
             </ModalHeader>
 
             <ModalContent className={cl("modal")}>
@@ -197,13 +197,13 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                             }
                         }}
                     >
-                        Upload File
+                        Dosya Yükle
                     </Button>
                 </div>
 
-                <Forms.FormTitle>Preview</Forms.FormTitle>
+                <Forms.FormTitle>Önizleme</Forms.FormTitle>
                 {metaError
-                    ? <Paragraph className={cl("error")}>Failed to parse selected audio file: {metaError.message}</Paragraph>
+                    ? <Paragraph className={cl("error")}>Seçilen ses dosyasını ayrıştırılamadı: {metaError.message}</Paragraph>
                     : (
                         <VoicePreview
                             src={blobUrl}
@@ -214,10 +214,10 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
 
                 {isUnsupportedFormat && (
                     <Card variant="warning" className={Margins.top16} defaultPadding>
-                        <Forms.FormText>Voice Messages have to be OggOpus to be playable on iOS. This file is <code>{blob.type}</code> so it will not be playable on iOS.</Forms.FormText>
+                        <Forms.FormText>Sesli mesajlar iOS'ta oynatılabilmek için OggOpus formatında olmalıdır. Bu dosya <code>{blob.type}</code> formatındadır, bu yüzden iOS'ta oynatılamaz.</Forms.FormText>
 
                         <Forms.FormText className={Margins.top8}>
-                            To fix it, first convert it to OggOpus, for example using the <Link href="https://convertio.co/mp3-opus/">convertio web converter</Link>
+                            Düzeltmek için önce onu OggOpus'a dönüştürün, örneğin <Link href="https://convertio.co/mp3-opus/">convertio web dönüştürücüsünü</Link> kullanarak
                         </Forms.FormText>
                     </Card>
                 )}
@@ -230,10 +230,10 @@ function Modal({ modalProps }: { modalProps: ModalProps; }) {
                     onClick={() => {
                         sendAudio(blob!, meta ?? EMPTY_META);
                         modalProps.onClose();
-                        showToast("Now sending voice message... Please be patient", Toasts.Type.MESSAGE);
+                        showToast("Sesli mesaj gönderiliyor... Lütfen bekleyin.", Toasts.Type.MESSAGE);
                     }}
                 >
-                    Send
+                    Gönder
                 </Button>
             </ModalFooter>
         </ModalRoot>

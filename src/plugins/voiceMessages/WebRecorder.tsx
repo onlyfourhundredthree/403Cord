@@ -58,7 +58,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
     return (
         <>
             <Button onClick={toggleRecording}>
-                {recording ? "Stop" : "Start"} recording
+                Ses kaydını {recording ? "durdur" : "başlat"}
             </Button>
 
             <Button
@@ -69,7 +69,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
                     else recorder?.pause();
                 }}
             >
-                {paused ? "Resume" : "Pause"} recording
+                Ses kaydını {paused ? "devam ettir" : "durdur"}
             </Button>
         </>
     );

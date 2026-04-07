@@ -33,11 +33,13 @@ function togglePTT() {
     const mediaEngine = MediaEngineStore.getMediaEngine();
 
     const inputModeOptions = {
-        vadThreshold: modeOptions?.threshold ?? -60,
-        vadAutoThreshold: modeOptions?.autoThreshold ?? true,
+        threshold: modeOptions?.threshold ?? -60,
+        autoThreshold: modeOptions?.autoThreshold ?? true,
+        vadUseKrisp: modeOptions?.vadUseKrisp ?? true,
+        vadKrispActivationThreshold: modeOptions?.vadKrispActivationThreshold ?? 0.8,
         vadLeading: modeOptions?.vadLeading ?? 5,
         vadTrailing: modeOptions?.vadTrailing ?? 25,
-        pttReleaseDelay: modeOptions?.delay ?? 20,
+        delay: modeOptions?.delay ?? 20,
         shortcut: modeOptions?.shortcut ?? []
     };
 
