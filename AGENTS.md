@@ -1,5 +1,12 @@
 # Agent Memory - Proje Kuralları
 
+## Proje Konumları
+
+- **Vencord**: `C:\Users\Administrator\Documents\Vencord`
+- **403Installer**: `C:\Users\Administrator\Documents\403Installer`
+
+---
+
 ## Release Akışı
 
 **Yeni versiyon yayınlamak için tek komut:**
