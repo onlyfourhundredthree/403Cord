@@ -25,10 +25,13 @@ function updateTheme() {
 
     // Her zaman yüklenen temalar
     const imports: string[] = [];
-    imports.push("@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@100;300;400;500;700&display=swap');");
     imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
     if (settings.store.radialStatus) {
         imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
+    }
+    // Font ayarı varsa Google Fonts yükle
+    if (settings.store.font && settings.store.font.trim()) {
+        imports.push(`@import url('https://fonts.googleapis.com/css2?family=${encodeURIComponent(settings.store.font)}:wght@100;300;400;500;700&display=swap');`);
     }
 
     const rootBlock = `
@@ -48,8 +51,9 @@ function updateTheme() {
   --link-colour: ${settings.store.linkColour};
   --scrollbar-colour: ${settings.store.scrollbarColour};
   --gradient-direction: ${settings.store.gradientDirection};
-  --font: ${settings.store.font};
-  --rs-medium-width: ${settings.store.rsMediumWidth};
+  --font: ${settings.store.font && settings.store.font.trim() ? settings.store.font : "inherit"};
+  --window-padding: 0px;
+  --window-roundness: 0px;
 }
 `;
 
@@ -95,12 +99,13 @@ export const settings = definePluginSettings({
     },
 
     // --- ARKAPLAN ---
-    backgroundImage: { type: OptionType.STRING, description: "Arkaplan Görseli (Direkt link girin)", default: "https://i.imgur.com/OHStaWu.png", onChange: () => updateTheme() },
+    backgroundImage: { type: OptionType.STRING, description: "Arkaplan Görseli (Direkt link girin)", default: "https://images3.alphacoders.com/120/thumb-1920-1209094.jpg", onChange: () => updateTheme() },
     backgroundImageBlur: { type: OptionType.STRING, description: "Arkaplan Bulanıklığı (px)", default: "0px", onChange: () => updateTheme() },
 
     // --- POPUP/MODAL ---
     popoutModalImage: { type: OptionType.STRING, description: "Popup Modal Görseli (Direkt link veya 'transparent')", default: "transparent", onChange: () => updateTheme() },
     popoutModalBlur: { type: OptionType.STRING, description: "Popup Bulanıklığı (px)", default: "0px", onChange: () => updateTheme() },
+    popoutModalBrightness: { type: OptionType.STRING, description: "Popup Parlaklığı (0-1)", default: "0.6", onChange: () => updateTheme() },
 
     // --- HOME BUTON ---
     homeButtonImage: { type: OptionType.STRING, description: "Ana Sayfa Buton Görseli (Direkt link girin)", default: "https://i.imgur.com/rAzycBK.png", onChange: () => updateTheme() },
@@ -110,7 +115,6 @@ export const settings = definePluginSettings({
     leftBrightness: { type: OptionType.STRING, description: "Sol Panel Parlaklığı (0-1)", default: "0.6", onChange: () => updateTheme() },
     middleBrightness: { type: OptionType.STRING, description: "Orta Alan Parlaklığı (0-1)", default: "0.6", onChange: () => updateTheme() },
     rightBrightness: { type: OptionType.STRING, description: "Sağ Panel Parlaklığı (0-1)", default: "0", onChange: () => updateTheme() },
-    popoutModalBrightness: { type: OptionType.STRING, description: "Popup Parlaklığı (0-1)", default: "0.6", onChange: () => updateTheme() },
 
     // --- RENKLER ---
     gradientPrimary: { type: OptionType.STRING, description: "Birincil Gradyan (RGB: 103,58,183)", default: "103, 58, 183", onChange: () => updateTheme() },
@@ -120,10 +124,7 @@ export const settings = definePluginSettings({
     scrollbarColour: { type: OptionType.STRING, description: "Scrollbar Rengi", default: "rgba(255,255,255,0.05)", onChange: () => updateTheme() },
 
     // --- FONT ---
-    font: { type: OptionType.STRING, description: "Yazı Tipi (Örn: Quicksand veya Google Fonts linki)", default: "Quicksand", onChange: () => updateTheme() },
-
-    // --- RADIAL STATUS ---
-    rsMediumWidth: { type: OptionType.STRING, description: "Durum Çemberi Kalınlığı (Örn: 2.5px)", default: "2.5px", onChange: () => updateTheme() }
+    font: { type: OptionType.STRING, description: "Yazı Tipi (Google Fonts adı veya boş bırakın)", default: "", onChange: () => updateTheme() }
 });
 
 export default definePlugin({
