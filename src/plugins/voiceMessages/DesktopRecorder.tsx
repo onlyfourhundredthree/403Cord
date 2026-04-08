@@ -35,7 +35,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (success)
                         changeRecording(true);
                     else
-                        showToast("Failed to start recording", Toasts.Type.FAILURE);
+                        showToast("Ses kaydı başlatılamadı", Toasts.Type.FAILURE);
                 }
             );
         } else {
@@ -45,7 +45,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
                     if (buf)
                         setAudioBlob(new Blob([buf], { type: "audio/ogg; codecs=opus" }));
                     else
-                        showToast("Failed to finish recording", Toasts.Type.FAILURE);
+                        showToast("Ses kaydı bitirilemedi", Toasts.Type.FAILURE);
                 }
                 changeRecording(false);
             });
@@ -54,7 +54,7 @@ export const VoiceRecorderDesktop: VoiceRecorder = ({ setAudioBlob, onRecordingC
 
     return (
         <Button onClick={toggleRecording}>
-            {recording ? "Stop" : "Start"} recording
+            Ses kaydını {recording ? "durdur" : "başlat"}
         </Button>
     );
 };

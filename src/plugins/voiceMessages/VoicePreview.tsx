@@ -39,7 +39,7 @@ export const VoicePreview = ({
         <div className={cl("preview", recording ? "preview-recording" : [])}>
             <div className={cl("preview-indicator")} />
             <div className={cl("preview-time")}>{durationDisplay}</div>
-            <div className={cl("preview-label")}>{recording ? "RECORDING" : "----"}</div>
+            <div className={cl("preview-label")}>{recording ? "KAYIT EDİLİYOR" : "KAYIT HENÜZ BAŞLAMADI"}</div>
         </div>
     );
 };
