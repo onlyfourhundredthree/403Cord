@@ -47,7 +47,7 @@ export const VoiceRecorderWeb: VoiceRecorder = ({ setAudioBlob, onRecordingChang
             if (recorder) {
                 recorder.addEventListener("stop", () => {
                     setAudioBlob(new Blob(chunks, { type: "audio/ogg; codecs=opus" }));
-
+                    recorder.stream.getTracks().forEach(track => track.stop()); // Mikrofon yayinini kapat (Kaynak ve CPU sizintisini onler)
                     changeRecording(false);
                 });
                 recorder.stop();

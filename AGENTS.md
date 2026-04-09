@@ -140,3 +140,15 @@ scripts/
 - Lint hataları `pnpm lint --fix` ile düzeltilebilir
 - Release sadece `pnpm release` ile yapılır
 - Versiyon numarası manuel değiştirilmez
+
+---
+
+## Plugin Author Kuralı
+
+Tüm eklentilerde `authors` alanı **her zaman** şu şekilde olmalıdır:
+
+```ts
+authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
+```
+
+**Başka bir author formatı kullanılmamalıdır!**

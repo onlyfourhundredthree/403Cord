@@ -148,6 +148,9 @@ export const Magnifier = ErrorBoundary.wrap<MagnifierProps>(({ instance, size: i
             document.removeEventListener("mousedown", onMouseDown);
             document.removeEventListener("mouseup", onMouseUp);
             document.removeEventListener("wheel", onWheel);
+            if (originalVideoElementRef.current) {
+                originalVideoElementRef.current.removeEventListener("timeupdate", syncVideos);
+            }
             if (rafIdRef.current !== null) {
                 cancelAnimationFrame(rafIdRef.current);
             }

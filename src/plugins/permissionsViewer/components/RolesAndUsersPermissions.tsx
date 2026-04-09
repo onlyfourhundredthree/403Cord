@@ -10,6 +10,7 @@ import { InfoIcon, OwnerCrownIcon } from "@components/Icons";
 import { cl, getGuildPermissionSpecMap } from "@plugins/permissionsViewer/utils";
 import { copyToClipboard } from "@utils/clipboard";
 import { getIntlMessage, getUniqueUsername } from "@utils/discord";
+import { LazyImage } from "@utils/LazyImage";
 import { ModalCloseButton, ModalContent, ModalHeader, ModalProps, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { Guild, Role, UnicodeEmoji, User } from "@vencord/discord-types";
 import { findByCodeLazy } from "@webpack";
@@ -134,17 +135,15 @@ function RolesAndUsersPermissionsComponent({ permissions, guild, modalProps, hea
                                                 />
                                             )}
                                             {permission.type === PermissionType.Role && roleIconSrc != null && (
-                                                <img
+                                                <LazyImage
                                                     className={cl("modal-role-image")}
                                                     src={roleIconSrc}
-                                                    loading="lazy"
                                                 />
                                             )}
                                             {permission.type === PermissionType.User && user != null && (
-                                                <img
+                                                <LazyImage
                                                     className={cl("modal-user-img")}
                                                     src={user.getAvatarURL(void 0, void 0, false)}
-                                                    loading="lazy"
                                                 />
                                             )}
                                             <Text variant="text-md/normal" className={cl("modal-list-item-text")}>

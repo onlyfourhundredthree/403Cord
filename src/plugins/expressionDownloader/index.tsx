@@ -172,7 +172,7 @@ export default definePlugin({
     name: "ExpressionDownloader",
     description: "Emoji ve Sticker'ları sağ tıklayarak direkt PNG/GIF olarak bilgisayarınıza indirin",
     tags: ["EmojiDownloader", "StickerDownloader", "Download"],
-    authors: [{ name: "antigravity", id: 0n }],
+    authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     contextMenus: {
         "message": messageContextMenuPatch,
         "expression-picker": expressionPickerPatch

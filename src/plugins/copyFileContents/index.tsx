@@ -10,7 +10,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { CopyIcon, NoEntrySignIcon } from "@components/Icons";
 import { copyWithToast } from "@utils/discord";
 import definePlugin from "@utils/types";
-import { Tooltip, useState } from "@webpack/common";
+import { React, Tooltip, useState } from "@webpack/common";
 
 const CheckMarkIcon = () => {
     return <svg width="24" height="24" viewBox="0 0 24 24">
@@ -34,6 +34,13 @@ export default definePlugin({
 
     addCopyButton: ErrorBoundary.wrap(({ fileContents, bytesLeft }: { fileContents: string, bytesLeft: number; }) => {
         const [recentlyCopied, setRecentlyCopied] = useState(false);
+        const timerRef = React.useRef<NodeJS.Timeout | null>(null);
+
+        React.useEffect(() => {
+            return () => {
+                if (timerRef.current) clearTimeout(timerRef.current);
+            };
+        }, []);
 
         return (
             <Tooltip text={recentlyCopied ? "Copied!" : bytesLeft > 0 ? "File too large to copy" : "Copy File Contents"}>
@@ -46,7 +53,8 @@ export default definePlugin({
                             if (!recentlyCopied && bytesLeft <= 0) {
                                 copyWithToast(fileContents);
                                 setRecentlyCopied(true);
-                                setTimeout(() => setRecentlyCopied(false), 2000);
+                                if (timerRef.current) clearTimeout(timerRef.current);
+                                timerRef.current = setTimeout(() => setRecentlyCopied(false), 2000);
                             }
                         }}
                     >

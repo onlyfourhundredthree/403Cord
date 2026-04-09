@@ -8,12 +8,14 @@ import "./styles.css";
 
 import { classNameFactory } from "@utils/css";
 import { getGuildAcronym, openImageModal, openUserProfile } from "@utils/discord";
+import { LazyImage } from "@utils/LazyImage";
 import { classes } from "@utils/misc";
 import { ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { useAwaiter } from "@utils/react";
+import { VirtualList } from "@utils/VirtualList";
 import { Guild, User } from "@vencord/discord-types";
 import { findComponentByCodeLazy, findCssClassesLazy } from "@webpack";
-import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, ScrollerThin, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
+import { FluxDispatcher, Forms, GuildChannelStore, GuildMemberStore, GuildRoleStore, IconUtils, Parser, PresenceStore, RelationshipStore, SnowflakeUtils, TabBar, Timestamp, useEffect, UserStore, UserUtils, useState, useStateFromStores } from "@webpack/common";
 
 const IconClasses = findCssClassesLazy("icon", "acronym", "childWrapper");
 const FriendRow = findComponentByCodeLazy("discriminatorClass:", ".isMobileOnline", "getAvatarURL");
@@ -80,11 +82,10 @@ function GuildInfoModal({ guild }: GuildProps) {
     return (
         <div className={cl("root")}>
             {bannerUrl && currentTab === Tabs.ServerInfo && (
-                <img
+                <LazyImage
                     className={cl("banner")}
                     src={bannerUrl}
                     alt=""
-                    loading="lazy"
                     onClick={() => openImageModal({
                         url: bannerUrl,
                         width: 1024
@@ -94,11 +95,10 @@ function GuildInfoModal({ guild }: GuildProps) {
 
             <div className={cl("header")}>
                 {iconUrl
-                    ? <img
+                    ? <LazyImage
                         className={cl("icon")}
                         src={iconUrl}
                         alt=""
-                        loading="lazy"
                         onClick={() => openImageModal({
                             url: iconUrl,
                             height: 512,
@@ -172,7 +172,7 @@ function Owner(guildId: string, owner: User) {
 
     return (
         <div className={cl("owner")}>
-            <img
+            <LazyImage
                 className={cl("owner-avatar")}
                 src={ownerAvatarUrl}
                 alt=""
@@ -265,16 +265,19 @@ function UserList(type: "friends" | "blocked" | "ignored", guild: Guild, ids: st
     useEffect(() => setCount(members.length), [members.length]);
 
     return (
-        <ScrollerThin fade className={cl("scroller")}>
-            {members.map(id =>
+        <VirtualList
+            className={cl("scroller")}
+            items={members}
+            itemHeight={42}
+            containerHeight={300}
+            renderItem={id => (
                 <FriendRow
-                    key={id}
                     user={UserStore.getUser(id)}
                     status={PresenceStore.getStatus(id) || "offline"}
                     onSelect={() => openUserProfile(id)}
                     onContextMenu={() => { }}
                 />
             )}
-        </ScrollerThin>
+        />
     );
 }

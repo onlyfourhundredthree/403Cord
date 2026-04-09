@@ -134,6 +134,16 @@ export const VoiceChannelIndicator = ErrorBoundary.wrap(({ userId, isProfile, is
     });
 
     const channel = channelId == null ? undefined : ChannelStore.getChannel(channelId);
+
+    React.useEffect(() => {
+        return () => {
+            if (channelId && clickTimers.has(channelId)) {
+                clearTimeout(clickTimers.get(channelId));
+                clickTimers.delete(channelId);
+            }
+        };
+    }, [channelId]);
+
     if (channel == null) return null;
 
     const isDM = channel.isDM() || channel.isMultiUserDM();
