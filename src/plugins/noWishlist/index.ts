@@ -17,7 +17,7 @@ function updateAttribute(key: string, value: any) {
 const settings = definePluginSettings({
     hideWishlist: {
         type: OptionType.BOOLEAN,
-        default: true,
+        default: false,
         description: "Mağazadaki 'İstek Listesi' sekmesini gizler.",
         name: "İstek Listesini Gizle",
         onChange: v => updateAttribute("hideWishlist", v)
@@ -28,13 +28,6 @@ const settings = definePluginSettings({
         description: "Sol menüdeki 'Mağaza' butonunu gizler.",
         name: "Mağaza Butonunu Gizle",
         onChange: v => updateAttribute("hideShop", v)
-    },
-    hideNitro: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Sol menüdeki 'Nitro' butonunu gizler.",
-        name: "Nitro Butonunu Gizle",
-        onChange: v => updateAttribute("hideNitro", v)
     },
     hideGift: {
         type: OptionType.BOOLEAN,
@@ -70,6 +63,13 @@ const settings = definePluginSettings({
         description: "Üye listesinin en üstündeki 'Etkinlik' kısmını gizler.",
         name: "Üye Listesi Etkinliklerini Gizle",
         onChange: v => updateAttribute("hideMemberlistActivity", v)
+    },
+    hideAppLauncher: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Mesaj kutusundaki 'Uygulamalar' butonunu gizler.",
+        name: "Uygulama Başlatıcıyı Gizle",
+        onChange: v => updateAttribute("hideAppLauncher", v)
     }
 });
 

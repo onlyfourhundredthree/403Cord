@@ -14,17 +14,13 @@ body[data-cleanui-hideShop="true"] [aria-label="Shop"] {
     display: none !important;
 }
 
-/* Nitro Butonu */
-body[data-cleanui-hideNitro="true"] a[href="/premium"],
-body[data-cleanui-hideNitro="true"] [aria-label="Nitro"] {
-    display: none !important;
-}
-
 /* Hediye Butonu */
 body[data-cleanui-hideGift="true"] [aria-label="Hediye gönder"],
 body[data-cleanui-hideGift="true"] [aria-label="Send a gift"],
-body[data-cleanui-hideGift="true"] button:has([aria-label="Hediye gönder"]),
-body[data-cleanui-hideGift="true"] button:has([aria-label="Send a gift"]) {
+body[data-cleanui-hideGift="true"] [aria-label="Hediye Ver"],
+body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label="Hediye gönder"]),
+body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label="Send a gift"]),
+body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label="Hediye Ver"]) {
     display: none !important;
 }
 
@@ -51,6 +47,12 @@ body[data-cleanui-hideGameCollection="true"] [class*="card_"]:has([class*="displ
 /* Üye Listesi Etkinlikleri (Member List Activity) */
 body[data-cleanui-hideMemberlistActivity="true"] [class*="membersGroup_"]:has([class*="toggleExpandIcon_"]),
 body[data-cleanui-hideMemberlistActivity="true"] [class*="membersGroup_"]:has([class*="header_"]),
-body[data-cleanui-hideMemberlistActivity="true"] [class*="container__"]:has([class*="infoSection_"]) {
+body[data-cleanui-hideMemberlistActivity="true"] [class*="membersWrap_"] [class*="container_"][class*="openOnHover_"]:has([class*="infoSection_"]) {
+    display: none !important;
+}
+
+/* Uygulama Başlatıcı (App Launcher) */
+body[data-cleanui-hideAppLauncher="true"] [aria-label="Uygulamalar"],
+body[data-cleanui-hideAppLauncher="true"] [aria-label="App Launcher"] {
     display: none !important;
 }
