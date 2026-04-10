@@ -1,11 +1,56 @@
-/* Hide wishlist tab in shop navigation */
-[aria-label="İstek Listesi"],
-[aria-label="Wishlist"] {
+/* Arayüz Temizleyici Styles */
+
+/* İstek Listesi */
+body[data-cleanui-hideWishlist="true"] [aria-label="İstek Listesi"],
+body[data-cleanui-hideWishlist="true"] [aria-label="Wishlist"],
+body[data-cleanui-hideWishlist="true"] [class*="overlay_"][class*="container_"] {
     display: none !important;
 }
 
-/* stylelint-disable selector-class-pattern */
-.overlay_c0bea0.container__06b03 {
+/* Mağaza Butonu */
+body[data-cleanui-hideShop="true"] a[href="/shop"],
+body[data-cleanui-hideShop="true"] [aria-label="Mağaza"],
+body[data-cleanui-hideShop="true"] [aria-label="Shop"] {
     display: none !important;
 }
-/* stylelint-enable selector-class-pattern */
+
+/* Nitro Butonu */
+body[data-cleanui-hideNitro="true"] a[href="/premium"],
+body[data-cleanui-hideNitro="true"] [aria-label="Nitro"] {
+    display: none !important;
+}
+
+/* Hediye Butonu */
+body[data-cleanui-hideGift="true"] [aria-label="Hediye gönder"],
+body[data-cleanui-hideGift="true"] [aria-label="Send a gift"],
+body[data-cleanui-hideGift="true"] button:has([aria-label="Hediye gönder"]),
+body[data-cleanui-hideGift="true"] button:has([aria-label="Send a gift"]) {
+    display: none !important;
+}
+
+/* Gelen Kutusu */
+body[data-cleanui-hideInbox="true"] [aria-label="Gelen Kutusu"],
+body[data-cleanui-hideInbox="true"] [aria-label="Inbox"] {
+    display: none !important;
+}
+
+/* Yardım Butonu */
+body[data-cleanui-hideHelp="true"] [aria-label="Yardım"],
+body[data-cleanui-hideHelp="true"] [aria-label="Help"],
+body[data-cleanui-hideHelp="true"] a[href*="support.discord.com"] {
+    display: none !important;
+}
+
+/* Oyun Koleksiyonu (Profile Card) */
+body[data-cleanui-hideGameCollection="true"] [class*="overlay_"]:has([class*="displayCountText_"]),
+body[data-cleanui-hideGameCollection="true"] [class*="innerContainer_"],
+body[data-cleanui-hideGameCollection="true"] [class*="card_"]:has([class*="displayCountText"]) {
+    display: none !important;
+}
+
+/* Üye Listesi Etkinlikleri (Member List Activity) */
+body[data-cleanui-hideMemberlistActivity="true"] [class*="membersGroup_"]:has([class*="toggleExpandIcon_"]),
+body[data-cleanui-hideMemberlistActivity="true"] [class*="membersGroup_"]:has([class*="header_"]),
+body[data-cleanui-hideMemberlistActivity="true"] [class*="container__"]:has([class*="infoSection_"]) {
+    display: none !important;
+}
