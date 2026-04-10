@@ -77,30 +77,29 @@ const EmojiParser = findByPropsLazy("convertSurrogateToName");
 const EmojiUtils = findByPropsLazy("getURL", "getEmojiColors");
 
 const ChannelTypesToChannelNames = {
-    [ChannelTypes.GUILD_TEXT]: "text",
-    [ChannelTypes.GUILD_ANNOUNCEMENT]: "announcement",
+    [ChannelTypes.GUILD_TEXT]: "metin",
+    [ChannelTypes.GUILD_ANNOUNCEMENT]: "duyuru",
     [ChannelTypes.GUILD_FORUM]: "forum",
-    [ChannelTypes.GUILD_VOICE]: "voice",
-    [ChannelTypes.GUILD_STAGE_VOICE]: "stage"
+    [ChannelTypes.GUILD_VOICE]: "ses",
+    [ChannelTypes.GUILD_STAGE_VOICE]: "sahne"
 };
 
 const SortOrderTypesToNames = {
-    [SortOrderTypes.LATEST_ACTIVITY]: "Latest activity",
-    [SortOrderTypes.CREATION_DATE]: "Creation date"
+    [SortOrderTypes.LATEST_ACTIVITY]: "Son aktivite",
+    [SortOrderTypes.CREATION_DATE]: "Oluşturulma tarihi"
 };
 
 const ForumLayoutTypesToNames = {
-    [ForumLayoutTypes.DEFAULT]: "Not set",
-    [ForumLayoutTypes.LIST]: "List view",
-    [ForumLayoutTypes.GRID]: "Gallery view"
+    [ForumLayoutTypes.DEFAULT]: "Ayarlanmadı",
+    [ForumLayoutTypes.LIST]: "Liste görünümü",
+    [ForumLayoutTypes.GRID]: "Galeri görünümü"
 };
 
 const VideoQualityModesToNames = {
-    [VideoQualityModes.AUTO]: "Automatic",
+    [VideoQualityModes.AUTO]: "Otomatik",
     [VideoQualityModes.FULL]: "720p"
 };
 
-// Icon from the modal when clicking a message link you don't have access to view
 const HiddenChannelLogo = "/assets/433e3ec4319a9d11b0cbe39342614982.svg";
 
 function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
@@ -163,7 +162,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <img className={cl("logo")} src={HiddenChannelLogo} />
 
                 <div className={cl("heading-container")}>
-                    <Text variant="heading-xxl/bold">This is a {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "hidden" : "locked"} {ChannelTypesToChannelNames[type]} channel</Text>
+                    <Text variant="heading-xxl/bold">Bu {!PermissionStore.can(PermissionsBits.VIEW_CHANNEL, channel) ? "gizli" : "kilitli"} bir {ChannelTypesToChannelNames[type]} kanalıdır</Text>
                     {channel.isNSFW() &&
                         <Tooltip text="NSFW">
                             {({ onMouseLeave, onMouseEnter }) => (
@@ -186,8 +185,8 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
 
                 {(!channel.isGuildVoice() && !channel.isGuildStageVoice()) && (
                     <Text variant="text-lg/normal">
-                        You can not see the {channel.isForumChannel() ? "posts" : "messages"} of this channel.
-                        {channel.isForumChannel() && topic && topic.length > 0 && " However you may see its guidelines:"}
+                        Bu kanalın {channel.isForumChannel() ? "gönderilerini" : "mesajlarını"} göremezsin.
+                        {channel.isForumChannel() && topic && topic.length > 0 && " Yine de yönergelerini görebilirsin:"}
                     </Text >
                 )}
 
@@ -199,45 +198,45 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
 
                 {lastMessageId &&
                     <Text variant="text-md/normal">
-                        Last {channel.isForumChannel() ? "post" : "message"} created:
+                        Oluşturulan son {channel.isForumChannel() ? "gönderi" : "mesaj"}:
                         <Timestamp timestamp={new Date(SnowflakeUtils.extractTimestamp(lastMessageId))} />
                     </Text>
                 }
                 {lastPinTimestamp &&
-                    <Text variant="text-md/normal">Last message pin: <Timestamp timestamp={new Date(lastPinTimestamp)} /></Text>
+                    <Text variant="text-md/normal">Son mesaj iğnelemesi: <Timestamp timestamp={new Date(lastPinTimestamp)} /></Text>
                 }
                 {(rateLimitPerUser ?? 0) > 0 &&
-                    <Text variant="text-md/normal">Slowmode: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
+                    <Text variant="text-md/normal">Yavaş mod: {formatDuration(rateLimitPerUser!, "seconds")}</Text>
                 }
                 {(defaultThreadRateLimitPerUser ?? 0) > 0 &&
                     <Text variant="text-md/normal">
-                        Default thread slowmode: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
+                        Varsayılan başlık yavaş modu: {formatDuration(defaultThreadRateLimitPerUser!, "seconds")}
                     </Text>
                 }
                 {((channel.isGuildVoice() || channel.isGuildStageVoice()) && bitrate != null) &&
-                    <Text variant="text-md/normal">Bitrate: {bitrate} bits</Text>
+                    <Text variant="text-md/normal">Bit hızı: {bitrate} bits</Text>
                 }
                 {rtcRegion !== undefined &&
-                    <Text variant="text-md/normal">Region: {rtcRegion ?? "Automatic"}</Text>
+                    <Text variant="text-md/normal">Bölge: {rtcRegion ?? "Otomatik"}</Text>
                 }
                 {(channel.isGuildVoice() || channel.isGuildStageVoice()) &&
-                    <Text variant="text-md/normal">Video quality mode: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
+                    <Text variant="text-md/normal">Video kalitesi modu: {VideoQualityModesToNames[videoQualityMode ?? VideoQualityModes.AUTO]}</Text>
                 }
                 {(defaultAutoArchiveDuration ?? 0) > 0 &&
                     <Text variant="text-md/normal">
-                        Default inactivity duration before archiving {channel.isForumChannel() ? "posts" : "threads"}:
+                        {channel.isForumChannel() ? "Gönderiler" : "Başlıklar"} arşivlenmeden önceki varsayılan inaktiflik süresi:
                         {" " + formatDuration(defaultAutoArchiveDuration!, "minutes")}
                     </Text>
                 }
                 {defaultForumLayout != null &&
-                    <Text variant="text-md/normal">Default layout: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
+                    <Text variant="text-md/normal">Varsayılan düzen: {ForumLayoutTypesToNames[defaultForumLayout]}</Text>
                 }
                 {defaultSortOrder != null &&
-                    <Text variant="text-md/normal">Default sort order: {SortOrderTypesToNames[defaultSortOrder]}</Text>
+                    <Text variant="text-md/normal">Varsayılan sıralama ölçütü: {SortOrderTypesToNames[defaultSortOrder]}</Text>
                 }
                 {defaultReactionEmoji != null &&
                     <div className={cl("default-emoji-container")}>
-                        <Text variant="text-md/normal">Default reaction emoji:</Text>
+                        <Text variant="text-md/normal">Varsayılan tepki emojisi:</Text>
                         {Parser.defaultRules[defaultReactionEmoji.emojiName ? "emoji" : "customEmoji"].react({
                             name: defaultReactionEmoji.emojiName
                                 ? EmojiParser.convertSurrogateToName(defaultReactionEmoji.emojiName)
@@ -251,11 +250,11 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                     </div>
                 }
                 {channel.hasFlag(ChannelFlags.REQUIRE_TAG) &&
-                    <Text variant="text-md/normal">Posts on this forum require a tag to be set.</Text>
+                    <Text variant="text-md/normal">Bu forumdaki gönderiler için bir etiket ayarlanması gerekir.</Text>
                 }
                 {availableTags && availableTags.length > 0 &&
                     <div className={cl("tags-container")}>
-                        <Text variant="text-lg/bold">Available tags:</Text>
+                        <Text variant="text-lg/bold">Mevcut etiketler:</Text>
                         <div className={cl("tags")}>
                             {availableTags.map(tag => <TagComponent tag={tag} key={tag.id} />)}
                         </div>
@@ -264,7 +263,7 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                 <div className={cl("allowed-users-and-roles-container")}>
                     <div className={cl("allowed-users-and-roles-container-title")}>
                         {isPluginEnabled(PermissionsViewerPlugin.name) && (
-                            <Tooltip text="Permission Details">
+                            <Tooltip text="Yetki Ayrıntıları">
                                 {({ onMouseLeave, onMouseEnter }) => (
                                     <button
                                         onMouseLeave={onMouseLeave}
@@ -283,8 +282,8 @@ function HiddenChannelLockScreen({ channel }: { channel: ExtendedChannel; }) {
                                 )}
                             </Tooltip>
                         )}
-                        <Text variant="text-lg/bold">Allowed users and roles:</Text>
-                        <Tooltip text={defaultAllowedUsersAndRolesDropdownState ? "Hide Allowed Users and Roles" : "View Allowed Users and Roles"}>
+                        <Text variant="text-lg/bold">İzin verilen kullanıcılar ve roller:</Text>
+                        <Tooltip text={defaultAllowedUsersAndRolesDropdownState ? "İzin Verilen Kullanıcıları ve Rolleri Gizle" : "İzin Verilen Kullanıcıları ve Rolleri Görüntüle"}>
                             {({ onMouseLeave, onMouseEnter }) => (
                                 <button
                                     onMouseLeave={onMouseLeave}

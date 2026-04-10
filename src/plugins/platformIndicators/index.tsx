@@ -82,10 +82,10 @@ function ensureOwnStatus(user: User) {
         if (typeof sessions !== "object") return null;
         const sortedSessions = Object.values(sessions).sort(({ status: a }, { status: b }) => {
             if (a === b) return 0;
-            if (a === "online") return 1;
-            if (b === "online") return -1;
-            if (a === "idle") return 1;
-            if (b === "idle") return -1;
+            if (a === "çevrimiçi") return 1;
+            if (b === "çevrimiçi") return -1;
+            if (a === "boşta") return 1;
+            if (b === "boşta") return -1;
             return 0;
         });
 

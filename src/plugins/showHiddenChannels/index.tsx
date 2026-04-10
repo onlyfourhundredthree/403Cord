@@ -30,22 +30,22 @@ const CONNECT = 1n << 20n;
 
 export const settings = definePluginSettings({
     hideUnreads: {
-        description: "Hide Unreads",
+        description: "Okunmamışları Gizle",
         type: OptionType.BOOLEAN,
         default: true,
         restartNeeded: true
     },
     showMode: {
-        description: "The mode used to display hidden channels.",
+        description: "Gizli kanalları görüntülemek için kullanılan mod.",
         type: OptionType.SELECT,
         options: [
-            { label: "Plain style with Lock Icon instead", value: ShowMode.LockIcon, default: true },
-            { label: "Muted style with hidden eye icon on the right", value: ShowMode.HiddenIconWithMutedStyle },
+            { label: "Bunun yerine Kilit Simgesi olan düz stil", value: ShowMode.LockIcon, default: true },
+            { label: "Sağda gizli göz simgesi olan sessize alınmış stil", value: ShowMode.HiddenIconWithMutedStyle },
         ],
         restartNeeded: true
     },
     defaultAllowedUsersAndRolesDropdownState: {
-        description: "Whether the allowed users and roles dropdown on hidden channels should be open by default",
+        description: "Gizli kanallardaki izin verilen kullanıcılar ve roller açılır menüsünün varsayılan olarak açık olup olmayacağı",
         type: OptionType.BOOLEAN,
         default: true
     }
@@ -57,7 +57,7 @@ function isUncategorized(objChannel: { channel: Channel; comparator: number; }) 
 
 export default definePlugin({
     name: "ShowHiddenChannels",
-    description: "Show channels that you do not have access to view.",
+    description: "Erişiminiz olmayan kanalları gösterir.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
 
@@ -540,7 +540,7 @@ export default definePlugin({
     ), { noop: true }),
 
     HiddenChannelIcon: ErrorBoundary.wrap(() => (
-        <Tooltip text="Hidden Channel">
+        <Tooltip text="Gizli Kanal">
             {({ onMouseLeave, onMouseEnter }) => (
                 <svg
                     onMouseLeave={onMouseLeave}

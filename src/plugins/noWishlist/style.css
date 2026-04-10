@@ -1,0 +1,10 @@
+/* Hide wishlist tab in shop navigation */
+[aria-label="İstek Listesi"],
+[aria-label="Wishlist"] {
+    display: none !important;
+}
+
+/* Hide wishlist section in shop */
+[class*="container"]:has([class*="wishlistCard"]) {
+    display: none !important;
+}

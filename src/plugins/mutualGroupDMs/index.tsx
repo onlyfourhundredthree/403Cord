@@ -170,7 +170,7 @@ export default definePlugin({
                     : (
                         <div className={ProfileListClasses.empty}>
                             <div className={ProfileListClasses.textContainer}>
-                                <BaseText tag="h3" size="md" weight="medium" style={{ color: "var(--text-strong)" }}>You don't have any group chats in common</BaseText>
+                                <BaseText tag="h3" size="md" weight="medium" style={{ color: "var(--text-strong)" }}>Hiç ortak grup sohbetiniz yok.</BaseText>
                             </div>
                         </div>
                     )
