@@ -81,6 +81,10 @@ export const PluginTranslationMap: Record<string, { name: string, description: s
         name: "Geliştirici Arkadaşı",
         description: "Dev Companion bağlandığında bildirip bildirmeyeceği."
     },
+    DisableCallIdle: {
+        name: "Sesten Atmayı Engelle",
+        description: "DM sesli aramalarında 3 dakika sonra otomatik olarak atılmanızı ve AFK kanalına taşınmanızı engeller."
+    },
     ExpressionCloner: {
         name: "İfade Klonlayıcı",
         description: "Başkalarının emojilerini ve Çıkartmalarını sağ tıklayarak kendi sunucunuza kolayca klonlamanızı sağlar."

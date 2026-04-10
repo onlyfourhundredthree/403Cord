@@ -92,7 +92,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
 
     return (
         <div className={cl("widget", { tooltip: isTooltip, "member-list": !isTooltip })}>
-            <Tooltip text={`${formattedOnlineCount} online in this channel`} position="bottom">
+            <Tooltip text={`Bu kanalda ${formattedOnlineCount} çevrimiçi üye var.`} position="bottom">
                 {props => (
                     <div {...props} className={cl("container")}>
                         <CircleIcon className={cl("online-count")} />
@@ -100,7 +100,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                     </div>
                 )}
             </Tooltip>
-            <Tooltip text={`${numberFormat(totalCount)} total server members`} position="bottom">
+            <Tooltip text={`Bu sunucuda ${numberFormat(totalCount)} üye var.`} position="bottom">
                 {props => (
                     <div {...props} className={cl("container")}>
                         <CircleIcon className={cl("total-count")} />
@@ -109,7 +109,7 @@ export function MemberCount({ isTooltip, tooltipGuildId }: { isTooltip?: true; t
                 )}
             </Tooltip>
             {includeVoice && voiceActivityCount > 0 &&
-                <Tooltip text={`${formattedVoiceCount} members in voice`} position="bottom">
+                <Tooltip text={`${formattedVoiceCount} üye sesli kanallarda`} position="bottom">
                     {props => (
                         <div {...props} className={cl("container")}>
                             <VoiceIcon className={cl("voice-icon")} />

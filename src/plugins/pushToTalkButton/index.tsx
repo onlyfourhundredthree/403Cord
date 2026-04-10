@@ -55,7 +55,7 @@ const audioDeviceContextPatch: NavContextMenuPatchCallback = children => {
     const modeOptions = MediaEngineStore.getModeOptions();
 
     const isPTT = voiceMode === "PUSH_TO_TALK";
-    const shortcut = modeOptions?.shortcut?.[0] || "Tuş Atanmamış";
+    const shortcut = modeOptions?.shortcut?.[0] || "❌";
     const delay = modeOptions?.delay ?? 20;
 
     const lastGroupIndex = children.length - 1;
