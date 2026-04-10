@@ -4,7 +4,8 @@
     display: none !important;
 }
 
-/* Hide wishlist section in shop */
-[class*="container"]:has([class*="wishlistCard"]) {
+/* stylelint-disable selector-class-pattern */
+.overlay_c0bea0.container__06b03 {
     display: none !important;
 }
+/* stylelint-enable selector-class-pattern */
