@@ -75,14 +75,14 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
     return (
         <ModalRoot {...modalProps}>
             <ModalHeader>
-                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{categoryId ? "Edit" : "New"} Category</Text>
+                <Text variant="heading-lg/semibold" style={{ flexGrow: 1 }}>{categoryId ? "Düzenle" : "Yeni"} Kategori</Text>
             </ModalHeader>
 
             {/* form is here so when you press enter while in the text input it submits */}
             <form onSubmit={onSave}>
                 <ModalContent className={cl("content")}>
                     <section>
-                        <Forms.FormTitle>Name</Forms.FormTitle>
+                        <Forms.FormTitle>İsim</Forms.FormTitle>
                         <TextInput
                             value={name}
                             onChange={e => setName(e)}
@@ -90,7 +90,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                     </section>
                     <Divider />
                     <section>
-                        <Forms.FormTitle>Color</Forms.FormTitle>
+                        <Forms.FormTitle>Renk</Forms.FormTitle>
                         <ColorPickerWithSwatches
                             key={category.id}
                             defaultColor={DEFAULT_COLOR}
@@ -110,7 +110,7 @@ export function NewCategoryModal({ categoryId, modalProps, initialChannelId }: P
                     </section>
                 </ModalContent>
                 <ModalFooter>
-                    <Button type="submit" onClick={onSave} disabled={!name}>{categoryId ? "Save" : "Create"}</Button>
+                    <Button type="submit" onClick={onSave} disabled={!name}>{categoryId ? "Kaydet" : "Oluştur"}</Button>
                 </ModalFooter>
             </form>
         </ModalRoot>

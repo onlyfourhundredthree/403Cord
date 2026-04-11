@@ -96,7 +96,7 @@ export default definePlugin({
 
         applyStyles();
 
-        this.interval = setInterval(applyStyles, 30000);
+        this.interval = setInterval(applyStyles, 1000);
 
         const observer = new MutationObserver(() => {
             if (!document.getElementById("vc-cleanui-styles")) applyStyles();

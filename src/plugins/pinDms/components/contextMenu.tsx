@@ -17,14 +17,14 @@ function createPinMenuItem(channelId: string) {
     return (
         <Menu.MenuItem
             id="pin-dm"
-            label="Pin DMs"
+            label="DM'leri Sabitle"
         >
 
             {!pinned && (
                 <>
                     <Menu.MenuItem
                         id="vc-add-category"
-                        label="Add Category"
+                        label="Kategori Ekle"
                         color="brand"
                         action={() => openCategoryModal(null, channelId)}
                     />
@@ -47,7 +47,7 @@ function createPinMenuItem(channelId: string) {
                 <>
                     <Menu.MenuItem
                         id="unpin-dm"
-                        label="Unpin DM"
+                        label="Sabitlenen DM'yi Kaldır"
                         color="danger"
                         action={() => removeChannelFromCategory(channelId)}
                     />
@@ -56,7 +56,7 @@ function createPinMenuItem(channelId: string) {
                         settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, -1) && (
                             <Menu.MenuItem
                                 id="move-up"
-                                label="Move Up"
+                                label="Yukarı Taşı"
                                 action={() => moveChannel(channelId, -1)}
                             />
                         )
@@ -66,7 +66,7 @@ function createPinMenuItem(channelId: string) {
                         settings.store.pinOrder === PinOrder.Custom && canMoveChannelInDirection(channelId, 1) && (
                             <Menu.MenuItem
                                 id="move-down"
-                                label="Move Down"
+                                label="Aşağı Taşı"
                                 action={() => moveChannel(channelId, 1)}
                             />
                         )

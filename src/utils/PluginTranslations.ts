@@ -198,7 +198,7 @@ export const PluginTranslationMap: Record<string, { name: string, description: s
         description: "Bir sunucudaki yetkilerinizi profil kısmında oldukça detaylı şekilde analiz edebilmenizi sağlar."
     },
     PinDMs: {
-        name: "Mesaj Sabitleme",
+        name: "DM Sabitleme",
         description: "Dilediğiniz DM kanallarını ekranın başına listelendirilerek sabitleme izni sunar."
     },
     PlainFolderIcon: {

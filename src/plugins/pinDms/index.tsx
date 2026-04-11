@@ -39,20 +39,20 @@ export const enum PinOrder {
 export const settings = definePluginSettings({
     pinOrder: {
         type: OptionType.SELECT,
-        description: "Which order should pinned DMs be displayed in?",
+        description: "Sabitlenen DM'ler hangi sırayla gösterilsin?",
         options: [
-            { label: "Most recent message", value: PinOrder.LastMessage, default: true },
-            { label: "Custom (right click channels to reorder)", value: PinOrder.Custom }
+            { label: "En son mesaj", value: PinOrder.LastMessage, default: true },
+            { label: "Özel (sıralamak için kanallara sağ tıklayın)", value: PinOrder.Custom }
         ]
     },
     canCollapseDmSection: {
         type: OptionType.BOOLEAN,
-        description: "Allow uncategorised DMs section to be collapsable",
+        description: "Kategorize edilmemiş DM bölümünün daraltılmasına izin ver",
         default: false
     },
     dmSectionCollapsed: {
         type: OptionType.BOOLEAN,
-        description: "Collapse DM section",
+        description: "DM bölümünü daralt",
         default: false,
         hidden: true
     },
@@ -64,7 +64,7 @@ export const settings = definePluginSettings({
 
 export default definePlugin({
     name: "PinDMs",
-    description: "Allows you to pin private channels to the top of your DM list. To pin/unpin or re-order pins, right click DMs",
+    description: "Özel kanalları DM listenizin en üstüne sabitlemenizi sağlar. Sabitlemek/çıkarmak veya yeniden sıralamak için DM'lere sağ tıklayın.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
     contextMenus,
@@ -266,11 +266,11 @@ export default definePlugin({
                             navId="vc-pindms-header-menu"
                             onClose={() => FluxDispatcher.dispatch({ type: "CONTEXT_MENU_CLOSE" })}
                             color="danger"
-                            aria-label="Pin DMs Category Menu"
+                            aria-label="DM Sabitleme Kategori Menüsü"
                         >
                             <Menu.MenuItem
                                 id="vc-pindms-edit-category"
-                                label="Edit Category"
+                                label="Kategoriyi Düzenle"
                                 action={() => openCategoryModal(category.id, null)}
                             />
 
@@ -280,14 +280,14 @@ export default definePlugin({
                                         {
                                             canMoveCategoryInDirection(category.id, -1) && <Menu.MenuItem
                                                 id="vc-pindms-move-category-up"
-                                                label="Move Up"
+                                                label="Yukarı Taşı"
                                                 action={() => moveCategory(category.id, -1)}
                                             />
                                         }
                                         {
                                             canMoveCategoryInDirection(category.id, 1) && <Menu.MenuItem
                                                 id="vc-pindms-move-category-down"
-                                                label="Move Down"
+                                                label="Aşağı Taşı"
                                                 action={() => moveCategory(category.id, 1)}
                                             />
                                         }
@@ -300,7 +300,7 @@ export default definePlugin({
                             <Menu.MenuItem
                                 id="vc-pindms-delete-category"
                                 color="danger"
-                                label="Delete Category"
+                                label="Kategoriyi Sil"
                                 action={() => removeCategory(category.id)}
                             />
 
