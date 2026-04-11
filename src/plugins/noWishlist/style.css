@@ -15,12 +15,10 @@ body[data-cleanui-hideShop="true"] [aria-label="Shop"] {
 }
 
 /* Hediye Butonu */
-body[data-cleanui-hideGift="true"] [aria-label="Hediye gönder"],
-body[data-cleanui-hideGift="true"] [aria-label="Send a gift"],
-body[data-cleanui-hideGift="true"] [aria-label="Hediye Ver"],
-body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label="Hediye gönder"]),
-body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label="Send a gift"]),
-body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label="Hediye Ver"]) {
+body[data-cleanui-hideGift="true"] [aria-label*="hediye" i],
+body[data-cleanui-hideGift="true"] [aria-label*="gift" i],
+body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label*="hediye" i]),
+body[data-cleanui-hideGift="true"] [class*="button_"]:has([aria-label*="gift" i]) {
     display: none !important;
 }
 
@@ -38,9 +36,8 @@ body[data-cleanui-hideHelp="true"] a[href*="support.discord.com"] {
 }
 
 /* Oyun Koleksiyonu (Profile Card) */
-body[data-cleanui-hideGameCollection="true"] [class*="overlay_"]:has([class*="displayCountText_"]),
-body[data-cleanui-hideGameCollection="true"] [class*="innerContainer_"],
-body[data-cleanui-hideGameCollection="true"] [class*="card_"]:has([class*="displayCountText"]) {
+body[data-cleanui-hideGameCollection="true"] [class*="innerContainer_"][class*="card_"]:has([class*="displayCountText_"]),
+body[data-cleanui-hideGameCollection="true"] [class*="overlay_"][class*="innerContainer_"][class*="card_"] {
     display: none !important;
 }
 

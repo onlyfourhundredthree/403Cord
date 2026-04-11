@@ -25,7 +25,7 @@ function updateTheme() {
 
     // Her zaman yüklenen temalar
     const imports: string[] = [];
-    imports.push("@import url('https://discordstyles.github.io/FrostedGlass/FrostedGlass.css');");
+    imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/FrostedGlass/deploy/FrostedGlass.theme.css');");
     if (settings.store.radialStatus) {
         imports.push("@import url('https://raw.githubusercontent.com/DiscordStyles/RadialStatus/deploy/RadialStatus.theme.css');");
     }
