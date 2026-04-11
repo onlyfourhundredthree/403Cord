@@ -35,12 +35,17 @@ function applyStyles() {
 
     let css = "";
     try {
-        const { store } = settings;
-        for (const key in CSS_RULES) {
-            if (store[key]) css += CSS_RULES[key] + "\n";
+        // Accessing settings via multiple paths to ensure we get something
+        const store = settings.store || (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI;
+        if (store) {
+            for (const key in CSS_RULES) {
+                if (store[key] === true) {
+                    css += CSS_RULES[key] + "\n";
+                }
+            }
         }
-    } catch {
-        // Safe fallback
+    } catch (e) {
+        // Fail silently
     }
 
     if (styleTag.textContent !== css) {
@@ -94,7 +99,15 @@ export default definePlugin({
     onStart() {
         migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
 
+        // Ensure settings are ready by forcing the pluginName if necessary
+        try { (settings as any).pluginName = "CleanUI"; } catch { }
+
         applyStyles();
+
+        // Multiple retries for startup as Vencord settings can be slow to sync to disk
+        setTimeout(applyStyles, 500);
+        setTimeout(applyStyles, 2000);
+        setTimeout(applyStyles, 5000);
 
         this.interval = setInterval(applyStyles, 1000);
 
