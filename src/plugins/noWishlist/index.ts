@@ -113,8 +113,8 @@ export default definePlugin({
         }))
     ],
 
-    onStart() {
-        console.log("%c[CleanUI] PLUGIN STARTING...", "color: #ff00ff; font-weight: bold; font-size: 20px;");
+    start() {
+        console.log("%c[CleanUI] PLUGIN STARTED!", "color: #ff00ff; font-weight: bold; font-size: 20px;");
 
         try {
             migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
@@ -122,37 +122,28 @@ export default definePlugin({
             console.error("[CleanUI] Migration Error:", e);
         }
 
-        // Expose for console debugging
-        if (typeof window !== "undefined") {
-            (window as any).__CLEANUI_DEBUG = {
-                apply: applyStyles,
-                settings: settings,
-                cache: getEmergencyCache,
-                rules: CSS_RULES,
-                ping: () => console.log("CLEANUI PONG")
-            };
-        }
-
         applyStyles();
 
-        // Initial sync of emergency cache with store once READY
+        // Vencord settings can sometimes take a fraction of a second to load from disk
         setTimeout(() => {
             const cache = getEmergencyCache();
             const { store } = settings;
             let changed = false;
-            for (const key in settings.def) {
-                if (store[key] !== undefined && store[key] !== cache[key]) {
-                    cache[key] = store[key];
-                    changed = true;
+            if (store) {
+                for (const key in settings.def) {
+                    if (store[key] !== undefined && store[key] !== cache[key]) {
+                        cache[key] = store[key];
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+                    applyStyles();
                 }
             }
-            if (changed) {
-                localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-                applyStyles();
-            }
-        }, 3000);
+        }, 1000);
 
-        this.interval = setInterval(applyStyles, 1000);
+        this.interval = setInterval(applyStyles, 2000);
 
         const observer = new MutationObserver(() => {
             if (!document.getElementById("vc-cleanui-styles")) applyStyles();
@@ -160,7 +151,8 @@ export default definePlugin({
         observer.observe(document.head || document.documentElement, { childList: true });
     },
 
-    onStop() {
+    stop() {
+        console.log("%c[CleanUI] PLUGIN STOPPED!", "color: #ff0000; font-weight: bold; font-size: 20px;");
         if (this.interval) clearInterval(this.interval);
         document.getElementById("vc-cleanui-styles")?.remove();
     }
