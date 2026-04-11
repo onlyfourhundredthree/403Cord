@@ -69,6 +69,8 @@ function cacheSettings(settings: Record<string, boolean>) {
     }
 }
 
+let isStartingUp = true;
+
 function applyStyles() {
     if (typeof document === "undefined") return;
 
@@ -84,27 +86,24 @@ function applyStyles() {
     let css = "";
     try {
         const cached = getCachedSettings();
-        const vStore = settings.store;
-        const gStore = (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI;
 
+        // During startup, we trust the cache MORE than the settings store
+        // because the store might not be fully linked to the disk yet.
         for (const key in CSS_RULES) {
-            let val = false;
-            try {
-                // Priority: Vencord Store > Global API > Local Cache
-                if (vStore && vStore[key] !== undefined) val = vStore[key];
-                else if (gStore && gStore[key] !== undefined) val = gStore[key];
-                else val = cached[key] || false;
-            } catch {
-                val = cached[key] || false;
+            let val = cached[key] || false;
+
+            // If we are not in startup, or if the store definitely has a value, use it
+            if (!isStartingUp) {
+                try {
+                    const vStore = settings.store;
+                    if (vStore && vStore[key] !== undefined) val = vStore[key];
+                } catch { }
             }
 
             if (val === true) css += CSS_RULES[key];
         }
     } catch (e) {
-        const cached = getCachedSettings();
-        for (const key in CSS_RULES) {
-            if (cached[key]) css += CSS_RULES[key];
-        }
+        // Fallback
     }
 
     if (style.textContent !== css) {
@@ -235,11 +234,15 @@ export default definePlugin({
     ],
 
     onStart() {
-        // Initial application - should use cache if settings aren't ready
+        // 1. Migrate settings immediately
+        migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
+
+        // 2. Initial application (uses cache)
         applyStyles();
 
-        // Settings sync: update cache with real settings once they are ready
+        // 3. Sync Cache with Store after a delay (Settings Store should be ready by then)
         setTimeout(() => {
+            isStartingUp = false;
             try {
                 const { store } = settings;
                 const cached = getCachedSettings();
@@ -250,17 +253,14 @@ export default definePlugin({
                         changed = true;
                     }
                 }
-                if (changed) {
-                    cacheSettings(cached);
-                    applyStyles();
-                }
+                if (changed) cacheSettings(cached);
+                applyStyles();
             } catch { }
-        }, 2000);
+        }, 10000); // 10 seconds startup grace period
 
-        // Keep-alive interval
+        // 4. Maintenance
         this.interval = setInterval(applyStyles, 3000);
 
-        // Style tag protection
         const observer = new MutationObserver(() => {
             if (!document.getElementById("vc-cleanui-styles")) applyStyles();
         });
@@ -268,6 +268,7 @@ export default definePlugin({
     },
 
     onStop() {
+        isStartingUp = true;
         if (this.interval) clearInterval(this.interval);
         document.getElementById("vc-cleanui-styles")?.remove();
     }
