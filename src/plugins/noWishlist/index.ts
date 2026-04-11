@@ -7,120 +7,47 @@
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
-// Dynamic CSS mapping
-const CSS_RULES: Record<string, string> = {
-    hideWishlist: `
-        [aria-label="İstek Listesi"], [aria-label="Wishlist"], [class*="overlay_"][class*="container_"] { display: none !important; }
-    `,
-    hideShop: `
-        a[href="/shop"], [aria-label="Mağaza"], [aria-label="Shop"] { display: none !important; }
-    `,
-    hideGift: `
-        [aria-label*="hediye" i], [aria-label*="gift" i], [class*="button_"]:has([aria-label*="hediye" i]), [class*="button_"]:has([aria-label*="gift" i]) { display: none !important; }
-    `,
-    hideInbox: `
-        [aria-label="Gelen Kutusu"], [aria-label="Inbox"] { display: none !important; }
-    `,
-    hideHelp: `
-        [aria-label="Yardım"], [aria-label="Help"], a[href*="support.discord.com"] { display: none !important; }
-    `,
-    hideGameCollection: `
-        [class*="innerContainer_"][class*="card_"]:has([class*="displayCountText_"]), [class*="overlay_"][class*="innerContainer_"][class*="card_"] { display: none !important; }
-    `,
-    hideMemberlistActivity: `
-        [class*="membersGroup_"]:has([class*="toggleExpandIcon_"]), [class*="membersGroup_"]:has([class*="header_"]), [class*="membersWrap_"] [class*="container_"][class*="openOnHover_"]:has([class*="infoSection_"]) { display: none !important; }
-    `,
-    hideAppLauncher: `
-        [aria-label="Uygulamalar"], [aria-label="App Launcher"] { display: none !important; }
-    `,
-    hideQuests: `
-        a[href="/quest-home"] { display: none !important; }
-    `,
-    hideAvatarDecorations: `
-        [class*="avatarDecoration"], svg:has(foreignObject + [class*="avatarDecoration"]), [class*="avatar_"] > svg > foreignObject + [class*="avatarDecoration"] { display: none !important; }
-    `,
-    hideProfileEffects: `
-        [class*="profileEffects"] { display: none !important; }
-    `,
-    muteEveryone: `
-        [class*="mention"][class*="everyone"], [class*="mention"][class*="here"] { background-color: transparent !important; color: var(--text-normal) !important; }
-    `,
-    muteRoles: `
-        [class*="mention"]:not([class*="everyone"], [class*="here"]) { background-color: transparent !important; }
-    `
-};
+import managedStyle from "./style.css?managed";
 
-const CACHE_KEY = "vc-cleanui-cache";
+const CACHE_KEY = "vc-cleanui-v3-cache";
 
-function getCachedSettings(): Record<string, boolean> {
+function getCache() {
     try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        return cached ? JSON.parse(cached) : {};
-    } catch {
-        return {};
-    }
+        return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+    } catch { return {}; }
 }
 
-function cacheSettings(settings: Record<string, boolean>) {
+function setCache(c: any) {
     try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(settings));
-    } catch {
-        // Ignore
-    }
+        localStorage.setItem(CACHE_KEY, JSON.stringify(c));
+    } catch { }
 }
 
-let isStartingUp = true;
-
-function applyStyles() {
+function updateClasses() {
     if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    const cache = getCache();
 
-    let style = document.getElementById("vc-cleanui-styles") as HTMLStyleElement;
-    if (!style) {
-        style = document.createElement("style");
-        style.id = "vc-cleanui-styles";
-        (document.head || document.documentElement).appendChild(style);
-    }
-
-    if (!style) return;
-
-    let css = "";
+    // We also try to read from Vencord store if it's ready
+    let store: any = null;
     try {
-        const cached = getCachedSettings();
+        store = settings.store;
+    } catch { }
 
-        // During startup, we trust the cache MORE than the settings store
-        // because the store might not be fully linked to the disk yet.
-        for (const key in CSS_RULES) {
-            let val = cached[key] || false;
-
-            // If we are not in startup, or if the store definitely has a value, use it
-            if (!isStartingUp) {
-                try {
-                    const vStore = settings.store;
-                    if (vStore && vStore[key] !== undefined) val = vStore[key];
-                } catch { }
-            }
-
-            if (val === true) css += CSS_RULES[key];
+    for (const key in settings.def) {
+        // Source of truth: Vencord Store (if exists and contains the key), otherwise Cache
+        let val = cache[key] || false;
+        if (store && store[key] !== undefined) {
+            val = store[key];
         }
-    } catch (e) {
-        // Fallback
+
+        const className = `vc-clean-${key}`;
+        if (val) {
+            if (!root.classList.contains(className)) root.classList.add(className);
+        } else {
+            if (root.classList.contains(className)) root.classList.remove(className);
+        }
     }
-
-    if (style.textContent !== css) {
-        style.textContent = css;
-    }
-}
-
-function handleSettingChange(key: string, value: boolean) {
-    const cached = getCachedSettings();
-    cached[key] = value;
-    cacheSettings(cached);
-    applyStyles();
-}
-
-// Migrate settings
-if (typeof Vencord !== "undefined") {
-    migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
 }
 
 const settings = definePluginSettings({
@@ -128,89 +55,155 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         default: false,
         description: "İstek Listesini Gizle",
-        onChange: v => handleSettingChange("hideWishlist", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideWishlist = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideShop: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Mağaza Butonunu Gizle",
-        onChange: v => handleSettingChange("hideShop", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideShop = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideGift: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Hediye Butonunu Gizle",
-        onChange: v => handleSettingChange("hideGift", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideGift = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideInbox: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Gelen Kutusunu Gizle",
-        onChange: v => handleSettingChange("hideInbox", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideInbox = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideHelp: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Yardım Butonunu Gizle",
-        onChange: v => handleSettingChange("hideHelp", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideHelp = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideGameCollection: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Oyun Koleksiyonunu Gizle",
-        onChange: v => handleSettingChange("hideGameCollection", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideGameCollection = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideMemberlistActivity: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Üye Listesi Etkinliklerini Gizle",
-        onChange: v => handleSettingChange("hideMemberlistActivity", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideMemberlistActivity = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideAppLauncher: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Uygulama Başlatıcıyı Gizle",
-        onChange: v => handleSettingChange("hideAppLauncher", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideAppLauncher = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideQuests: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Görevleri Gizle",
-        onChange: v => handleSettingChange("hideQuests", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideQuests = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideAvatarDecorations: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Avatar Dekorasyonlarını Gizle",
-        onChange: v => handleSettingChange("hideAvatarDecorations", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideAvatarDecorations = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     hideProfileEffects: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Profil Efektlerini Gizle",
-        onChange: v => handleSettingChange("hideProfileEffects", v)
+        onChange: v => {
+            const c = getCache();
+            c.hideProfileEffects = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     muteEveryone: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "@everyone & @here Sustur",
-        onChange: v => handleSettingChange("muteEveryone", v)
+        onChange: v => {
+            const c = getCache();
+            c.muteEveryone = v;
+            setCache(c);
+            updateClasses();
+        }
     },
     muteRoles: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Rol Etiketlerini Sustur",
-        onChange: v => handleSettingChange("muteRoles", v)
+        onChange: v => {
+            const c = getCache();
+            c.muteRoles = v;
+            setCache(c);
+            updateClasses();
+        }
     }
 });
 
 export default definePlugin({
     name: "CleanUI",
-    description: "Discord arayüzündeki gereksiz öğeleri (İstek Listesi, Mağaza, Nitro vb.) gizlemenizi sağlar.",
+    description: "Discord arayüzündeki gereksiz öğeleri gizlemenizi sağlar.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
+    managedStyle,
 
-    interval: null as any,
+    maintenanceInterval: null as any,
 
     patches: [
         ...[
@@ -234,42 +227,28 @@ export default definePlugin({
     ],
 
     onStart() {
-        // 1. Migrate settings immediately
         migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
 
-        // 2. Initial application (uses cache)
-        applyStyles();
+        // Instant application
+        updateClasses();
 
-        // 3. Sync Cache with Store after a delay (Settings Store should be ready by then)
-        setTimeout(() => {
-            isStartingUp = false;
-            try {
-                const { store } = settings;
-                const cached = getCachedSettings();
-                let changed = false;
-                for (const key in settings.def) {
-                    if (store[key] !== undefined && store[key] !== cached[key]) {
-                        cached[key] = store[key];
-                        changed = true;
-                    }
-                }
-                if (changed) cacheSettings(cached);
-                applyStyles();
-            } catch { }
-        }, 10000); // 10 seconds startup grace period
+        // Nuclear startup: re-apply every 500ms for 10 seconds
+        const start = Date.now();
+        const interval = setInterval(() => {
+            updateClasses();
+            if (Date.now() - start > 10000) clearInterval(interval);
+        }, 500);
 
-        // 4. Maintenance
-        this.interval = setInterval(applyStyles, 3000);
-
-        const observer = new MutationObserver(() => {
-            if (!document.getElementById("vc-cleanui-styles")) applyStyles();
-        });
-        observer.observe(document.head || document.documentElement, { childList: true });
+        this.maintenanceInterval = setInterval(updateClasses, 5000);
     },
 
     onStop() {
-        isStartingUp = true;
-        if (this.interval) clearInterval(this.interval);
-        document.getElementById("vc-cleanui-styles")?.remove();
+        if (this.maintenanceInterval) clearInterval(this.maintenanceInterval);
+        if (typeof document !== "undefined") {
+            const root = document.documentElement;
+            for (const key in settings.def) {
+                root.classList.remove(`vc-clean-${key}`);
+            }
+        }
     }
 });
