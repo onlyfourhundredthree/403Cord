@@ -23,6 +23,22 @@ const CSS_RULES: Record<string, string> = {
     muteRoles: '[class*="mention"]:not([class*="everyone"], [class*="here"]) { background-color: transparent !important; }'
 };
 
+const CACHE_KEY = "vc-cleanui-emergency-v1";
+
+function getEmergencyCache() {
+    try {
+        return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+    } catch { return {}; }
+}
+
+function updateEmergencyCache(key: string, val: boolean) {
+    try {
+        const cache = getEmergencyCache();
+        cache[key] = val;
+        localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+    } catch { }
+}
+
 function applyStyles() {
     if (typeof document === "undefined") return;
 
@@ -34,39 +50,40 @@ function applyStyles() {
     }
 
     let css = "";
-    try {
-        // Accessing settings via multiple paths to ensure we get something
-        const store = settings.store || (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI;
-        if (store) {
-            for (const key in CSS_RULES) {
-                if (store[key] === true) {
-                    css += CSS_RULES[key] + "\n";
-                }
-            }
+    const emergency = getEmergencyCache();
+    let store: any = null;
+    try { store = settings.store; } catch { }
+
+    for (const key in CSS_RULES) {
+        // We TRUST Vencord store if it has a value, otherwise we use Emergency Cache
+        const val = (store && store[key] !== undefined) ? store[key] : emergency[key];
+        if (val) {
+            css += CSS_RULES[key] + "\n";
         }
-    } catch (e) {
-        // Fail silently
     }
 
-    if (styleTag.textContent !== css) {
-        styleTag.textContent = css;
-    }
+    if (styleTag.textContent !== css) styleTag.textContent = css;
 }
 
+const handle = (key: string, v: boolean) => {
+    updateEmergencyCache(key, v);
+    applyStyles();
+};
+
 const settings = definePluginSettings({
-    hideWishlist: { type: OptionType.BOOLEAN, default: false, description: "İstek Listesini Gizle", onChange: applyStyles },
-    hideShop: { type: OptionType.BOOLEAN, default: false, description: "Mağaza Butonunu Gizle", onChange: applyStyles },
-    hideGift: { type: OptionType.BOOLEAN, default: false, description: "Hediye Butonunu Gizle", onChange: applyStyles },
-    hideInbox: { type: OptionType.BOOLEAN, default: false, description: "Gelen Kutusunu Gizle", onChange: applyStyles },
-    hideHelp: { type: OptionType.BOOLEAN, default: false, description: "Yardım Butonunu Gizle", onChange: applyStyles },
-    hideGameCollection: { type: OptionType.BOOLEAN, default: false, description: "Oyun Koleksiyonunu Gizle", onChange: applyStyles },
-    hideMemberlistActivity: { type: OptionType.BOOLEAN, default: false, description: "Üye Listesi Etkinliklerini Gizle", onChange: applyStyles },
-    hideAppLauncher: { type: OptionType.BOOLEAN, default: false, description: "Uygulama Başlatıcıyı Gizle", onChange: applyStyles },
-    hideQuests: { type: OptionType.BOOLEAN, default: false, description: "Görevleri Gizle", onChange: applyStyles },
-    hideAvatarDecorations: { type: OptionType.BOOLEAN, default: false, description: "Avatar Dekorasyonlarını Gizle", onChange: applyStyles },
-    hideProfileEffects: { type: OptionType.BOOLEAN, default: false, description: "Profil Efektlerini Gizle", onChange: applyStyles },
-    muteEveryone: { type: OptionType.BOOLEAN, default: false, description: "@everyone & @here Sustur", onChange: applyStyles },
-    muteRoles: { type: OptionType.BOOLEAN, default: false, description: "Rol Etiketlerini Sustur", onChange: applyStyles }
+    hideWishlist: { type: OptionType.BOOLEAN, default: false, description: "İstek Listesini Gizle", onChange: v => handle("hideWishlist", v) },
+    hideShop: { type: OptionType.BOOLEAN, default: false, description: "Mağaza Butonunu Gizle", onChange: v => handle("hideShop", v) },
+    hideGift: { type: OptionType.BOOLEAN, default: false, description: "Hediye Butonunu Gizle", onChange: v => handle("hideGift", v) },
+    hideInbox: { type: OptionType.BOOLEAN, default: false, description: "Gelen Kutusunu Gizle", onChange: v => handle("hideInbox", v) },
+    hideHelp: { type: OptionType.BOOLEAN, default: false, description: "Yardım Butonunu Gizle", onChange: v => handle("hideHelp", v) },
+    hideGameCollection: { type: OptionType.BOOLEAN, default: false, description: "Oyun Koleksiyonunu Gizle", onChange: v => handle("hideGameCollection", v) },
+    hideMemberlistActivity: { type: OptionType.BOOLEAN, default: false, description: "Üye Listesi Etkinliklerini Gizle", onChange: v => handle("hideMemberlistActivity", v) },
+    hideAppLauncher: { type: OptionType.BOOLEAN, default: false, description: "Uygulama Başlatıcıyı Gizle", onChange: v => handle("hideAppLauncher", v) },
+    hideQuests: { type: OptionType.BOOLEAN, default: false, description: "Görevleri Gizle", onChange: v => handle("hideQuests", v) },
+    hideAvatarDecorations: { type: OptionType.BOOLEAN, default: false, description: "Avatar Dekorasyonlarını Gizle", onChange: v => handle("hideAvatarDecorations", v) },
+    hideProfileEffects: { type: OptionType.BOOLEAN, default: false, description: "Profil Efektlerini Gizle", onChange: v => handle("hideProfileEffects", v) },
+    muteEveryone: { type: OptionType.BOOLEAN, default: false, description: "@everyone & @here Sustur", onChange: v => handle("muteEveryone", v) },
+    muteRoles: { type: OptionType.BOOLEAN, default: false, description: "Rol Etiketlerini Sustur", onChange: v => handle("muteRoles", v) }
 });
 
 export default definePlugin({
@@ -99,15 +116,34 @@ export default definePlugin({
     onStart() {
         migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
 
-        // Ensure settings are ready by forcing the pluginName if necessary
-        try { (settings as any).pluginName = "CleanUI"; } catch { }
+        // Expose for console debugging
+        if (typeof window !== "undefined") {
+            (window as any).__CLEANUI_DEBUG = {
+                apply: applyStyles,
+                settings: settings,
+                cache: getEmergencyCache,
+                rules: CSS_RULES
+            };
+        }
 
         applyStyles();
 
-        // Multiple retries for startup as Vencord settings can be slow to sync to disk
-        setTimeout(applyStyles, 500);
-        setTimeout(applyStyles, 2000);
-        setTimeout(applyStyles, 5000);
+        // Initial sync of emergency cache with store once READY
+        setTimeout(() => {
+            const cache = getEmergencyCache();
+            const { store } = settings;
+            let changed = false;
+            for (const key in settings.def) {
+                if (store[key] !== undefined && store[key] !== cache[key]) {
+                    cache[key] = store[key];
+                    changed = true;
+                }
+            }
+            if (changed) {
+                localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+                applyStyles();
+            }
+        }, 3000);
 
         this.interval = setInterval(applyStyles, 1000);
 
