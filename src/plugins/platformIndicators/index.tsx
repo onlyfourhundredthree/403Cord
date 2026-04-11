@@ -34,7 +34,10 @@ const { useStatusFillColor } = mapMangledModuleLazy([".5625*", "translate"], {
 });
 
 const platformMap = {
-    embedded: "Console",
+    desktop: "Masaüstü",
+    mobile: "Mobil",
+    web: "Web",
+    embedded: "Konsol",
     vr: "VR"
 };
 
@@ -82,10 +85,10 @@ function ensureOwnStatus(user: User) {
         if (typeof sessions !== "object") return null;
         const sortedSessions = Object.values(sessions).sort(({ status: a }, { status: b }) => {
             if (a === b) return 0;
-            if (a === "çevrimiçi") return 1;
-            if (b === "çevrimiçi") return -1;
-            if (a === "boşta") return 1;
-            if (b === "boşta") return -1;
+            if (a === "online") return 1;
+            if (b === "online") return -1;
+            if (a === "idle") return 1;
+            if (b === "idle") return -1;
             return 0;
         });
 
@@ -107,17 +110,18 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 
     ensureOwnStatus(user);
 
-    const status = PresenceStore.getClientStatus(user.id);
-    if (!status) return [];
+    const status = PresenceStore.getStatus(user.id);
+    const clientStatus = PresenceStore.getClientStatus(user.id);
+    if (status === "offline" || !clientStatus) return [];
 
-    return Object.entries(status).map(([platform, status]) => ({
+    return Object.entries(clientStatus).map(([platform, platStatus]) => ({
         key: `vc-platform-indicator-${platform}`,
         component: () => (
             <span className="vc-platform-indicator">
                 <PlatformIcon
                     key={platform}
                     platform={platform as DiscordPlatform}
-                    status={status}
+                    status={platStatus as OnlineStatus}
                     small={false}
                 />
             </span>
@@ -128,14 +132,18 @@ function getBadges({ userId }: BadgeUserArgs): ProfileBadge[] {
 const PlatformIndicator = ({ user, small = false }: { user: User; small?: boolean; }) => {
     ensureOwnStatus(user);
 
-    const status = useStateFromStores([PresenceStore], () => PresenceStore.getClientStatus(user.id));
-    if (!status) return null;
+    const { status, clientStatus } = useStateFromStores([PresenceStore], () => ({
+        status: PresenceStore.getStatus(user.id),
+        clientStatus: PresenceStore.getClientStatus(user.id)
+    }));
 
-    const icons = Object.entries(status).map(([platform, status]) => (
+    if (status === "offline" || !clientStatus) return null;
+
+    const icons = Object.entries(clientStatus).map(([platform, platStatus]) => (
         <PlatformIcon
             key={platform}
             platform={platform as DiscordPlatform}
-            status={status}
+            status={platStatus as OnlineStatus}
             small={small}
         />
     ));
