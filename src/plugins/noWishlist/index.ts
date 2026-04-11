@@ -10,11 +10,12 @@ import definePlugin, { OptionType } from "@utils/types";
 import managedStyle from "./style.css?managed";
 
 function updateAttribute(key: string, value: any) {
-    if (typeof document === "undefined" || !document.body) return;
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
     const attr = `data-cleanui-${key}`;
     const val = String(value);
-    if (document.body.getAttribute(attr) !== val) {
-        document.body.setAttribute(attr, val);
+    if (root.getAttribute(attr) !== val) {
+        root.setAttribute(attr, val);
     }
 }
 
@@ -102,6 +103,13 @@ const settings = definePluginSettings({
         description: "Tüm sunucularda rol etiketlerini (@Rol) susturur.",
         name: "Rol Etiketlerini Sustur",
         onChange: v => updateAttribute("muteRoles", v)
+    },
+    hideProfileEffects: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Tüm kullanıcıların profil efektlerini gizler.",
+        name: "Profil Efektlerini Gizle",
+        onChange: v => updateAttribute("hideProfileEffects", v)
     }
 });
 
@@ -138,10 +146,10 @@ export default definePlugin({
     onStart() {
         this.applyAllAttributes();
 
-        // Ensure attributes persist even if Discord or other plugins modify the body
+        // Ensure attributes persist even if Discord or other plugins modify the document
         if (typeof document !== "undefined") {
             this.observer = new MutationObserver(() => this.applyAllAttributes());
-            this.observer.observe(document.body, { attributes: true });
+            this.observer.observe(document.documentElement, { attributes: true });
         }
     },
 
@@ -153,9 +161,10 @@ export default definePlugin({
 
     onStop() {
         this.observer?.disconnect();
-        if (typeof document === "undefined" || !document.body) return;
+        if (typeof document === "undefined") return;
+        const root = document.documentElement;
         for (const key in settings.def) {
-            document.body.removeAttribute(`data-cleanui-${key}`);
+            root.removeAttribute(`data-cleanui-${key}`);
         }
     }
 });
