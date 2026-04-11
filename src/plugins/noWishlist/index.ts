@@ -50,7 +50,24 @@ const CSS_RULES: Record<string, string> = {
     `
 };
 
-const styleElement: HTMLStyleElement | null = null;
+const CACHE_KEY = "vc-cleanui-cache";
+
+function getCachedSettings(): Record<string, boolean> {
+    try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        return cached ? JSON.parse(cached) : {};
+    } catch {
+        return {};
+    }
+}
+
+function cacheSettings(settings: Record<string, boolean>) {
+    try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify(settings));
+    } catch {
+        // Ignore
+    }
+}
 
 function applyStyles() {
     if (typeof document === "undefined") return;
@@ -59,25 +76,43 @@ function applyStyles() {
     if (!style) {
         style = document.createElement("style");
         style.id = "vc-cleanui-styles";
-        document.head.appendChild(style);
+        document.head?.appendChild(style);
     }
+
+    if (!style) return;
 
     let css = "";
     try {
-        // Try several setting keys to find the right one
-        const pluginSettings = settings.store ||
-            (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI ||
-            (Vencord as any).Api?.Settings?.Settings?.plugins?.["Arayüz Temizleyici"];
+        // 1. Try Cache first (fastest)
+        const cached = getCachedSettings();
 
-        if (pluginSettings) {
-            for (const key in CSS_RULES) {
-                if (pluginSettings[key] === true) {
-                    css += CSS_RULES[key];
-                }
+        // 2. Try Vencord Store (Source of truth)
+        const vStore = settings.store;
+
+        // 3. Try Global API (Last resort)
+        const gStore = (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI;
+
+        for (const key in CSS_RULES) {
+            // Use Vencord store if available, otherwise fallback to cache
+            let val = false;
+            try {
+                if (vStore && vStore[key] !== undefined) val = vStore[key];
+                else if (gStore && gStore[key] !== undefined) val = gStore[key];
+                else val = cached[key] || false;
+            } catch {
+                val = cached[key] || false;
+            }
+
+            if (val === true) {
+                css += CSS_RULES[key];
             }
         }
     } catch (e) {
-        // Silent error
+        // If everything fails, try cache one last time
+        const cached = getCachedSettings();
+        for (const key in CSS_RULES) {
+            if (cached[key]) css += CSS_RULES[key];
+        }
     }
 
     if (style.textContent !== css) {
@@ -85,7 +120,14 @@ function applyStyles() {
     }
 }
 
-// Migrate settings from old IDs to new name
+function handleSettingChange(key: string, value: boolean) {
+    const cached = getCachedSettings();
+    cached[key] = value;
+    cacheSettings(cached);
+    applyStyles();
+}
+
+// Migrate settings
 if (typeof Vencord !== "undefined") {
     migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
 }
@@ -94,93 +136,80 @@ const settings = definePluginSettings({
     hideWishlist: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Mağazadaki 'İstek Listesi' sekmesini gizler.",
         name: "İstek Listesini Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideWishlist", v)
     },
     hideShop: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Sol menüdeki 'Mağaza' butonunu gizler.",
         name: "Mağaza Butonunu Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideShop", v)
     },
     hideGift: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Mesaj kutusundaki 'Hediye' butonunu gizler.",
         name: "Hediye Butonunu Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideGift", v)
     },
     hideInbox: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Sağ üstteki 'Gelen Kutusu' butonunu gizler.",
         name: "Gelen Kutusunu Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideInbox", v)
     },
     hideHelp: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Sağ üstteki 'Yardım' butonunu gizler.",
         name: "Yardım Butonunu Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideHelp", v)
     },
     hideGameCollection: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Profildeki 'Oyun Koleksiyonu' kısmını gizler.",
         name: "Oyun Koleksiyonunu Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideGameCollection", v)
     },
     hideMemberlistActivity: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Üye listesinin en üstündeki 'Etkinlik' kısmını gizler.",
         name: "Üye Listesi Etkinliklerini Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideMemberlistActivity", v)
     },
     hideAppLauncher: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Mesaj kutusundaki 'Uygulamalar' butonunu gizler.",
         name: "Uygulama Başlatıcıyı Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideAppLauncher", v)
     },
     hideQuests: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Sol menüdeki 'Görevler' butonunu gizler.",
         name: "Görevleri Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideQuests", v)
     },
     hideAvatarDecorations: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Tüm kullanıcıların avatar dekorasyonlarını gizler.",
         name: "Avatar Dekorasyonlarını Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideAvatarDecorations", v)
     },
     hideProfileEffects: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Tüm kullanıcıların profil efektlerini gizler.",
         name: "Profil Efektlerini Gizle",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("hideProfileEffects", v)
     },
     muteEveryone: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Tüm sunucularda @everyone ve @here etiketlerini susturur.",
         name: "@everyone & @here Sustur",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("muteEveryone", v)
     },
     muteRoles: {
         type: OptionType.BOOLEAN,
         default: false,
-        description: "Tüm sunucularda rol etiketlerini (@Rol) susturur.",
         name: "Rol Etiketlerini Sustur",
-        onChange: applyStyles
+        onChange: v => handleSettingChange("muteRoles", v)
     }
 });
 
@@ -191,7 +220,6 @@ export default definePlugin({
     settings,
 
     interval: null as any,
-    fastInterval: null as any,
 
     patches: [
         ...[
@@ -215,30 +243,40 @@ export default definePlugin({
     ],
 
     onStart() {
-        // Initial application
+        // Initial application - should use cache if settings aren't ready
         applyStyles();
 
-        // Fast retries for the first 5 seconds (every 200ms)
-        let count = 0;
-        this.fastInterval = setInterval(() => {
-            applyStyles();
-            count++;
-            if (count > 25) clearInterval(this.fastInterval);
-        }, 200);
+        // Settings sync: update cache with real settings once they are ready
+        setTimeout(() => {
+            try {
+                const { store } = settings;
+                const cached = getCachedSettings();
+                let changed = false;
+                for (const key in settings.def) {
+                    if (store[key] !== undefined && store[key] !== cached[key]) {
+                        cached[key] = store[key];
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    cacheSettings(cached);
+                    applyStyles();
+                }
+            } catch { }
+        }, 2000);
 
-        // Long-term maintenance (every 3 seconds)
+        // Keep-alive interval
         this.interval = setInterval(applyStyles, 3000);
 
-        // Watch for style tag deletion
+        // Style tag protection
         const observer = new MutationObserver(() => {
             if (!document.getElementById("vc-cleanui-styles")) applyStyles();
         });
-        observer.observe(document.head, { childList: true });
+        observer.observe(document.head || document.documentElement, { childList: true });
     },
 
     onStop() {
         if (this.interval) clearInterval(this.interval);
-        if (this.fastInterval) clearInterval(this.fastInterval);
         document.getElementById("vc-cleanui-styles")?.remove();
     }
 });
