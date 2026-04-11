@@ -4,20 +4,79 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { definePluginSettings } from "@api/Settings";
+import { definePluginSettings, migratePluginSettings } from "@api/Settings";
 import definePlugin, { OptionType } from "@utils/types";
 
-import managedStyle from "./style.css?managed";
+// Dynamic CSS mapping
+const CSS_RULES: Record<string, string> = {
+    hideWishlist: `
+        [aria-label="İstek Listesi"], [aria-label="Wishlist"], [class*="overlay_"][class*="container_"] { display: none !important; }
+    `,
+    hideShop: `
+        a[href="/shop"], [aria-label="Mağaza"], [aria-label="Shop"] { display: none !important; }
+    `,
+    hideGift: `
+        [aria-label*="hediye" i], [aria-label*="gift" i], [class*="button_"]:has([aria-label*="hediye" i]), [class*="button_"]:has([aria-label*="gift" i]) { display: none !important; }
+    `,
+    hideInbox: `
+        [aria-label="Gelen Kutusu"], [aria-label="Inbox"] { display: none !important; }
+    `,
+    hideHelp: `
+        [aria-label="Yardım"], [aria-label="Help"], a[href*="support.discord.com"] { display: none !important; }
+    `,
+    hideGameCollection: `
+        [class*="innerContainer_"][class*="card_"]:has([class*="displayCountText_"]), [class*="overlay_"][class*="innerContainer_"][class*="card_"] { display: none !important; }
+    `,
+    hideMemberlistActivity: `
+        [class*="membersGroup_"]:has([class*="toggleExpandIcon_"]), [class*="membersGroup_"]:has([class*="header_"]), [class*="membersWrap_"] [class*="container_"][class*="openOnHover_"]:has([class*="infoSection_"]) { display: none !important; }
+    `,
+    hideAppLauncher: `
+        [aria-label="Uygulamalar"], [aria-label="App Launcher"] { display: none !important; }
+    `,
+    hideQuests: `
+        a[href="/quest-home"] { display: none !important; }
+    `,
+    hideAvatarDecorations: `
+        [class*="avatarDecoration"], svg:has(foreignObject + [class*="avatarDecoration"]), [class*="avatar_"] > svg > foreignObject + [class*="avatarDecoration"] { display: none !important; }
+    `,
+    hideProfileEffects: `
+        [class*="profileEffects"] { display: none !important; }
+    `,
+    muteEveryone: `
+        [class*="mention"][class*="everyone"], [class*="mention"][class*="here"] { background-color: transparent !important; color: var(--text-normal) !important; }
+    `,
+    muteRoles: `
+        [class*="mention"]:not([class*="everyone"], [class*="here"]) { background-color: transparent !important; }
+    `
+};
 
-function updateAttribute(key: string, value: any) {
+let styleElement: HTMLStyleElement | null = null;
+
+function applyStyles() {
     if (typeof document === "undefined") return;
-    const root = document.documentElement;
-    const attr = `data-cleanui-${key}`;
-    const val = String(value);
-    if (root.getAttribute(attr) !== val) {
-        root.setAttribute(attr, val);
+
+    if (!styleElement) {
+        styleElement = document.createElement("style");
+        styleElement.id = "vc-cleanui-styles";
+        document.head.appendChild(styleElement);
     }
+
+    let css = "";
+    try {
+        const { store } = settings;
+        for (const key in CSS_RULES) {
+            if (store[key]) {
+                css += CSS_RULES[key];
+            }
+        }
+    } catch (e) {
+        // Settings not ready
+    }
+    styleElement.textContent = css;
 }
+
+// Migrate from old name if exists
+migratePluginSettings("Arayüz Temizleyici", "noWishlist");
 
 const settings = definePluginSettings({
     hideWishlist: {
@@ -25,91 +84,91 @@ const settings = definePluginSettings({
         default: false,
         description: "Mağazadaki 'İstek Listesi' sekmesini gizler.",
         name: "İstek Listesini Gizle",
-        onChange: v => updateAttribute("hideWishlist", v)
+        onChange: applyStyles
     },
     hideShop: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Sol menüdeki 'Mağaza' butonunu gizler.",
         name: "Mağaza Butonunu Gizle",
-        onChange: v => updateAttribute("hideShop", v)
+        onChange: applyStyles
     },
     hideGift: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Mesaj kutusundaki 'Hediye' butonunu gizler.",
         name: "Hediye Butonunu Gizle",
-        onChange: v => updateAttribute("hideGift", v)
+        onChange: applyStyles
     },
     hideInbox: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Sağ üstteki 'Gelen Kutusu' butonunu gizler.",
         name: "Gelen Kutusunu Gizle",
-        onChange: v => updateAttribute("hideInbox", v)
+        onChange: applyStyles
     },
     hideHelp: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Sağ üstteki 'Yardım' butonunu gizler.",
         name: "Yardım Butonunu Gizle",
-        onChange: v => updateAttribute("hideHelp", v)
+        onChange: applyStyles
     },
     hideGameCollection: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Profildeki 'Oyun Koleksiyonu' kısmını gizler.",
         name: "Oyun Koleksiyonunu Gizle",
-        onChange: v => updateAttribute("hideGameCollection", v)
+        onChange: applyStyles
     },
     hideMemberlistActivity: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Üye listesinin en üstündeki 'Etkinlik' kısmını gizler.",
         name: "Üye Listesi Etkinliklerini Gizle",
-        onChange: v => updateAttribute("hideMemberlistActivity", v)
+        onChange: applyStyles
     },
     hideAppLauncher: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Mesaj kutusundaki 'Uygulamalar' butonunu gizler.",
         name: "Uygulama Başlatıcıyı Gizle",
-        onChange: v => updateAttribute("hideAppLauncher", v)
+        onChange: applyStyles
     },
     hideQuests: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Sol menüdeki 'Görevler' butonunu gizler.",
         name: "Görevleri Gizle",
-        onChange: v => updateAttribute("hideQuests", v)
+        onChange: applyStyles
     },
     hideAvatarDecorations: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Tüm kullanıcıların avatar dekorasyonlarını gizler.",
         name: "Avatar Dekorasyonlarını Gizle",
-        onChange: v => updateAttribute("hideAvatarDecorations", v)
-    },
-    muteEveryone: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Tüm sunucularda @everyone ve @here etiketlerini susturur.",
-        name: "@everyone & @here Sustur",
-        onChange: v => updateAttribute("muteEveryone", v)
-    },
-    muteRoles: {
-        type: OptionType.BOOLEAN,
-        default: false,
-        description: "Tüm sunucularda rol etiketlerini (@Rol) susturur.",
-        name: "Rol Etiketlerini Sustur",
-        onChange: v => updateAttribute("muteRoles", v)
+        onChange: applyStyles
     },
     hideProfileEffects: {
         type: OptionType.BOOLEAN,
         default: false,
         description: "Tüm kullanıcıların profil efektlerini gizler.",
         name: "Profil Efektlerini Gizle",
-        onChange: v => updateAttribute("hideProfileEffects", v)
+        onChange: applyStyles
+    },
+    muteEveryone: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Tüm sunucularda @everyone ve @here etiketlerini susturur.",
+        name: "@everyone & @here Sustur",
+        onChange: applyStyles
+    },
+    muteRoles: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Tüm sunucularda rol etiketlerini (@Rol) susturur.",
+        name: "Rol Etiketlerini Sustur",
+        onChange: applyStyles
     }
 });
 
@@ -117,10 +176,10 @@ export default definePlugin({
     name: "Arayüz Temizleyici",
     description: "Discord arayüzündeki gereksiz öğeleri (İstek Listesi, Mağaza, Nitro vb.) gizlemenizi sağlar.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
-    managedStyle,
     settings,
 
     observer: null as MutationObserver | null,
+    interval: null as any,
 
     patches: [
         ...[
@@ -144,71 +203,25 @@ export default definePlugin({
     ],
 
     onStart() {
-        // Apply immediately
-        this.applyAllAttributes();
+        applyStyles();
 
-        // Apply again after a short delay to ensure DOM is ready and settings are synced
-        setTimeout(() => this.applyAllAttributes(), 500);
-        setTimeout(() => this.applyAllAttributes(), 2000);
-        setTimeout(() => this.applyAllAttributes(), 5000);
-
-        // Persistent observer to ensure attributes stay there
-        if (typeof document !== "undefined") {
-            this.observer = new MutationObserver(mutations => {
-                // If any attributes were changed or nodes added, re-verify our attributes
-                for (const mutation of mutations) {
-                    if (mutation.type === "attributes" || mutation.type === "childList") {
-                        this.applyAllAttributes();
-                        break;
-                    }
-                }
-            });
-
-            this.observer.observe(document.documentElement, {
-                attributes: true,
-                childList: true,
-                subtree: false // Only need to watch <html> level
-            });
-
-            // Also watch <body> just in case Discord resets it
-            const watchBody = () => {
-                if (document.body) {
-                    this.observer?.observe(document.body, { attributes: true });
-                } else {
-                    setTimeout(watchBody, 100);
-                }
-            };
-            watchBody();
-        }
-    },
-
-    applyAllAttributes() {
-        try {
-            const { store } = settings;
-            if (!store) return;
-
-            for (const key in settings.def) {
-                const value = store[key];
-                if (value !== undefined) {
-                    updateAttribute(key, value);
-                }
+        // Ensure styles stay injected even if DOM is modified
+        const observer = new MutationObserver(() => {
+            if (!document.getElementById("vc-cleanui-styles")) {
+                applyStyles();
             }
-        } catch (e) {
-            // Silently fail if settings aren't ready yet
-        }
+        });
+        observer.observe(document.head, { childList: true });
+        this.observer = observer;
+
+        // Settings change fallback
+        this.interval = setInterval(applyStyles, 2000);
     },
 
     onStop() {
         this.observer?.disconnect();
-        if (typeof document === "undefined") return;
-        const root = document.documentElement;
-        for (const key in settings.def) {
-            root.removeAttribute(`data-cleanui-${key}`);
-        }
-        if (document.body) {
-            for (const key in settings.def) {
-                document.body.removeAttribute(`data-cleanui-${key}`);
-            }
-        }
+        if (this.interval) clearInterval(this.interval);
+        styleElement?.remove();
+        styleElement = null;
     }
 });
