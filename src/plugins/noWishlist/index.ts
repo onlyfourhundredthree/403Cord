@@ -50,33 +50,45 @@ const CSS_RULES: Record<string, string> = {
     `
 };
 
-let styleElement: HTMLStyleElement | null = null;
+const styleElement: HTMLStyleElement | null = null;
 
 function applyStyles() {
     if (typeof document === "undefined") return;
 
-    if (!styleElement) {
-        styleElement = document.createElement("style");
-        styleElement.id = "vc-cleanui-styles";
-        document.head.appendChild(styleElement);
+    let style = document.getElementById("vc-cleanui-styles") as HTMLStyleElement;
+    if (!style) {
+        style = document.createElement("style");
+        style.id = "vc-cleanui-styles";
+        document.head.appendChild(style);
     }
 
     let css = "";
     try {
-        const { store } = settings;
-        for (const key in CSS_RULES) {
-            if (store[key]) {
-                css += CSS_RULES[key];
+        // Try several setting keys to find the right one
+        const pluginSettings = settings.store ||
+            (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI ||
+            (Vencord as any).Api?.Settings?.Settings?.plugins?.["Arayüz Temizleyici"];
+
+        if (pluginSettings) {
+            for (const key in CSS_RULES) {
+                if (pluginSettings[key] === true) {
+                    css += CSS_RULES[key];
+                }
             }
         }
     } catch (e) {
-        // Settings not ready
+        // Silent error
     }
-    styleElement.textContent = css;
+
+    if (style.textContent !== css) {
+        style.textContent = css;
+    }
 }
 
-// Migrate from old name if exists
-migratePluginSettings("Arayüz Temizleyici", "noWishlist");
+// Migrate settings from old IDs to new name
+if (typeof Vencord !== "undefined") {
+    migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
+}
 
 const settings = definePluginSettings({
     hideWishlist: {
@@ -173,13 +185,13 @@ const settings = definePluginSettings({
 });
 
 export default definePlugin({
-    name: "Arayüz Temizleyici",
+    name: "CleanUI",
     description: "Discord arayüzündeki gereksiz öğeleri (İstek Listesi, Mağaza, Nitro vb.) gizlemenizi sağlar.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
 
-    observer: null as MutationObserver | null,
     interval: null as any,
+    fastInterval: null as any,
 
     patches: [
         ...[
@@ -203,25 +215,30 @@ export default definePlugin({
     ],
 
     onStart() {
+        // Initial application
         applyStyles();
 
-        // Ensure styles stay injected even if DOM is modified
+        // Fast retries for the first 5 seconds (every 200ms)
+        let count = 0;
+        this.fastInterval = setInterval(() => {
+            applyStyles();
+            count++;
+            if (count > 25) clearInterval(this.fastInterval);
+        }, 200);
+
+        // Long-term maintenance (every 3 seconds)
+        this.interval = setInterval(applyStyles, 3000);
+
+        // Watch for style tag deletion
         const observer = new MutationObserver(() => {
-            if (!document.getElementById("vc-cleanui-styles")) {
-                applyStyles();
-            }
+            if (!document.getElementById("vc-cleanui-styles")) applyStyles();
         });
         observer.observe(document.head, { childList: true });
-        this.observer = observer;
-
-        // Settings change fallback
-        this.interval = setInterval(applyStyles, 2000);
     },
 
     onStop() {
-        this.observer?.disconnect();
         if (this.interval) clearInterval(this.interval);
-        styleElement?.remove();
-        styleElement = null;
+        if (this.fastInterval) clearInterval(this.fastInterval);
+        document.getElementById("vc-cleanui-styles")?.remove();
     }
 });
