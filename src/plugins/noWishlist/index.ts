@@ -114,7 +114,13 @@ export default definePlugin({
     ],
 
     onStart() {
-        migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
+        console.log("%c[CleanUI] PLUGIN STARTING...", "color: #ff00ff; font-weight: bold; font-size: 20px;");
+
+        try {
+            migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
+        } catch (e) {
+            console.error("[CleanUI] Migration Error:", e);
+        }
 
         // Expose for console debugging
         if (typeof window !== "undefined") {
@@ -122,7 +128,8 @@ export default definePlugin({
                 apply: applyStyles,
                 settings: settings,
                 cache: getEmergencyCache,
-                rules: CSS_RULES
+                rules: CSS_RULES,
+                ping: () => console.log("CLEANUI PONG")
             };
         }
 
