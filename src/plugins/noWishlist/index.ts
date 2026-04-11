@@ -11,7 +11,11 @@ import managedStyle from "./style.css?managed";
 
 function updateAttribute(key: string, value: any) {
     if (typeof document === "undefined" || !document.body) return;
-    document.body.setAttribute(`data-cleanui-${key}`, String(value));
+    const attr = `data-cleanui-${key}`;
+    const val = String(value);
+    if (document.body.getAttribute(attr) !== val) {
+        document.body.setAttribute(attr, val);
+    }
 }
 
 const settings = definePluginSettings({
@@ -70,6 +74,34 @@ const settings = definePluginSettings({
         description: "Mesaj kutusundaki 'Uygulamalar' butonunu gizler.",
         name: "Uygulama Başlatıcıyı Gizle",
         onChange: v => updateAttribute("hideAppLauncher", v)
+    },
+    hideQuests: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Sol menüdeki 'Görevler' butonunu gizler.",
+        name: "Görevleri Gizle",
+        onChange: v => updateAttribute("hideQuests", v)
+    },
+    hideAvatarDecorations: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Tüm kullanıcıların avatar dekorasyonlarını gizler.",
+        name: "Avatar Dekorasyonlarını Gizle",
+        onChange: v => updateAttribute("hideAvatarDecorations", v)
+    },
+    muteEveryone: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Tüm sunucularda @everyone ve @here etiketlerini susturur.",
+        name: "@everyone & @here Sustur",
+        onChange: v => updateAttribute("muteEveryone", v)
+    },
+    muteRoles: {
+        type: OptionType.BOOLEAN,
+        default: false,
+        description: "Tüm sunucularda rol etiketlerini (@Rol) susturur.",
+        name: "Rol Etiketlerini Sustur",
+        onChange: v => updateAttribute("muteRoles", v)
     }
 });
 
@@ -80,13 +112,47 @@ export default definePlugin({
     managedStyle,
     settings,
 
+    observer: null as MutationObserver | null,
+
+    patches: [
+        ...[
+            '"MessageStore"',
+            '"ReadStateStore"'
+        ].map(find => ({
+            find,
+            replacement: [
+                {
+                    match: /(?<=function (\i)\((\i)\){)(?=.*MESSAGE_CREATE:\1)/,
+                    replace: (_, _funcName, props) => `
+                        const msg = ${props}.message;
+                        if (msg) {
+                            if ($self.settings.store.muteEveryone) msg.mention_everyone = false;
+                            if ($self.settings.store.muteRoles) msg.mention_roles = [];
+                        }
+                    `
+                }
+            ]
+        }))
+    ],
+
     onStart() {
+        this.applyAllAttributes();
+
+        // Ensure attributes persist even if Discord or other plugins modify the body
+        if (typeof document !== "undefined") {
+            this.observer = new MutationObserver(() => this.applyAllAttributes());
+            this.observer.observe(document.body, { attributes: true });
+        }
+    },
+
+    applyAllAttributes() {
         for (const key in settings.def) {
             updateAttribute(key, settings.store[key]);
         }
     },
 
     onStop() {
+        this.observer?.disconnect();
         if (typeof document === "undefined" || !document.body) return;
         for (const key in settings.def) {
             document.body.removeAttribute(`data-cleanui-${key}`);

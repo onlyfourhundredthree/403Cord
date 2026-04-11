@@ -53,3 +53,28 @@ body[data-cleanui-hideAppLauncher="true"] [aria-label="Uygulamalar"],
 body[data-cleanui-hideAppLauncher="true"] [aria-label="App Launcher"] {
     display: none !important;
 }
+
+/* Görevler (Quests) */
+body[data-cleanui-hideQuests="true"] a[href="/quest-home"] {
+    display: none !important;
+}
+
+/* Avatar Dekorasyonları (Avatar Decorations) */
+body[data-cleanui-hideAvatarDecorations="true"] [class*="avatarDecoration"],
+body[data-cleanui-hideAvatarDecorations="true"] svg:has(foreignObject + [class*="avatarDecoration"]),
+body[data-cleanui-hideAvatarDecorations="true"] [class*="avatar_"] > svg > foreignObject + [class*="avatarDecoration"] {
+    display: none !important;
+}
+
+/* Herkese ve Buradakilere Mute (@everyone & @here) */
+body[data-cleanui-muteEveryone="true"] [class*="mention"][class*="everyone"],
+body[data-cleanui-muteEveryone="true"] [class*="mention"][class*="here"] {
+    background-color: transparent !important;
+    color: var(--text-normal) !important;
+}
+
+/* Rol Etiketlerini Mute (Role Mentions) */
+body[data-cleanui-muteRoles="true"] [class*="mention"]:not([class*="everyone"], [class*="here"]) {
+    /* Note: This is a bit broad but helps hide the yellow highlight for roles */
+    background-color: transparent !important;
+}
