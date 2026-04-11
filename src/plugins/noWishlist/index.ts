@@ -23,25 +23,34 @@ function setCache(c: any) {
     } catch { }
 }
 
+let isStartingUp = true;
+
 function updateClasses() {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
     const cache = getCache();
 
-    // We also try to read from Vencord store if it's ready
     let store: any = null;
     try {
         store = settings.store;
     } catch { }
 
     for (const key in settings.def) {
-        // Source of truth: Vencord Store (if exists and contains the key), otherwise Cache
+        const className = `vc-clean-${key}`;
+
+        // Cache is our primary source during startup
         let val = cache[key] || false;
-        if (store && store[key] !== undefined) {
+
+        // After startup, we sync with the store
+        if (!isStartingUp && store && store[key] !== undefined) {
             val = store[key];
+            // Update cache if they differ
+            if (val !== cache[key]) {
+                cache[key] = val;
+                setCache(cache);
+            }
         }
 
-        const className = `vc-clean-${key}`;
         if (val) {
             if (!root.classList.contains(className)) root.classList.add(className);
         } else {
@@ -229,20 +238,25 @@ export default definePlugin({
     onStart() {
         migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
 
-        // Instant application
+        isStartingUp = true;
         updateClasses();
 
-        // Nuclear startup: re-apply every 500ms for 10 seconds
+        // Nuclear startup: re-apply frequently to fight Discord's initial renders
         const start = Date.now();
-        const interval = setInterval(() => {
+        const startInterval = setInterval(() => {
             updateClasses();
-            if (Date.now() - start > 10000) clearInterval(interval);
-        }, 500);
+            if (Date.now() - start > 20000) {
+                clearInterval(startInterval);
+                isStartingUp = false;
+                updateClasses(); // Final sync with store
+            }
+        }, 1000);
 
         this.maintenanceInterval = setInterval(updateClasses, 5000);
     },
 
     onStop() {
+        isStartingUp = true;
         if (this.maintenanceInterval) clearInterval(this.maintenanceInterval);
         if (typeof document !== "undefined") {
             const root = document.documentElement;
