@@ -76,26 +76,21 @@ function applyStyles() {
     if (!style) {
         style = document.createElement("style");
         style.id = "vc-cleanui-styles";
-        document.head?.appendChild(style);
+        (document.head || document.documentElement).appendChild(style);
     }
 
     if (!style) return;
 
     let css = "";
     try {
-        // 1. Try Cache first (fastest)
         const cached = getCachedSettings();
-
-        // 2. Try Vencord Store (Source of truth)
         const vStore = settings.store;
-
-        // 3. Try Global API (Last resort)
         const gStore = (Vencord as any).Api?.Settings?.Settings?.plugins?.CleanUI;
 
         for (const key in CSS_RULES) {
-            // Use Vencord store if available, otherwise fallback to cache
             let val = false;
             try {
+                // Priority: Vencord Store > Global API > Local Cache
                 if (vStore && vStore[key] !== undefined) val = vStore[key];
                 else if (gStore && gStore[key] !== undefined) val = gStore[key];
                 else val = cached[key] || false;
@@ -103,12 +98,9 @@ function applyStyles() {
                 val = cached[key] || false;
             }
 
-            if (val === true) {
-                css += CSS_RULES[key];
-            }
+            if (val === true) css += CSS_RULES[key];
         }
     } catch (e) {
-        // If everything fails, try cache one last time
         const cached = getCachedSettings();
         for (const key in CSS_RULES) {
             if (cached[key]) css += CSS_RULES[key];
@@ -136,79 +128,79 @@ const settings = definePluginSettings({
     hideWishlist: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "İstek Listesini Gizle",
+        description: "İstek Listesini Gizle",
         onChange: v => handleSettingChange("hideWishlist", v)
     },
     hideShop: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Mağaza Butonunu Gizle",
+        description: "Mağaza Butonunu Gizle",
         onChange: v => handleSettingChange("hideShop", v)
     },
     hideGift: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Hediye Butonunu Gizle",
+        description: "Hediye Butonunu Gizle",
         onChange: v => handleSettingChange("hideGift", v)
     },
     hideInbox: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Gelen Kutusunu Gizle",
+        description: "Gelen Kutusunu Gizle",
         onChange: v => handleSettingChange("hideInbox", v)
     },
     hideHelp: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Yardım Butonunu Gizle",
+        description: "Yardım Butonunu Gizle",
         onChange: v => handleSettingChange("hideHelp", v)
     },
     hideGameCollection: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Oyun Koleksiyonunu Gizle",
+        description: "Oyun Koleksiyonunu Gizle",
         onChange: v => handleSettingChange("hideGameCollection", v)
     },
     hideMemberlistActivity: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Üye Listesi Etkinliklerini Gizle",
+        description: "Üye Listesi Etkinliklerini Gizle",
         onChange: v => handleSettingChange("hideMemberlistActivity", v)
     },
     hideAppLauncher: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Uygulama Başlatıcıyı Gizle",
+        description: "Uygulama Başlatıcıyı Gizle",
         onChange: v => handleSettingChange("hideAppLauncher", v)
     },
     hideQuests: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Görevleri Gizle",
+        description: "Görevleri Gizle",
         onChange: v => handleSettingChange("hideQuests", v)
     },
     hideAvatarDecorations: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Avatar Dekorasyonlarını Gizle",
+        description: "Avatar Dekorasyonlarını Gizle",
         onChange: v => handleSettingChange("hideAvatarDecorations", v)
     },
     hideProfileEffects: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Profil Efektlerini Gizle",
+        description: "Profil Efektlerini Gizle",
         onChange: v => handleSettingChange("hideProfileEffects", v)
     },
     muteEveryone: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "@everyone & @here Sustur",
+        description: "@everyone & @here Sustur",
         onChange: v => handleSettingChange("muteEveryone", v)
     },
     muteRoles: {
         type: OptionType.BOOLEAN,
         default: false,
-        name: "Rol Etiketlerini Sustur",
+        description: "Rol Etiketlerini Sustur",
         onChange: v => handleSettingChange("muteRoles", v)
     }
 });
