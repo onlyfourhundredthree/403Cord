@@ -51,36 +51,32 @@ export default definePlugin({
             find: "renderSidebar(){",
             replacement: [
                 {
-                    match: /return\(0,\i\.jsxs?\)\("div",{className:\i\.\i\.sidebar,children:\[(.+?)\]}\)/,
-                    replace: (m, children) => `Vencord.Plugins.plugins.PortableDiscord.wrapPortable("sidebar", "Kanallar", (0, Vencord.Webpack.Common.React.jsxs)("div", {className: Vencord.Webpack.findCssClasses(["sidebar"])[0], children: [${children}]}))`
+                    match: /className:\i\.\i\.sidebar,children:\[(.+?)\]/,
+                    replace: (m, children) => `className:Vencord.Webpack.findCssClasses(["sidebar"])[0], children:[...($self.isPoppedOut('sidebar') ? [] : [${children}]), $self.renderPopoutButton('sidebar')]`
                 },
                 {
-                    match: /(?<=return\(0,\i\.jsxs?\)\("div",{className:\i\.\i\.sidebar,)/,
-                    replace: "children:[$self.renderPopoutButton('sidebar'),"
+                    match: /return\(0,\i\.jsxs?\)\("div",\{className:\i\.\i\.sidebar,/,
+                    replace: m => `if($self.isPoppedOut('sidebar')) return $self.wrapPortable('sidebar', 'Kanallar', (0, Vencord.Webpack.Common.React.jsx)("div", { className: Vencord.Webpack.findCssClasses(["sidebar"])[0], children: [${m.split("children:[")[1]?.split("]")[0] || "null"}] })); ${m}`
                 }
             ]
         },
         {
-            // Member List Popout
-            find: "{isSidebarVisible:",
+            // Members List
+            find: "aria-multiselectable",
             replacement: [
                 {
-                    match: /children:\[(\i\.useMemo[^}]+"aria-multiselectable")(?<=className:(\i),.+?)/,
-                    replace: (m, memo, className) => `children:[${className}?.includes('members') ? $self.wrapPortable('members', 'Üyeler', ${memo}) : null, $self.renderPopoutButton('members'), ${memo}]`
+                    match: /className:\i,children:\[(\i\.useMemo.+?)\]/,
+                    replace: (m, className, memo) => `className:${className}, children:[$self.renderPopoutButton('members'), $self.isPoppedOut('members') ? $self.wrapPortable('members', 'Üyeler', ${memo}) : ${memo}]`
                 }
             ]
         },
         {
-            // Voice / Panels Popout
+            // Panels
             find: "renderPanels(){",
             replacement: [
                 {
-                    match: /return\(0,\i\.jsx\)\(\i\.\i,{className:\i\.\i\.panels,children:\[(.+?)\]}\)/,
-                    replace: (m, children) => `Vencord.Plugins.plugins.PortableDiscord.wrapPortable("panels", "Ses ve Paneller", (0, Vencord.Webpack.Common.React.jsx)("div", {className: Vencord.Webpack.findCssClasses(["panels"])[0], children: [${children}]}))`
-                },
-                {
-                    match: /(?<=return\(0,\i\.jsx\)\(\i\.\i,{className:\i\.\i\.panels,)/,
-                    replace: "children:[$self.renderPopoutButton('panels'),"
+                    match: /className:\i\.\i\.panels,children:\[(.+?)\]/,
+                    replace: (m, children) => `className:Vencord.Webpack.findCssClasses(["panels"])[0], children:[...($self.isPoppedOut('panels') ? [] : [${children}]), $self.renderPopoutButton('panels')]`
                 }
             ]
         }
@@ -122,7 +118,14 @@ export default definePlugin({
                     e.stopPropagation();
                     this.togglePopout(id);
                 }}
-                style={{ position: "absolute", top: 5, right: 35, zIndex: 100 }}
+                style={{
+                    position: "absolute",
+                    top: "10px",
+                    right: id === "sidebar" ? "12px" : "48px",
+                    zIndex: 2000,
+                    width: "26px",
+                    height: "26px"
+                }}
             >
                 <PopoutIcon width={16} height={16} />
             </div>

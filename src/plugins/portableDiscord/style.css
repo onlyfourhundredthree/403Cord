@@ -56,13 +56,21 @@
 
 /* Button to trigger popout */
 .vc-portable-popout-btn {
-    opacity: 0.3;
-    transition: opacity 0.2s;
+    opacity: 0.8;
+    transition: opacity 0.2s, transform 0.2s;
     cursor: pointer;
+    background: rgb(0 0 0 / 40%);
+    border-radius: 4px;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .vc-portable-popout-btn:hover {
     opacity: 1;
+    transform: scale(1.1);
+    background: rgb(0 0 0 / 60%);
 }
 
 /* Specific overrides for Discord components when inside portable container */
