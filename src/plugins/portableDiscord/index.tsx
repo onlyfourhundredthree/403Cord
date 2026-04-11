@@ -51,12 +51,12 @@ export default definePlugin({
             find: "renderSidebar(){",
             replacement: [
                 {
-                    match: /className:\i\.\i\.sidebar,children:\[(.+?)\]/,
-                    replace: (m, children) => `className:Vencord.Webpack.findCssClasses(["sidebar"])[0], children:[...($self.isPoppedOut('sidebar') ? [] : [${children}]), $self.renderPopoutButton('sidebar')]`
+                    match: /className:\i(?:\.\i)+,children:\[/,
+                    replace: "$&$self.renderPopoutButton('sidebar'),"
                 },
                 {
-                    match: /return\(0,\i\.jsxs?\)\("div",\{className:\i\.\i\.sidebar,/,
-                    replace: m => `if($self.isPoppedOut('sidebar')) return $self.wrapPortable('sidebar', 'Kanallar', (0, Vencord.Webpack.Common.React.jsx)("div", { className: Vencord.Webpack.findCssClasses(["sidebar"])[0], children: [${m.split("children:[")[1]?.split("]")[0] || "null"}] })); ${m}`
+                    match: /return\s*(\(0,\i\.jsxs?\)\("div",\s*\{.+?\}\s*\))/,
+                    replace: "return $self.wrapPortable('sidebar', 'Kanallar', $1)"
                 }
             ]
         },
@@ -65,8 +65,12 @@ export default definePlugin({
             find: "aria-multiselectable",
             replacement: [
                 {
-                    match: /className:\i,children:\[(\i\.useMemo.+?)\]/,
-                    replace: (m, className, memo) => `className:${className}, children:[$self.renderPopoutButton('members'), $self.isPoppedOut('members') ? $self.wrapPortable('members', 'Üyeler', ${memo}) : ${memo}]`
+                    match: /className:\i,children:\[/,
+                    replace: "$&$self.renderPopoutButton('members'),"
+                },
+                {
+                    match: /return\s*(\i\.useMemo.+?aria-multiselectable.+?\}\s*\))/,
+                    replace: "return $self.wrapPortable('members', 'Üyeler', $1)"
                 }
             ]
         },
@@ -75,8 +79,12 @@ export default definePlugin({
             find: "renderPanels(){",
             replacement: [
                 {
-                    match: /className:\i\.\i\.panels,children:\[(.+?)\]/,
-                    replace: (m, children) => `className:Vencord.Webpack.findCssClasses(["panels"])[0], children:[...($self.isPoppedOut('panels') ? [] : [${children}]), $self.renderPopoutButton('panels')]`
+                    match: /className:\i(?:\.\i)+,children:\[/,
+                    replace: "$&$self.renderPopoutButton('panels'),"
+                },
+                {
+                    match: /return\s*(\(0,\i\.jsx\)\(\i\.\i,\s*\{.+?\}\s*\))/,
+                    replace: "return $self.wrapPortable('panels', 'Ses ve Paneller', $1)"
                 }
             ]
         }
