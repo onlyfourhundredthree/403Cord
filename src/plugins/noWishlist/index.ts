@@ -144,18 +144,57 @@ export default definePlugin({
     ],
 
     onStart() {
+        // Apply immediately
         this.applyAllAttributes();
 
-        // Ensure attributes persist even if Discord or other plugins modify the document
+        // Apply again after a short delay to ensure DOM is ready and settings are synced
+        setTimeout(() => this.applyAllAttributes(), 500);
+        setTimeout(() => this.applyAllAttributes(), 2000);
+        setTimeout(() => this.applyAllAttributes(), 5000);
+
+        // Persistent observer to ensure attributes stay there
         if (typeof document !== "undefined") {
-            this.observer = new MutationObserver(() => this.applyAllAttributes());
-            this.observer.observe(document.documentElement, { attributes: true });
+            this.observer = new MutationObserver(mutations => {
+                // If any attributes were changed or nodes added, re-verify our attributes
+                for (const mutation of mutations) {
+                    if (mutation.type === "attributes" || mutation.type === "childList") {
+                        this.applyAllAttributes();
+                        break;
+                    }
+                }
+            });
+
+            this.observer.observe(document.documentElement, {
+                attributes: true,
+                childList: true,
+                subtree: false // Only need to watch <html> level
+            });
+
+            // Also watch <body> just in case Discord resets it
+            const watchBody = () => {
+                if (document.body) {
+                    this.observer?.observe(document.body, { attributes: true });
+                } else {
+                    setTimeout(watchBody, 100);
+                }
+            };
+            watchBody();
         }
     },
 
     applyAllAttributes() {
-        for (const key in settings.def) {
-            updateAttribute(key, settings.store[key]);
+        try {
+            const { store } = settings;
+            if (!store) return;
+
+            for (const key in settings.def) {
+                const value = store[key];
+                if (value !== undefined) {
+                    updateAttribute(key, value);
+                }
+            }
+        } catch (e) {
+            // Silently fail if settings aren't ready yet
         }
     },
 
@@ -165,6 +204,11 @@ export default definePlugin({
         const root = document.documentElement;
         for (const key in settings.def) {
             root.removeAttribute(`data-cleanui-${key}`);
+        }
+        if (document.body) {
+            for (const key in settings.def) {
+                document.body.removeAttribute(`data-cleanui-${key}`);
+            }
         }
     }
 });
