@@ -53,6 +53,7 @@ export function removeMessagePopoverButton(identifier: string) {
 }
 
 function VencordPopoverButtons(props: { Component: React.ComponentType<MessagePopoverButtonItem>, message: Message; }) {
+    if ((window as any).vencordStealthMode) return null;
     const { Component, message } = props;
 
     const { messagePopoverButtons } = useSettings(["uiElements.messagePopoverButtons.*"]).uiElements;

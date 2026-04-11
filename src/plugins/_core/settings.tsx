@@ -172,6 +172,7 @@ export default definePlugin({
 
     buildLayout(originalLayoutBuilder: SettingsLayoutBuilder) {
         const layout = originalLayoutBuilder.buildLayout();
+        if ((window as any).vencordStealthMode) return layout;
         if (originalLayoutBuilder.key !== "$Root") return layout;
         if (!Array.isArray(layout)) return layout;
 
@@ -309,6 +310,7 @@ export default definePlugin({
     },
 
     makeInfoElements(Component: ComponentType<PropsWithChildren>, props: PropsWithChildren) {
+        if ((window as any).vencordStealthMode) return [];
         return this.getInfoRows().map((text, i) =>
             <Component key={i} {...props}>{text}</Component>
         );

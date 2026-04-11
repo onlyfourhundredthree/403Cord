@@ -114,8 +114,6 @@ export default definePlugin({
     ],
 
     start() {
-        console.log("%c[CleanUI] PLUGIN STARTED!", "color: #ff00ff; font-weight: bold; font-size: 20px;");
-
         try {
             migratePluginSettings("CleanUI", "Arayüz Temizleyici", "noWishlist", "NoWishlist");
         } catch (e) {
@@ -143,7 +141,6 @@ export default definePlugin({
             }
         }, 1000);
 
-        this.interval = setInterval(applyStyles, 2000);
 
         const observer = new MutationObserver(() => {
             if (!document.getElementById("vc-cleanui-styles")) applyStyles();
@@ -152,8 +149,6 @@ export default definePlugin({
     },
 
     stop() {
-        console.log("%c[CleanUI] PLUGIN STOPPED!", "color: #ff0000; font-weight: bold; font-size: 20px;");
-        if (this.interval) clearInterval(this.interval);
         document.getElementById("vc-cleanui-styles")?.remove();
     }
 });

@@ -34,6 +34,7 @@ export function _modifyAccessories(
     elements: JSX.Element[],
     props: Record<string, any>
 ) {
+    if ((window as any).vencordStealthMode) return elements;
     for (const [key, accessory] of accessories.entries()) {
         const res = (
             <ErrorBoundary noop message={`Failed to render ${key} Message Accessory`} key={key}>
