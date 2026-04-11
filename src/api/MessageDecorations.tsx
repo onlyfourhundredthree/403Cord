@@ -46,8 +46,7 @@ export function removeMessageDecoration(identifier: string) {
     decorationsFactories.delete(identifier);
 }
 
-export function __addDecorationsToMessage(props: MessageDecorationProps): JSX.Element | null {
-    if ((window as any).vencordStealthMode) return null;
+export function __addDecorationsToMessage(props: MessageDecorationProps): JSX.Element {
     const decorations = Array.from(
         decorationsFactories.entries(),
         ([key, Decoration]) => (

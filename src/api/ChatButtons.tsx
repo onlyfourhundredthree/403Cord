@@ -96,7 +96,6 @@ export const ChatBarButtonMap = new Map<string, ChatBarButtonData>();
 const logger = new Logger("ChatButtons");
 
 function VencordChatBarButtons(props: ChatBarProps) {
-    if ((window as any).vencordStealthMode) return null;
     const { chatBarButtons } = useSettings(["uiElements.chatBarButtons.*"]).uiElements;
 
     const { analyticsName } = props.type;

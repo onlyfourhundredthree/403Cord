@@ -3,7 +3,6 @@
 ## Proje Konumları
 
 - **Vencord**: `C:\Users\Administrator\Documents\Vencord`
-- **403Installer**: `C:\Users\Administrator\Documents\403Installer`
 
 ---
 

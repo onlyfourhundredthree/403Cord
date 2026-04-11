@@ -119,7 +119,6 @@ interface ContextMenuProps {
 }
 
 export function _usePatchContextMenu(props: ContextMenuProps) {
-    if ((window as any).vencordStealthMode) return props;
     props = {
         ...props,
         children: cloneMenuChildren(props.children),

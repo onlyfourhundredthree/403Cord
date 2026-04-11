@@ -1,0 +1,100 @@
+.vc-portable-container {
+    position: fixed;
+    z-index: 1000;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-accent);
+    border-radius: 8px;
+    box-shadow: var(--elevation-high);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 200px;
+    min-height: 100px;
+}
+
+.vc-portable-header {
+    height: 32px;
+    background: var(--background-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    cursor: move;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.vc-portable-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--header-primary);
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.vc-portable-close {
+    cursor: pointer;
+    color: var(--interactive-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vc-portable-close:hover {
+    color: var(--interactive-hover);
+}
+
+.vc-portable-content {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Button to trigger popout */
+.vc-portable-popout-btn {
+    opacity: 0.3;
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.vc-portable-popout-btn:hover {
+    opacity: 1;
+}
+
+/* Specific overrides for Discord components when inside portable container */
+.vc-portable-active {
+    position: fixed !important;
+    z-index: 1000 !important;
+    background: var(--background-secondary) !important;
+    border: 1px solid var(--background-modifier-accent) !important;
+    border-radius: 8px !important;
+    box-shadow: var(--elevation-high) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    pointer-events: auto !important;
+}
+
+.vc-portable-container [class*="sidebar-"],
+.vc-portable-active[class*="sidebar-"] {
+    width: 240px !important;
+
+    /* Sidebar default width */
+    height: 600px !important;
+}
+
+.vc-portable-container [class*="members-"],
+.vc-portable-active[class*="members-"] {
+    width: 240px !important;
+    height: 600px !important;
+}
+
+.vc-portable-active [class*="sidebar-"],
+.vc-portable-active [class*="members-"] {
+    width: 100% !important;
+    height: 100% !important;
+}

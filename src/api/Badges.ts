@@ -65,7 +65,6 @@ export function removeProfileBadge(badge: ProfileBadge) {
  * You probably don't need to use this.
  */
 export function _getBadges(args: BadgeUserArgs) {
-    if ((window as any).vencordStealthMode) return [];
     const badges = [] as ProfileBadge[];
     for (const badge of Badges) {
         if (badge.shouldShow && !badge.shouldShow(args)) {
