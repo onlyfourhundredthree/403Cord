@@ -1,108 +1,50 @@
-.vc-portable-container {
-    position: fixed;
-    z-index: 1000;
-    background: var(--background-secondary);
-    border: 1px solid var(--background-modifier-accent);
-    border-radius: 8px;
-    box-shadow: var(--elevation-high);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-width: 200px;
-    min-height: 100px;
-}
+/* 
+ * PortableDiscord Plugin Styles
+ * Handles the floating panel appearance and button states
+ */
 
-.vc-portable-header {
-    height: 32px;
-    background: var(--background-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 8px;
-    cursor: move;
-    user-select: none;
-    flex-shrink: 0;
-}
-
-.vc-portable-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--header-primary);
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.vc-portable-close {
-    cursor: pointer;
-    color: var(--interactive-normal);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.vc-portable-close:hover {
-    color: var(--interactive-hover);
-}
-
-.vc-portable-content {
-    flex-grow: 1;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-/* Button to trigger popout */
+/* The popout toggle button injected into each panel */
 .vc-portable-popout-btn {
-    opacity: 0.8;
-    transition: opacity 0.2s, transform 0.2s;
-    cursor: pointer;
-    background: rgb(0 0 0 / 40%);
-    border-radius: 4px;
-    padding: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+
+/* Show button on panel hover */
+[class*="sidebar_"]:hover > .vc-portable-btn,
+[class*="membersWrap_"]:hover > .vc-portable-btn,
+[class*="panels_"]:hover > .vc-portable-btn {
+    opacity: 1;
 }
 
 .vc-portable-popout-btn:hover {
-    opacity: 1;
     transform: scale(1.1);
-    background: rgb(0 0 0 / 60%);
+    background: rgb(0 0 0 / 65%) !important;
+    color: var(--interactive-hover);
 }
 
-/* Specific overrides for Discord components when inside portable container */
+/* When dragging, ensure nothing interferes */
+.vc-portable-active * {
+    pointer-events: auto;
+}
+
+/* Active (popped-out) panels */
 .vc-portable-active {
-    position: fixed !important;
-    z-index: 1000 !important;
-    background: var(--background-secondary) !important;
     border: 1px solid var(--background-modifier-accent) !important;
-    border-radius: 8px !important;
-    box-shadow: var(--elevation-high) !important;
-    overflow: hidden !important;
-    display: flex !important;
-    flex-direction: column !important;
-    pointer-events: auto !important;
 }
 
-.vc-portable-container [class*="sidebar-"],
-.vc-portable-active[class*="sidebar-"] {
-    width: 240px !important;
-
-    /* Sidebar default width */
-    height: 600px !important;
+/* Drag header at the top of popped-out panels */
+.vc-portable-drag-header:hover + * {
+    pointer-events: auto;
 }
 
-.vc-portable-container [class*="members-"],
-.vc-portable-active[class*="members-"] {
-    width: 240px !important;
-    height: 600px !important;
+.vc-portable-close-btn:hover {
+    background: rgb(255 255 255 / 8%) !important;
+    color: var(--interactive-hover) !important;
 }
 
-.vc-portable-active [class*="sidebar-"],
-.vc-portable-active [class*="members-"] {
-    width: 100% !important;
+/* Ensure sidebar stays full height when floating */
+.vc-portable-active[class*="sidebar_"] > [class*="sidebar_"],
+.vc-portable-active > [class*="scrollerBase_"] {
     height: 100% !important;
+    flex: 1 !important;
 }
