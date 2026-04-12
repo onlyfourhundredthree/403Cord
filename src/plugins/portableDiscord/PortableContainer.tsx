@@ -26,7 +26,7 @@ interface PortableContainerProps {
 
 export function PortableContainer({ title, id, onClose, children, defaultX = 100, defaultY = 100, defaultWidth = 240, defaultHeight = 600 }: PortableContainerProps) {
     const [pos, setPos] = useState({ x: defaultX, y: defaultY });
-    const [size, setSize] = useState({ width: defaultWidth, height: defaultHeight });
+    const [size] = useState({ width: defaultWidth, height: defaultHeight });
     const dragging = useRef(false);
     const startPos = useRef({ x: 0, y: 0 });
     const startMouse = useRef({ x: 0, y: 0 });
@@ -42,13 +42,9 @@ export function PortableContainer({ title, id, onClose, children, defaultX = 100
 
     const handleMouseMove = (e: MouseEvent) => {
         if (!dragging.current) return;
-
-        const dx = e.clientX - startMouse.current.x;
-        const dy = e.clientY - startMouse.current.y;
-
         setPos({
-            x: startPos.current.x + dx,
-            y: startPos.current.y + dy
+            x: startPos.current.x + (e.clientX - startMouse.current.x),
+            y: startPos.current.y + (e.clientY - startMouse.current.y)
         });
     };
 
@@ -56,8 +52,6 @@ export function PortableContainer({ title, id, onClose, children, defaultX = 100
         dragging.current = false;
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
-
-        // Save to settings could be done here if needed
     };
 
     return ReactDOM.createPortal(

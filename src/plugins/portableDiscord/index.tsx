@@ -7,28 +7,25 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import ErrorBoundary from "@components/ErrorBoundary";
 import { OpenExternalIcon as PopoutIcon } from "@components/Icons";
 import definePlugin, { OptionType } from "@utils/types";
 import { React } from "@webpack/common";
 
 import { PortableContainer } from "./PortableContainer";
 
+const state = {
+    activePopouts: new Set<string>()
+};
+
 export const settings = definePluginSettings({
     popouts: {
-        type: OptionType.STRING, // JSON stringified for simplicity in settings
-        default: "{}",
+        type: OptionType.STRING,
+        default: "[]",
         description: "Popped out panels state",
         hidden: true
     }
 });
-
-interface PluginState {
-    activePopouts: Set<string>;
-}
-
-const state: PluginState = {
-    activePopouts: new Set()
-};
 
 export default definePlugin({
     name: "PortableDiscord",
@@ -40,53 +37,36 @@ export default definePlugin({
         try {
             const saved = JSON.parse(settings.store.popouts);
             state.activePopouts = new Set(Array.isArray(saved) ? saved : []);
-        } catch (e) {
+        } catch {
             state.activePopouts = new Set();
         }
     },
 
     patches: [
         {
-            // Sidebar (Channels) Popout
+            // Sidebar: hide when popped out, inject popout button into children
             find: "renderSidebar(){",
-            replacement: [
-                {
-                    match: /className:\i(?:\.\i)+,children:\[/,
-                    replace: "$&$self.renderPopoutButton('sidebar'),"
-                },
-                {
-                    match: /return\s*(\(0,\i\.jsxs?\)\("div",\s*\{.+?\}\s*\))/,
-                    replace: "return $self.wrapPortable('sidebar', 'Kanallar', $1)"
-                }
-            ]
+            replacement: {
+                match: /(?<=renderSidebar\(\){)/,
+                replace: "if($self.isPoppedOut('sidebar'))return null;"
+            }
         },
         {
-            // Members List
-            find: "aria-multiselectable",
-            replacement: [
-                {
-                    match: /className:\i,children:\[/,
-                    replace: "$&$self.renderPopoutButton('members'),"
-                },
-                {
-                    match: /return\s*(\i\.useMemo.+?aria-multiselectable.+?\}\s*\))/,
-                    replace: "return $self.wrapPortable('members', 'Üyeler', $1)"
-                }
-            ]
+            // Member List: inject popout button right before the useMemo list element
+            // Exact same approach as MemberCount plugin
+            find: "{isSidebarVisible:",
+            replacement: {
+                match: /children:\[(\i\.useMemo[^}]+"aria-multiselectable")(?<=className:(\i),.+?)/,
+                replace: "children:[$2?.includes('members')?$self.renderMembersToggle():null,$1"
+            }
         },
         {
-            // Panels
+            // Panels: hide when popped out
             find: "renderPanels(){",
-            replacement: [
-                {
-                    match: /className:\i(?:\.\i)+,children:\[/,
-                    replace: "$&$self.renderPopoutButton('panels'),"
-                },
-                {
-                    match: /return\s*(\(0,\i\.jsx\)\(\i\.\i,\s*\{.+?\}\s*\))/,
-                    replace: "return $self.wrapPortable('panels', 'Ses ve Paneller', $1)"
-                }
-            ]
+            replacement: {
+                match: /(?<=renderPanels\(\){)/,
+                replace: "if($self.isPoppedOut('panels'))return null;"
+            }
         }
     ],
 
@@ -101,8 +81,49 @@ export default definePlugin({
             state.activePopouts.add(id);
         }
         settings.store.popouts = JSON.stringify(Array.from(state.activePopouts));
-        VencordNative.updater.rebuild();
+        // Force Discord to re-render the component
+        const el = document.querySelector("[data-portable-id]");
+        (el as any)?._reactFiber?.return?.stateNode?.forceUpdate?.();
     },
+
+    // Shown inside the member list sidebar - uses a toggle button
+    renderMembersToggle: ErrorBoundary.wrap(() => {
+        const [isOut, setOut] = React.useState(state.activePopouts.has("members"));
+
+        return (
+            <div
+                className="vc-portable-popout-btn"
+                title={isOut ? "Üyeler Listesini Geri Al" : "Üyeler Listesini Taşı"}
+                onClick={() => {
+                    const plugin = Vencord.Plugins.plugins.PortableDiscord as any;
+                    plugin.togglePopout("members");
+                    setOut(!isOut);
+                }}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", marginBottom: "4px" }}
+            >
+                <PopoutIcon width={16} height={16} />
+            </div>
+        );
+    }, { noop: true }),
+
+    // Sidebar popout button - rendered via DOM injection through renderSidebar patch
+    renderSidebarToggle: ErrorBoundary.wrap(() => {
+        const [isOut, setOut] = React.useState(state.activePopouts.has("sidebar"));
+
+        return (
+            <div
+                className="vc-portable-popout-btn"
+                title={isOut ? "Kanallar Listesini Geri Al" : "Kanallar Listesini Taşı"}
+                onClick={() => {
+                    const plugin = Vencord.Plugins.plugins.PortableDiscord as any;
+                    plugin.togglePopout("sidebar");
+                    setOut(!isOut);
+                }}
+            >
+                <PopoutIcon width={16} height={16} />
+            </div>
+        );
+    }, { noop: true }),
 
     wrapPortable(id: string, title: string, content: React.ReactNode) {
         if (!this.isPoppedOut(id)) return content;
@@ -115,28 +136,6 @@ export default definePlugin({
             >
                 {content}
             </PortableContainer>
-        );
-    },
-
-    renderPopoutButton(id: string) {
-        return (
-            <div
-                className="vc-portable-popout-btn"
-                onClick={e => {
-                    e.stopPropagation();
-                    this.togglePopout(id);
-                }}
-                style={{
-                    position: "absolute",
-                    top: "10px",
-                    right: id === "sidebar" ? "12px" : "48px",
-                    zIndex: 2000,
-                    width: "26px",
-                    height: "26px"
-                }}
-            >
-                <PopoutIcon width={16} height={16} />
-            </div>
         );
     }
 });
