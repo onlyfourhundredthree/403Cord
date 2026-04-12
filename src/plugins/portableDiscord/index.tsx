@@ -52,13 +52,13 @@ export default definePlugin({
     observer: null as MutationObserver | null,
     injectedButtons: new Set<string>(),
 
-    onStart() {
+    start() {
         this.setupPortable();
         this.observer = new MutationObserver(() => this.setupPortable());
         this.observer.observe(document.body, { childList: true, subtree: true });
     },
 
-    onStop() {
+    stop() {
         this.observer?.disconnect();
         this.observer = null;
 
