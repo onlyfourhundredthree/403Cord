@@ -41,12 +41,10 @@ const CLOSE_ICON = "<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\
 
 // ────── CSS Float ─────────────────────────────────────────────────────────────
 //
-// Architecture:
-//   • The Discord element stays in its original React tree (events preserved).
-//   • A "ghost shell" div is placed above it — it provides the title bar and the
-//     resize grip.  Its body area is pointer-events:none + transparent so the
-//     element beneath receives all mouse interaction.
-//   • When shell is dragged / resized, element position/size is synced.
+// Ghost shell arch: the Discord element stays in its original React tree.
+// A transparent "ghost shell" div sits on top of it: title bar + resize grip.
+// The shell body is pointer-events:none so the element receives all mouse events.
+// When shell is dragged/resized, the element's fixed position/size is synced.
 
 interface CSSFloat {
     el: HTMLElement;
@@ -62,15 +60,15 @@ function cssPopout(el: HTMLElement, title: string, key: string) {
     const rect = el.getBoundingClientRect();
     let cx = saved?.x ?? rect.left;
     let cy = saved?.y ?? rect.top;
-    let cw = saved?.w ?? (rect.width || 300);
-    let ch = saved?.h ?? (rect.height || 400);
+    let cw = saved?.w ?? (rect.width || 400);
+    let ch = saved?.h ?? (rect.height || 500);
 
-    // Placeholder keeps the layout gap (not visible, display:none)
+    // Placeholder: keeps the layout slot (flex:1 so sidebar doesn't expand)
     const placeholder = document.createElement("div");
     placeholder.className = "vc-fw-placeholder";
     el.parentElement?.insertBefore(placeholder, el);
 
-    // Apply CSS positioning to the element itself
+    // Apply fixed positioning to the Discord element
     const applyEl = () => {
         el.style.setProperty("position", "fixed", "important");
         el.style.setProperty("left", `${cx}px`, "important");
@@ -83,13 +81,12 @@ function cssPopout(el: HTMLElement, title: string, key: string) {
         el.style.setProperty("box-shadow", "0 8px 24px rgb(0 0 0 / 55%)", "important");
         el.style.setProperty("border", "1px solid var(--background-modifier-accent,rgb(255 255 255/6%))", "important");
         el.style.setProperty("border-top", "none", "important");
-        el.style.setProperty("background-color", "var(--background-secondary,#313338)", "important");
+        el.style.setProperty("background-color", "var(--background-primary,#313338)", "important");
     };
-
     el.classList.add("vc-floating-el");
     applyEl();
 
-    // Ghost shell: full window size, transparent body
+    // Ghost shell — full-size transparent overlay
     const shell = document.createElement("div");
     shell.className = "vc-fw vc-fw-css";
     shell.style.cssText = `left:${cx}px;top:${cy}px;width:${cw}px;height:${ch}px;`;
@@ -139,8 +136,8 @@ function cssPopout(el: HTMLElement, title: string, key: string) {
     // ── Resize ────────────────────────────────────────────────────────────
     let rw = 0, rh = 0, rx = 0, ry = 0;
     const onResizeMove = (e: MouseEvent) => {
-        cw = Math.max(200, rw + (e.clientX - rx));
-        ch = Math.max(80, rh + (e.clientY - ry));
+        cw = Math.max(250, rw + (e.clientX - rx));
+        ch = Math.max(120, rh + (e.clientY - ry));
         shell.style.width = `${cw}px`;
         shell.style.height = `${ch}px`;
         applyEl();
@@ -176,7 +173,7 @@ function cssDock(key: string) {
     window.dispatchEvent(new Event("resize"));
 }
 
-// ────── Drag handle injection ────────────────────────────────────────────────
+// ────── Drag handle ──────────────────────────────────────────────────────────
 
 function injectHandle(el: HTMLElement, label: string, onClick: () => void) {
     if (el.querySelector(".vc-dh")) return;
@@ -195,7 +192,7 @@ function injectHandle(el: HTMLElement, label: string, onClick: () => void) {
 
 export default definePlugin({
     name: "PortableDiscord",
-    description: "Chat, ses paneli ve üye listesini yüzen taşınabilir pencerelere dönüştürür.",
+    description: "Metin kanalı chat'ini ve üye listesini yüzen taşınabilir pencerelere dönüştürür.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
     patches: [],
@@ -216,34 +213,31 @@ export default definePlugin({
 
     inject() {
         this.injectChat();
-        this.injectPanels();
         this.injectMemberList();
     },
 
-    /** Ana chat alanı — CSS float, Discord navigasyonu react eder */
+    /**
+     * Ana chat alanı (mesajlar + yazı kutusu) — CSS float.
+     * React güncellemeleri korunur; farklı kanala geçilirse içerik güncellenir.
+     * Placeholder sayesinde sidebar ve içerik alanı layout'u bozulmaz.
+     */
     injectChat() {
-        // The main chat is the largest child of the content area
-        const content = document.querySelector<HTMLElement>('[class*="base_"] [class*="content_"]');
-        if (!content) return;
+        // Find the main chat element: inside content_, not inside sidebar_, large enough
+        const base = document.querySelector<HTMLElement>('[class*="base_"]');
+        if (!base) return;
 
-        // Find chat_ element that is a direct/close child of content (not inside sidebar)
-        const el = Array.from(content.querySelectorAll<HTMLElement>('[class*="chat_"]'))
-            .find(e => !e.closest('[class*="sidebar_"]') && e.offsetWidth > 200);
-        if (!el || el.querySelector(".vc-dh")) return;
+        const chatEl = Array.from(base.querySelectorAll<HTMLElement>('[class*="chat_"]'))
+            .find(e =>
+                !e.closest('[class*="sidebar_"]') &&
+                !e.closest('[class*="standardSidebarView_"]') &&
+                e.offsetWidth > 300
+            );
+        if (!chatEl || chatEl.querySelector(".vc-dh")) return;
 
-        injectHandle(el, "💬 Chat", () => cssPopout(el, "💬 Chat", "chat"));
+        injectHandle(chatEl, "� Sohbet", () => cssPopout(chatEl, "� Sohbet", "chat"));
     },
 
-    /** Ses bağlantı paneli (sol alt) */
-    injectPanels() {
-        const el = document.querySelector<HTMLElement>(
-            '[class*="base_"] [class*="panels_"]'
-        );
-        if (!el || el.querySelector(".vc-dh")) return;
-        injectHandle(el, "🔊 Ses Paneli", () => cssPopout(el, "🔊 Ses Paneli", "panels"));
-    },
-
-    /** Üye listesi — CSS float, tam interaktif */
+    /** Üye listesi — CSS float, tam interaktif (scroll, tıklama, sağ tık) */
     injectMemberList() {
         const el = document.querySelector<HTMLElement>('[class*="membersWrap_"]');
         if (!el || el.querySelector(".vc-dh")) return;

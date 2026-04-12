@@ -215,6 +215,9 @@
 /* ── Placeholder ─────────────────────────────────────────────────────────────── */
 
 .vc-fw-placeholder {
-    display: none !important;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
     pointer-events: none;
+    visibility: hidden;
 }
