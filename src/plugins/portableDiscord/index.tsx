@@ -20,7 +20,7 @@ export const settings = definePluginSettings({
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-/** Append to #app-mount so React event delegation still works correctly */
+/** Append to #app-mount so React synthetic events still fire */
 function getRoot(): HTMLElement {
     return document.getElementById("app-mount") ?? document.body;
 }
@@ -28,18 +28,18 @@ function getRoot(): HTMLElement {
 function loadPositions(): Record<string, { x: number; y: number; w: number; h: number; }> {
     try { return JSON.parse(settings.store.positions) ?? {}; } catch { return {}; }
 }
-function savePosition(key: string, x: number, y: number, w: number, h: number) {
+function savePos(key: string, x: number, y: number, w: number, h: number) {
     const p = loadPositions();
     p[key] = { x, y, w, h };
     settings.store.positions = JSON.stringify(p);
 }
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
-const POPOUT_ICON = "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M15 2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V4.41l-4.3 4.3a1 1 0 1 1-1.4-1.42L19.58 3H16a1 1 0 0 1-1-1Z\"/><path d=\"M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-6a1 1 0 1 0-2 0v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h6a1 1 0 1 0 0-2H5Z\"/></svg>";
+const POPOUT_ICON = "<svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polyline points=\"15 3 21 3 21 9\"/><polyline points=\"9 21 3 21 3 15\"/><line x1=\"21\" y1=\"3\" x2=\"14\" y2=\"10\"/><line x1=\"3\" y1=\"21\" x2=\"10\" y2=\"14\"/></svg>";
 const CLOSE_ICON = "<svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\"><line x1=\"18\" y1=\"6\" x2=\"6\" y2=\"18\"/><line x1=\"6\" y1=\"6\" x2=\"18\" y2=\"18\"/></svg>";
 
-// ── CSS Float (preserves React events — element stays in DOM tree) ─────────────
-interface CSSFloat { el: HTMLElement; bar: HTMLDivElement; placeholder: HTMLDivElement; }
+// ── CSS Float — member list stays in DOM, only CSS position changes ─────────────
+interface CSSFloat { el: HTMLElement; shell: HTMLDivElement; placeholder: HTMLDivElement; }
 const cssFloats = new Map<string, CSSFloat>();
 
 function cssPopout(el: HTMLElement, title: string, key: string) {
@@ -52,46 +52,37 @@ function cssPopout(el: HTMLElement, title: string, key: string) {
     const w = saved?.w ?? (rect.width || 240);
     const h = saved?.h ?? (rect.height || 400);
 
-    // Invisible placeholder so the empty slot doesn't cause layout shift
+    // Invisible placeholder keeps the layout slot
     const placeholder = document.createElement("div");
     placeholder.style.cssText = "display:none;pointer-events:none;flex-shrink:0;";
     el.parentElement?.insertBefore(placeholder, el);
 
-    // Title bar only — height: 30px so it never blocks clicks on the content
-    const bar = document.createElement("div");
-    bar.className = "vc-fw-bar";
-    bar.innerHTML = `<span class="vc-fw-title">${title}</span>`;
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "vc-fw-close";
-    closeBtn.innerHTML = CLOSE_ICON;
-    closeBtn.title = "Geri Al";
-    closeBtn.onclick = () => cssDock(key);
-    bar.appendChild(closeBtn);
-
-    // Outer shell — only 30px tall (title bar), content is the element itself below
+    // Title bar shell — 30px only so it never blocks clicks on content below
     const shell = document.createElement("div");
-    shell.className = "vc-fw";
-    shell.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:30px;`;
+    shell.className = "vc-fw vc-fw-css";
+    shell.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:30px;z-index:1000;`;
+
+    const bar = makeBar(title, () => cssDock(key));
     shell.appendChild(bar);
     getRoot().appendChild(shell);
 
-    // Float the actual element directly via CSS
+    // Apply fixed position directly on the element (stays in React tree!)
     el.classList.add("vc-floating-el");
     el.style.setProperty("position", "fixed", "important");
     el.style.setProperty("left", `${x}px`, "important");
     el.style.setProperty("top", `${y + 30}px`, "important");
     el.style.setProperty("width", `${w}px`, "important");
     el.style.setProperty("height", `${h - 30}px`, "important");
-    el.style.setProperty("z-index", "9999", "important");
+    el.style.setProperty("z-index", "1000", "important");
     el.style.setProperty("overflow", "hidden", "important");
     el.style.setProperty("border-radius", "0 0 8px 8px", "important");
-    el.style.setProperty("box-shadow", "0 8px 24px rgb(0 0 0 / 60%)", "important");
+    el.style.setProperty("box-shadow", "0 8px 24px rgb(0 0 0 / 55%)", "important");
     el.style.setProperty("border", "1px solid var(--background-modifier-accent)", "important");
     el.style.setProperty("border-top", "none", "important");
+    el.style.setProperty("background", "var(--background-secondary)", "important");
 
-    cssFloats.set(key, { el, bar: shell, placeholder });
+    cssFloats.set(key, { el, shell, placeholder });
 
-    // Drag
     let sx = 0, sy = 0, sl = 0, st = 0;
     const onMove = (e: MouseEvent) => {
         const nx = sl + e.clientX - sx;
@@ -104,7 +95,7 @@ function cssPopout(el: HTMLElement, title: string, key: string) {
     const onUp = () => {
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
-        savePosition(key, parseInt(shell.style.left), parseInt(shell.style.top), w, h);
+        savePos(key, parseInt(shell.style.left), parseInt(shell.style.top), w, h);
     };
     bar.addEventListener("mousedown", e => {
         if ((e.target as Element).closest(".vc-fw-close")) return;
@@ -123,17 +114,25 @@ function cssDock(key: string) {
     if (!f) return;
     f.el.classList.remove("vc-floating-el");
     f.el.removeAttribute("style");
-    f.bar.remove();
+    f.shell.remove();
     f.placeholder.remove();
     cssFloats.delete(key);
     window.dispatchEvent(new Event("resize"));
 }
 
-// ── DOM Float (for category groups — moved outside virtual list) ───────────────
-interface DOMFloat { el: HTMLElement; shell: HTMLDivElement; origParent: HTMLElement; origNext: ChildNode | null; }
+// ── DOM Float — moves element into a floating window div ───────────────────────
+interface DOMFloat {
+    shell: HTMLDivElement;
+    restore: () => void;
+}
 const domFloats = new Map<string, DOMFloat>();
 
-function domPopout(el: HTMLElement, title: string, key: string) {
+function domPopout(
+    el: HTMLElement,
+    title: string,
+    key: string,
+    restore: () => void
+) {
     if (domFloats.has(key)) return;
 
     const saved = loadPositions()[key];
@@ -143,30 +142,18 @@ function domPopout(el: HTMLElement, title: string, key: string) {
     const w = saved?.w ?? (rect.width || 240);
     const h = saved?.h ?? (rect.height || 300);
 
-    const origParent = el.parentElement!;
-    const origNext = el.nextSibling;
-
     const shell = document.createElement("div");
     shell.className = "vc-fw";
-    shell.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;min-width:160px;min-height:60px;`;
+    shell.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;min-width:160px;min-height:60px;z-index:1000;`;
 
-    const bar = document.createElement("div");
-    bar.className = "vc-fw-bar";
-    bar.innerHTML = `<span class="vc-fw-title">${title}</span>`;
-    const closeBtn = document.createElement("button");
-    closeBtn.className = "vc-fw-close";
-    closeBtn.innerHTML = CLOSE_ICON;
-    closeBtn.title = "Geri Al";
-    closeBtn.onclick = () => domDock(key);
-    bar.appendChild(closeBtn);
-
+    const bar = makeBar(title, () => domDock(key));
     const body = document.createElement("div");
     body.className = "vc-fw-body";
     body.appendChild(el);
 
     shell.append(bar, body);
     getRoot().appendChild(shell);
-    domFloats.set(key, { el, shell, origParent, origNext });
+    domFloats.set(key, { shell, restore });
 
     let sx = 0, sy = 0, sl = 0, st = 0;
     const onMove = (e: MouseEvent) => {
@@ -176,7 +163,7 @@ function domPopout(el: HTMLElement, title: string, key: string) {
     const onUp = () => {
         document.removeEventListener("mousemove", onMove);
         document.removeEventListener("mouseup", onUp);
-        savePosition(key, parseInt(shell.style.left), parseInt(shell.style.top), shell.offsetWidth, shell.offsetHeight);
+        savePos(key, parseInt(shell.style.left), parseInt(shell.style.top), shell.offsetWidth, shell.offsetHeight);
     };
     bar.addEventListener("mousedown", e => {
         if ((e.target as Element).closest(".vc-fw-close")) return;
@@ -191,11 +178,25 @@ function domPopout(el: HTMLElement, title: string, key: string) {
 function domDock(key: string) {
     const f = domFloats.get(key);
     if (!f) return;
-    const { el, shell, origParent, origNext } = f;
-    if (origNext?.parentNode === origParent) origParent.insertBefore(el, origNext);
-    else origParent.appendChild(el);
-    shell.remove();
+    f.restore();
+    f.shell.remove();
     domFloats.delete(key);
+}
+
+// ── Shared title bar builder ───────────────────────────────────────────────────
+function makeBar(title: string, onClose: () => void): HTMLDivElement {
+    const bar = document.createElement("div");
+    bar.className = "vc-fw-bar";
+    const span = document.createElement("span");
+    span.className = "vc-fw-title";
+    span.textContent = title;
+    const btn = document.createElement("button");
+    btn.className = "vc-fw-close";
+    btn.innerHTML = CLOSE_ICON;
+    btn.title = "Geri Al";
+    btn.onclick = onClose;
+    bar.append(span, btn);
+    return bar;
 }
 
 // ── Drag handle ────────────────────────────────────────────────────────────────
@@ -238,18 +239,17 @@ export default definePlugin({
 
     inject() {
         this.injectMemberList();
-        this.injectChannelItems();
+        this.injectChannels();
     },
 
     injectMemberList() {
         const el = document.querySelector<HTMLElement>('[class*="membersWrap_"]');
         if (!el || el.querySelector(".vc-dh")) return;
         if (el.closest('[class*="standardSidebarView_"]')) return;
-        // CSS float — React stays in its original tree, all events preserved
         injectHandle(el, "Üye Listesi", () => cssPopout(el, "Üye Listesi", "members"));
     },
 
-    injectChannelItems() {
+    injectChannels() {
         const items = document.querySelectorAll<HTMLElement>(
             '[class*="content_"] [class*="containerDefault_"]:not([data-vc-inj])'
         );
@@ -266,35 +266,64 @@ export default definePlugin({
                 injectHandle(item, `\uD83D\uDCC1 ${label}`, () => {
                     const key = `cat:${label}`;
                     if (domFloats.has(key)) return;
-                    const group = document.createElement("div");
-                    group.className = "vc-group";
-                    const toMove: Element[] = [item];
+
+                    // Capture original positions BEFORE moving anything
+                    const catParent = item.parentElement!;
+                    const catNext = item.nextSibling; // first sibling after category
+
+                    const siblings: Element[] = [];
                     let sib = item.nextElementSibling;
                     while (sib) {
                         if (sib.querySelector("[aria-expanded]")) break;
-                        toMove.push(sib);
+                        siblings.push(sib);
                         sib = sib.nextElementSibling;
                     }
-                    for (const n of toMove) group.appendChild(n);
+                    const afterGroup = siblings.length > 0
+                        ? siblings[siblings.length - 1].nextSibling
+                        : catNext;
 
-                    // Disable expand/collapse toggle to prevent crash when floating
-                    const toggleBtn = group.querySelector<HTMLElement>("[aria-expanded]");
-                    if (toggleBtn) {
-                        toggleBtn.style.pointerEvents = "none";
-                        toggleBtn.style.cursor = "default";
-                    }
+                    // Build group with all items
+                    const group = document.createElement("div");
+                    group.className = "vc-group";
+                    group.appendChild(item);
+                    for (const s of siblings) group.appendChild(s);
 
-                    domPopout(group, `\uD83D\uDCC1 ${label}`, key);
+                    // Disable expand/collapse while floating to prevent crash
+                    const toggle = group.querySelector<HTMLElement>("[aria-expanded]");
+                    if (toggle) { toggle.style.pointerEvents = "none"; toggle.style.cursor = "default"; }
+
+                    // Restore: put each item back in original order
+                    const restore = () => {
+                        const allItems = [item, ...siblings];
+                        let ref: Node | null = afterGroup;
+                        for (const n of allItems) {
+                            if (ref && ref.parentNode === catParent) {
+                                catParent.insertBefore(n, ref);
+                            } else {
+                                catParent.appendChild(n);
+                            }
+                            ref = n.nextSibling;
+                        }
+                        // Re-enable expand/collapse
+                        if (toggle) { toggle.style.pointerEvents = ""; toggle.style.cursor = ""; }
+                    };
+
+                    domPopout(group, `\uD83D\uDCC1 ${label}`, key, restore);
                 });
-                continue;
+            } else {
+                if (item.querySelector("[class*='voiceUser_'], [class*='liveVoice_']")) continue;
+                injectHandle(item, `# ${label}`, () => {
+                    const key = `ch:${label}`;
+                    if (domFloats.has(key)) return;
+                    const parent = item.parentElement!;
+                    const next = item.nextSibling;
+                    const restore = () => {
+                        if (next?.parentNode === parent) parent.insertBefore(item, next);
+                        else parent.appendChild(item);
+                    };
+                    domPopout(item, `# ${label}`, key, restore);
+                });
             }
-            // Skip voice channels (lose React context when extracted)
-            if (item.querySelector("[class*='voiceUser_'], [class*='liveVoice_']")) continue;
-            // Only inject on simple text channels
-            injectHandle(item, `# ${label}`, () => {
-                const key = `ch:${label}`;
-                domPopout(item, `# ${label}`, key);
-            });
         }
     }
 });

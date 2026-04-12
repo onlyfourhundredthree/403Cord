@@ -16,10 +16,11 @@
     align-items: center;
     justify-content: center;
     cursor: grab;
-    color: var(--interactive-normal);
-    background: rgb(0 0 0 / 40%);
+
+    /* Use Discord's muted interactive color — fits any theme */
+    color: var(--interactive-muted);
     opacity: 0;
-    transition: opacity 0.15s, background 0.15s;
+    transition: opacity 0.15s, color 0.15s, background 0.15s;
     z-index: 10;
     pointer-events: none;
 }
@@ -30,15 +31,16 @@
 }
 
 .vc-dh:hover {
-    background: rgb(0 0 0 / 65%);
     color: var(--interactive-hover);
+    background: var(--background-modifier-hover);
 }
 
 .vc-dh:active {
     cursor: grabbing;
+    color: var(--interactive-active);
 }
 
-/* member list handle sits near top, not center */
+/* Member list drag handle: near top-right, not vertically centered */
 [class*="membersWrap_"] > .vc-dh {
     top: 10px;
     right: 6px;
@@ -47,25 +49,38 @@
     height: 22px;
 }
 
-/* ── Floating title bar (.vc-fw) ─────────────────────────────────────────── */
-
-/* Used as the drag bar sitting on top of the CSS-floated element            */
+/* ── Floating window shell (.vc-fw) ─────────────────────────────────────── */
 
 .vc-fw {
     position: fixed;
-    z-index: 10000;
+
+    /* z-index 1000: above channel list / member list but BELOW Discord's
+       context menus, tooltips, and modals (typically 3 000 – 10 000) */
+    z-index: 1000;
     display: flex;
     flex-direction: column;
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid var(--background-modifier-accent);
-    box-shadow: 0 8px 32px rgb(0 0 0 / 65%), 0 2px 8px rgb(0 0 0 / 40%);
+    box-shadow: 0 8px 32px rgb(0 0 0 / 60%), 0 2px 8px rgb(0 0 0 / 35%);
+
+    /* Solid background — must be opaque to prevent transparency bleed */
     background: var(--background-secondary);
     min-width: 160px;
     min-height: 60px;
 }
 
-/* Title bar */
+/* CSS-float variant: the shell is only the 30 px title bar */
+.vc-fw.vc-fw-css {
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    box-shadow: none;
+
+    /* The actual element below carries the shadow */
+}
+
+/* ── Title bar ──────────────────────────────────────────────────────────── */
+
 .vc-fw-bar {
     height: 30px;
     min-height: 30px;
@@ -85,7 +100,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--header-primary);
+    color: var(--header-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -98,7 +113,7 @@
     padding: 3px;
     border-radius: 3px;
     cursor: pointer;
-    color: var(--interactive-normal);
+    color: var(--interactive-muted);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -108,49 +123,55 @@
 }
 
 .vc-fw-close:hover {
-    background: rgb(255 255 255 / 8%);
+    background: var(--background-modifier-hover);
     color: var(--interactive-hover);
 }
 
-/* Content body — used only in DOM-float (categories) */
+.vc-fw-close:active {
+    color: var(--interactive-active);
+}
+
+/* ── Content body (DOM-float only) ─────────────────────────────────────── */
+
 .vc-fw-body {
     flex: 1;
     overflow: hidden auto;
     display: flex;
     flex-direction: column;
     background: var(--background-secondary);
+    min-height: 0;
 }
 
 .vc-fw-body > * {
     flex-shrink: 0;
+    background: var(--background-secondary);
 }
 
-/* ── CSS-floated element ─────────────────────────────────────────────────── */
-
-/* The element that gets position:fixed applied directly (member list etc.)  */
+/* ── CSS-floated element (.vc-floating-el) ──────────────────────────────── */
 
 .vc-floating-el {
+    /* Solid background matching Discord's secondary panel color */
     background: var(--background-secondary) !important;
     border-radius: 0 0 8px 8px !important;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 55%) !important;
 }
 
-/* Ensure member list fills the floating area completely */
 .vc-floating-el[class*="membersWrap_"] {
     overflow: hidden !important;
 }
 
-/* ── Category group ─────────────────────────────────────────────────────── */
+/* ── Category / channel group inside float ──────────────────────────────── */
 
 .vc-group {
     display: flex;
     flex-direction: column;
     background: var(--background-secondary);
-    overflow-y: auto;
+    overflow: hidden auto;
     width: 100%;
     min-height: 0;
 }
 
-/* channels inside a floating category fill full width */
 .vc-group [class*="containerDefault_"] {
     width: 100% !important;
+    background: var(--background-secondary);
 }
