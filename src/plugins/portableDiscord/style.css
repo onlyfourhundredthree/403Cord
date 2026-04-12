@@ -63,7 +63,6 @@
     background: var(--background-secondary);
     min-width: 160px;
     min-height: 60px;
-    resize: both;
 }
 
 /* Title bar */

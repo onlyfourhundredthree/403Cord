@@ -148,7 +148,7 @@ function domPopout(el: HTMLElement, title: string, key: string) {
 
     const shell = document.createElement("div");
     shell.className = "vc-fw";
-    shell.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;`;
+    shell.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;min-width:160px;min-height:60px;`;
 
     const bar = document.createElement("div");
     bar.className = "vc-fw-bar";
@@ -276,16 +276,25 @@ export default definePlugin({
                         sib = sib.nextElementSibling;
                     }
                     for (const n of toMove) group.appendChild(n);
+
+                    // Disable expand/collapse toggle to prevent crash when floating
+                    const toggleBtn = group.querySelector<HTMLElement>("[aria-expanded]");
+                    if (toggleBtn) {
+                        toggleBtn.style.pointerEvents = "none";
+                        toggleBtn.style.cursor = "default";
+                    }
+
                     domPopout(group, `\uD83D\uDCC1 ${label}`, key);
                 });
-            } else {
-                // Skip voice channels (they cause bugs when individually extracted)
-                if (item.querySelector("[class*=\"voiceUser_\"], [class*=\"liveVoice_\"]")) continue;
-                injectHandle(item, `# ${label}`, () => {
-                    const key = `ch:${label}`;
-                    domPopout(item, `# ${label}`, key);
-                });
+                continue;
             }
+            // Skip voice channels (lose React context when extracted)
+            if (item.querySelector("[class*='voiceUser_'], [class*='liveVoice_']")) continue;
+            // Only inject on simple text channels
+            injectHandle(item, `# ${label}`, () => {
+                const key = `ch:${label}`;
+                domPopout(item, `# ${label}`, key);
+            });
         }
     }
 });
