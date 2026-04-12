@@ -1,8 +1,8 @@
 /*
- * PortableDiscord – Floating Window Styles
+ * PortableDiscord – Styles
  */
 
-/* ── Drag Handle Button (.vc-dh) ─────────────────────────────────────────── */
+/* ── Drag handle ─────────────────────────────────────────────────────────── */
 
 .vc-dh {
     position: absolute;
@@ -30,7 +30,7 @@
 }
 
 .vc-dh:hover {
-    background: rgb(0 0 0 / 60%);
+    background: rgb(0 0 0 / 65%);
     color: var(--interactive-hover);
 }
 
@@ -38,19 +38,22 @@
     cursor: grabbing;
 }
 
-/* Member list handle sits at top-right, not vertically centered */
-[class*="membersWrap_"] .vc-dh {
-    top: 8px;
+/* member list handle sits near top, not center */
+[class*="membersWrap_"] > .vc-dh {
+    top: 10px;
+    right: 6px;
     transform: none;
     width: 22px;
     height: 22px;
 }
 
-/* ── Floating Window (.vc-fw) ─────────────────────────────────────────────── */
+/* ── Floating title bar (.vc-fw) ─────────────────────────────────────────── */
+
+/* Used as the drag bar sitting on top of the CSS-floated element            */
 
 .vc-fw {
     position: fixed;
-    z-index: 9999;
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     border-radius: 8px;
@@ -58,9 +61,9 @@
     border: 1px solid var(--background-modifier-accent);
     box-shadow: 0 8px 32px rgb(0 0 0 / 65%), 0 2px 8px rgb(0 0 0 / 40%);
     background: var(--background-secondary);
-    resize: both;
     min-width: 160px;
     min-height: 60px;
+    resize: both;
 }
 
 /* Title bar */
@@ -110,20 +113,34 @@
     color: var(--interactive-hover);
 }
 
-/* Content area */
+/* Content body — used only in DOM-float (categories) */
 .vc-fw-body {
     flex: 1;
-    overflow: hidden;
+    overflow: hidden auto;
     display: flex;
     flex-direction: column;
+    background: var(--background-secondary);
 }
 
 .vc-fw-body > * {
-    flex: 1;
-    min-height: 0;
+    flex-shrink: 0;
 }
 
-/* ── Category group (.vc-group) ──────────────────────────────────────────── */
+/* ── CSS-floated element ─────────────────────────────────────────────────── */
+
+/* The element that gets position:fixed applied directly (member list etc.)  */
+
+.vc-floating-el {
+    background: var(--background-secondary) !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+/* Ensure member list fills the floating area completely */
+.vc-floating-el[class*="membersWrap_"] {
+    overflow: hidden !important;
+}
+
+/* ── Category group ─────────────────────────────────────────────────────── */
 
 .vc-group {
     display: flex;
@@ -131,20 +148,10 @@
     background: var(--background-secondary);
     overflow-y: auto;
     width: 100%;
+    min-height: 0;
 }
 
-/* ── Overrides inside floating windows ───────────────────────────────────── */
-
-/* Member list keeps its native width/height behaviour */
-.vc-fw [class*="membersWrap_"] {
-    width: 100% !important;
-    height: 100% !important;
-    position: relative !important;
-    box-shadow: none !important;
-    border-radius: 0 !important;
-}
-
-/* Channel items fill the floating window width */
-.vc-fw [class*="containerDefault_"] {
+/* channels inside a floating category fill full width */
+.vc-group [class*="containerDefault_"] {
     width: 100% !important;
 }
