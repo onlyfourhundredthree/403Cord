@@ -18,233 +18,206 @@ export const settings = definePluginSettings({
     }
 });
 
-interface PanelConfig {
-    id: string;
-    title: string;
-    selector: string;
-    defaultW: number;
-    defaultH: number;
-}
-
-const PANELS: PanelConfig[] = [
-    { id: "sidebar", title: "Kanallar", selector: '[class*="sidebar_"]', defaultW: 240, defaultH: 600 },
-    { id: "members", title: "Üye Listesi", selector: '[class*="membersWrap_"]', defaultW: 240, defaultH: 600 },
-    { id: "panels", title: "Ses Paneli", selector: '[class*="panels_"]', defaultW: 260, defaultH: 160 }
-];
-
-const POPOUT_ICON_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+// ── Icons ──────────────────────────────────────────────────────────────────────
+const POPOUT_ICON = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
   <path d="M15 2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0V4.41l-4.3 4.3a1 1 0 1 1-1.4-1.42L19.58 3H16a1 1 0 0 1-1-1Z"/>
   <path d="M5 2a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-6a1 1 0 1 0-2 0v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h6a1 1 0 1 0 0-2H5Z"/>
 </svg>`;
 
-const CLOSE_ICON_SVG = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+const CLOSE_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
   <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
 </svg>`;
 
+// ── Floating window manager ────────────────────────────────────────────────────
+interface WinRecord {
+    win: HTMLDivElement;
+    origParent: HTMLElement;
+    origNext: ChildNode | null;
+}
+const openWindows = new Map<HTMLElement, WinRecord>();
+let winSeq = 0;
+
+function positions(): Record<string, { x: number; y: number; }> {
+    try { return JSON.parse(settings.store.positions) ?? {}; } catch { return {}; }
+}
+function savePos(key: string, x: number, y: number) {
+    const p = positions();
+    p[key] = { x, y };
+    settings.store.positions = JSON.stringify(p);
+}
+
+function popout(el: HTMLElement, title: string) {
+    if (openWindows.has(el)) return; // already floating
+
+    const posKey = title;
+    const saved = positions()[posKey];
+    const rect = el.getBoundingClientRect();
+    const x = saved?.x ?? Math.max(80, rect.left);
+    const y = saved?.y ?? Math.max(40, rect.top);
+
+    // Create floating window
+    const win = document.createElement("div");
+    win.className = "vc-fw";
+    win.id = `vc-fw-${++winSeq}`;
+    win.style.cssText = `left:${x}px;top:${y}px;width:${Math.max(200, rect.width || 240)}px;height:${Math.max(60, rect.height || 400)}px;`;
+
+    // Title bar
+    const bar = document.createElement("div");
+    bar.className = "vc-fw-bar";
+    bar.innerHTML = `<span class="vc-fw-title">${title}</span>`;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "vc-fw-close";
+    closeBtn.innerHTML = CLOSE_ICON;
+    closeBtn.title = "Geri Al";
+    closeBtn.onclick = () => dock(el);
+    bar.appendChild(closeBtn);
+
+    // Content
+    const body = document.createElement("div");
+    body.className = "vc-fw-body";
+
+    // Record original position before moving
+    const origParent = el.parentElement!;
+    const origNext = el.nextSibling;
+
+    body.appendChild(el);
+    win.append(bar, body);
+    document.body.appendChild(win);
+
+    openWindows.set(el, { win, origParent, origNext });
+    makeDraggable(win, bar, posKey);
+}
+
+function dock(el: HTMLElement) {
+    const rec = openWindows.get(el);
+    if (!rec) return;
+    const { win, origParent, origNext } = rec;
+
+    if (origNext && origNext.parentNode === origParent) {
+        origParent.insertBefore(el, origNext);
+    } else {
+        origParent.appendChild(el);
+    }
+
+    win.remove();
+    openWindows.delete(el);
+}
+
+function makeDraggable(win: HTMLElement, handle: HTMLElement, posKey: string) {
+    let sx = 0, sy = 0, sl = 0, st = 0;
+    const onMove = (e: MouseEvent) => {
+        win.style.left = `${sl + e.clientX - sx}px`;
+        win.style.top = `${st + e.clientY - sy}px`;
+    };
+    const onUp = () => {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+        savePos(posKey, parseInt(win.style.left), parseInt(win.style.top));
+    };
+    handle.addEventListener("mousedown", e => {
+        if ((e.target as Element).closest(".vc-fw-close")) return;
+        sx = e.clientX; sy = e.clientY;
+        sl = parseInt(win.style.left) || 0; st = parseInt(win.style.top) || 0;
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onUp);
+        e.preventDefault();
+    });
+}
+
+// ── Drag handle button ─────────────────────────────────────────────────────────
+function addHandle(el: HTMLElement, title: string, getTarget: () => HTMLElement) {
+    if (el.querySelector(".vc-dh")) return; // already injected
+
+    const btn = document.createElement("div");
+    btn.className = "vc-dh";
+    btn.innerHTML = POPOUT_ICON;
+    btn.title = `${title} — Taşı`;
+    btn.onclick = e => { e.stopPropagation(); e.preventDefault(); popout(getTarget(), title); };
+
+    el.style.position = "relative";
+    el.appendChild(btn);
+
+    el.addEventListener("mouseenter", () => btn.classList.add("vc-dh-show"));
+    el.addEventListener("mouseleave", () => btn.classList.remove("vc-dh-show"));
+}
+
+// ─── Plugin ────────────────────────────────────────────────────────────────────
 export default definePlugin({
     name: "PortableDiscord",
-    description: "Discord'un çeşitli panellerini (Kanallar, Üyeler, Ses) taşınabilir hale getirir.",
+    description: "Üye listesini, kanalları ve kategorileri yüzen taşınabilir pencerelere dönüştürür.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
+    patches: [],
 
-    patches: [], // No webpack patches needed!
-
-    observer: null as MutationObserver | null,
-    injectedButtons: new Set<string>(),
+    obs: null as MutationObserver | null,
 
     start() {
-        this.setupPortable();
-        this.observer = new MutationObserver(() => this.setupPortable());
-        this.observer.observe(document.body, { childList: true, subtree: true });
+        this.inject();
+        this.obs = new MutationObserver(() => this.inject());
+        this.obs.observe(document.body, { childList: true, subtree: true });
     },
 
     stop() {
-        this.observer?.disconnect();
-        this.observer = null;
-
-        // Remove all popout states
-        document.querySelectorAll(".vc-portable-active").forEach(el => {
-            this.dockElement(el as HTMLElement);
-        });
-
-        // Remove all injected buttons and headers
-        document.querySelectorAll(".vc-portable-btn, .vc-portable-drag-header").forEach(el => el.remove());
-        this.injectedButtons.clear();
+        this.obs?.disconnect();
+        this.obs = null;
+        // Dock everything back
+        for (const el of [...openWindows.keys()]) dock(el);
+        document.querySelectorAll(".vc-dh").forEach(e => e.remove());
     },
 
-    setupPortable() {
-        for (const panel of PANELS) {
-            const el = document.querySelector(panel.selector) as HTMLElement | null;
-            if (!el) continue;
+    inject() {
+        this.injectMemberList();
+        this.injectChannelItems();
+    },
 
-            // If already active (popped out), restore the drag header if lost
-            if (el.classList.contains("vc-portable-active") && !el.querySelector(".vc-portable-drag-header")) {
-                this.addDragHeader(el, panel);
+    /** Member list: inject on the membersWrap_ element */
+    injectMemberList() {
+        const el = document.querySelector<HTMLElement>('[class*="membersWrap_"]');
+        if (!el) return;
+        if (el.closest('[class*="standardSidebarView_"]')) return; // skip settings
+        if (el.querySelector(".vc-dh")) return;
+
+        addHandle(el, "Üye Listesi", () => el);
+    },
+
+    /** Channel list items (inside content_ area, not inside guild icon rail) */
+    injectChannelItems() {
+        // All containerDefault_ items that live inside the server channel list (content_)
+        const items = document.querySelectorAll<HTMLElement>(
+            '[class*="content_"] [class*="containerDefault_"]:not([data-vc-injected])'
+        );
+
+        for (const item of items) {
+            if (item.closest('[class*="standardSidebarView_"]')) continue; // skip settings
+            if (item.closest('[class*="guilds_"]')) continue; // skip guild icon rail
+
+            item.setAttribute("data-vc-injected", "1");
+
+            const isCategory = !!item.querySelector("[aria-expanded]");
+            const nameEl = item.querySelector<HTMLElement>('[class*="name_"]');
+            const label = nameEl?.textContent?.trim() ?? "?";
+
+            if (isCategory) {
+                // Category: collect this header + all following channel siblings until next category
+                addHandle(item, `📁 ${label}`, () => {
+                    const group = document.createElement("div");
+                    group.className = "vc-group";
+
+                    const toMove: Element[] = [item];
+                    let sib = item.nextElementSibling;
+                    while (sib) {
+                        if (sib.querySelector("[aria-expanded]")) break; // next category
+                        toMove.push(sib);
+                        sib = sib.nextElementSibling;
+                    }
+                    for (const n of toMove) group.appendChild(n);
+                    return group;
+                });
+            } else {
+                // Individual channel
+                addHandle(item, `#\u200B ${label}`, () => item);
             }
-
-            // Inject toggle button if not already there
-            if (el.querySelector(`.vc-portable-btn[data-id="${panel.id}"]`)) continue;
-
-            const btn = document.createElement("div");
-            btn.className = "vc-portable-popout-btn vc-portable-btn";
-            btn.setAttribute("data-id", panel.id);
-            btn.setAttribute("title", `${panel.title}'i Taşı`);
-            btn.innerHTML = POPOUT_ICON_SVG;
-            btn.style.cssText = `
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                z-index: 100;
-                cursor: pointer;
-                border-radius: 4px;
-                padding: 2px;
-                width: 22px;
-                height: 22px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background: rgba(0,0,0,0.4);
-                color: var(--interactive-normal);
-            `;
-
-            btn.addEventListener("click", e => {
-                e.stopPropagation();
-                this.togglePanel(panel, el);
-            });
-
-            // Ensure parent is relatively positioned so our button sits correctly
-            const existingPos = el.style.position;
-            if (!existingPos || existingPos === "static") {
-                el.style.position = "relative";
-            }
-            el.appendChild(btn);
-        }
-    },
-
-    togglePanel(panel: PanelConfig, el: HTMLElement) {
-        if (el.classList.contains("vc-portable-active")) {
-            this.dockElement(el);
-        } else {
-            this.popoutElement(panel, el);
-        }
-    },
-
-    popoutElement(panel: PanelConfig, el: HTMLElement) {
-        const rect = el.getBoundingClientRect();
-
-        // Save position to settings
-        const positions = this.loadPositions();
-        const savedPos = positions[panel.id];
-        const x = savedPos?.x ?? rect.left;
-        const y = savedPos?.y ?? rect.top;
-        const w = (savedPos?.w ?? rect.width) || panel.defaultW;
-        const h = (savedPos?.h ?? rect.height) || panel.defaultH;
-
-        el.classList.add("vc-portable-active");
-        el.style.cssText = `
-            position: fixed !important;
-            left: ${x}px !important;
-            top: ${y}px !important;
-            width: ${w}px !important;
-            height: ${h}px !important;
-            z-index: 5000 !important;
-            border-radius: 8px !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6) !important;
-            overflow: hidden !important;
-            display: flex !important;
-            flex-direction: column !important;
-        `;
-
-        // Remove the popout button temporarily (drag header has close instead)
-        el.querySelector(".vc-portable-btn")?.remove();
-
-        // Add drag header
-        this.addDragHeader(el, panel);
-    },
-
-    dockElement(el: HTMLElement) {
-        el.classList.remove("vc-portable-active");
-        el.style.cssText = "position: relative;";
-
-        // Remove drag header
-        el.querySelector(".vc-portable-drag-header")?.remove();
-
-        // Re-inject popout button (will be re-added by observer)
-    },
-
-    addDragHeader(el: HTMLElement, panel: PanelConfig) {
-        const header = document.createElement("div");
-        header.className = "vc-portable-drag-header";
-        header.style.cssText = `
-            height: 32px;
-            min-height: 32px;
-            background: var(--background-tertiary, #2b2d31);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 10px;
-            cursor: move;
-            user-select: none;
-            flex-shrink: 0;
-            border-bottom: 1px solid var(--background-modifier-accent, rgba(255,255,255,0.06));
-        `;
-        header.innerHTML = `
-            <span style="font-size:11px;font-weight:700;color:var(--header-primary);text-transform:uppercase;letter-spacing:.5px;">${panel.title}</span>
-            <div class="vc-portable-close-btn" title="Geri Al" style="cursor:pointer;color:var(--interactive-normal);display:flex;align-items:center;padding:2px;border-radius:3px;">
-                ${CLOSE_ICON_SVG}
-            </div>
-        `;
-
-        // Close button
-        header.querySelector(".vc-portable-close-btn")!.addEventListener("click", () => {
-            this.dockElement(el);
-        });
-
-        // Drag functionality
-        let startX = 0, startY = 0, startLeft = 0, startTop = 0;
-
-        const onMouseMove = (e: MouseEvent) => {
-            const newLeft = startLeft + (e.clientX - startX);
-            const newTop = startTop + (e.clientY - startY);
-            el.style.left = `${newLeft}px`;
-            el.style.top = `${newTop}px`;
-        };
-
-        const onMouseUp = () => {
-            document.removeEventListener("mousemove", onMouseMove);
-            document.removeEventListener("mouseup", onMouseUp);
-
-            // Save position
-            const positions = this.loadPositions();
-            positions[panel.id] = {
-                x: parseInt(el.style.left),
-                y: parseInt(el.style.top),
-                w: el.offsetWidth,
-                h: el.offsetHeight
-            };
-            settings.store.positions = JSON.stringify(positions);
-        };
-
-        header.addEventListener("mousedown", (e: MouseEvent) => {
-            if ((e.target as HTMLElement).closest(".vc-portable-close-btn")) return;
-            startX = e.clientX;
-            startY = e.clientY;
-            startLeft = parseInt(el.style.left) || 0;
-            startTop = parseInt(el.style.top) || 0;
-            document.addEventListener("mousemove", onMouseMove);
-            document.addEventListener("mouseup", onMouseUp);
-            e.preventDefault();
-        });
-
-        // Insert at top of element
-        el.insertBefore(header, el.firstChild);
-    },
-
-    loadPositions(): Record<string, { x: number; y: number; w: number; h: number; }> {
-        try {
-            return JSON.parse(settings.store.positions) ?? {};
-        } catch {
-            return {};
         }
     }
 });

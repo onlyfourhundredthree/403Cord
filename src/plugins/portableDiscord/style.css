@@ -1,50 +1,150 @@
-/* 
- * PortableDiscord Plugin Styles
- * Handles the floating panel appearance and button states
+/*
+ * PortableDiscord – Floating Window Styles
  */
 
-/* The popout toggle button injected into each panel */
-.vc-portable-popout-btn {
+/* ── Drag Handle Button (.vc-dh) ─────────────────────────────────────────── */
+
+.vc-dh {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    color: var(--interactive-normal);
+    background: rgb(0 0 0 / 40%);
     opacity: 0;
-    transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease;
+    transition: opacity 0.15s, background 0.15s;
+    z-index: 10;
+    pointer-events: none;
 }
 
-/* Show button on panel hover */
-[class*="sidebar_"]:hover > .vc-portable-btn,
-[class*="membersWrap_"]:hover > .vc-portable-btn,
-[class*="panels_"]:hover > .vc-portable-btn {
+.vc-dh.vc-dh-show {
     opacity: 1;
+    pointer-events: auto;
 }
 
-.vc-portable-popout-btn:hover {
-    transform: scale(1.1);
-    background: rgb(0 0 0 / 65%) !important;
+.vc-dh:hover {
+    background: rgb(0 0 0 / 60%);
     color: var(--interactive-hover);
 }
 
-/* When dragging, ensure nothing interferes */
-.vc-portable-active * {
-    pointer-events: auto;
+.vc-dh:active {
+    cursor: grabbing;
 }
 
-/* Active (popped-out) panels */
-.vc-portable-active {
-    border: 1px solid var(--background-modifier-accent) !important;
+/* Member list handle sits at top-right, not vertically centered */
+[class*="membersWrap_"] .vc-dh {
+    top: 8px;
+    transform: none;
+    width: 22px;
+    height: 22px;
 }
 
-/* Drag header at the top of popped-out panels */
-.vc-portable-drag-header:hover + * {
-    pointer-events: auto;
+/* ── Floating Window (.vc-fw) ─────────────────────────────────────────────── */
+
+.vc-fw {
+    position: fixed;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--background-modifier-accent);
+    box-shadow: 0 8px 32px rgb(0 0 0 / 65%), 0 2px 8px rgb(0 0 0 / 40%);
+    background: var(--background-secondary);
+    resize: both;
+    min-width: 160px;
+    min-height: 60px;
 }
 
-.vc-portable-close-btn:hover {
-    background: rgb(255 255 255 / 8%) !important;
-    color: var(--interactive-hover) !important;
+/* Title bar */
+.vc-fw-bar {
+    height: 30px;
+    min-height: 30px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px 0 10px;
+    background: var(--background-tertiary);
+    border-bottom: 1px solid var(--background-modifier-accent);
+    cursor: move;
+    user-select: none;
 }
 
-/* Ensure sidebar stays full height when floating */
-.vc-portable-active[class*="sidebar_"] > [class*="sidebar_"],
-.vc-portable-active > [class*="scrollerBase_"] {
+.vc-fw-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--header-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.vc-fw-close {
+    background: none;
+    border: none;
+    padding: 3px;
+    border-radius: 3px;
+    cursor: pointer;
+    color: var(--interactive-normal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    line-height: 0;
+    transition: background 0.1s, color 0.1s;
+}
+
+.vc-fw-close:hover {
+    background: rgb(255 255 255 / 8%);
+    color: var(--interactive-hover);
+}
+
+/* Content area */
+.vc-fw-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-fw-body > * {
+    flex: 1;
+    min-height: 0;
+}
+
+/* ── Category group (.vc-group) ──────────────────────────────────────────── */
+
+.vc-group {
+    display: flex;
+    flex-direction: column;
+    background: var(--background-secondary);
+    overflow-y: auto;
+    width: 100%;
+}
+
+/* ── Overrides inside floating windows ───────────────────────────────────── */
+
+/* Member list keeps its native width/height behaviour */
+.vc-fw [class*="membersWrap_"] {
+    width: 100% !important;
     height: 100% !important;
-    flex: 1 !important;
+    position: relative !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+}
+
+/* Channel items fill the floating window width */
+.vc-fw [class*="containerDefault_"] {
+    width: 100% !important;
 }
