@@ -2,27 +2,51 @@
  * PortableDiscord – Styles
  */
 
-/* ── Drag handle ─────────────────────────────────────────────────────────── */
+/* ── Drag handle ─────────────────────────────────────────────────────────────── */
 
 .vc-dh {
     position: absolute;
     top: 50%;
-    right: 4px;
+    right: 6px;
     transform: translateY(-50%);
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: grab;
-
-    /* Use Discord's muted interactive color — fits any theme */
     color: var(--interactive-muted);
     opacity: 0;
-    transition: opacity 0.15s, color 0.15s, background 0.15s;
+    transition: opacity 0.15s ease, color 0.15s ease, background-color 0.15s ease;
     z-index: 10;
     pointer-events: none;
+}
+
+/* Chat area: button in top-right corner */
+[class*="chat_"] > .vc-dh {
+    top: 12px;
+    right: 12px;
+    transform: none;
+    width: 26px;
+    height: 26px;
+    background-color: var(--background-tertiary, #1e1f22);
+    border: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 6%));
+    opacity: 0;
+}
+
+/* Panels: button near top */
+[class*="panels_"] > .vc-dh {
+    top: 8px;
+    right: 8px;
+    transform: none;
+}
+
+/* Member list: top-right */
+[class*="membersWrap_"] > .vc-dh {
+    top: 8px;
+    right: 6px;
+    transform: none;
 }
 
 .vc-dh.vc-dh-show {
@@ -32,7 +56,7 @@
 
 .vc-dh:hover {
     color: var(--interactive-hover);
-    background: var(--background-modifier-hover);
+    background-color: var(--background-modifier-hover, rgb(255 255 255 / 4%));
 }
 
 .vc-dh:active {
@@ -40,46 +64,36 @@
     color: var(--interactive-active);
 }
 
-/* Member list drag handle: near top-right, not vertically centered */
-[class*="membersWrap_"] > .vc-dh {
-    top: 10px;
-    right: 6px;
-    transform: none;
-    width: 22px;
-    height: 22px;
-}
-
-/* ── Floating window shell (.vc-fw) ─────────────────────────────────────── */
+/* ── Floating window ─────────────────────────────────────────────────────────── */
 
 .vc-fw {
     position: fixed;
 
-    /* z-index 1000: above channel list / member list but BELOW Discord's
-       context menus, tooltips, and modals (typically 3 000 – 10 000) */
+    /* Below Discord context menus/tooltips/modals (~3000+) but above panels */
     z-index: 1000;
     display: flex;
     flex-direction: column;
     border-radius: 8px;
     overflow: hidden;
-    border: 1px solid var(--background-modifier-accent);
-    box-shadow: 0 8px 32px rgb(0 0 0 / 60%), 0 2px 8px rgb(0 0 0 / 35%);
+    border: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 6%));
+    box-shadow:
+        0 8px 32px rgb(0 0 0 / 60%),
+        0 2px 8px rgb(0 0 0 / 35%);
 
-    /* Solid background — must be opaque to prevent transparency bleed */
-    background: var(--background-secondary);
+    /* Solid opaque background — fallback #313338 (Discord dark secondary) */
+    background-color: var(--background-secondary, #313338);
     min-width: 160px;
     min-height: 60px;
 }
 
-/* CSS-float variant: the shell is only the 30 px title bar */
+/* CSS-float variant: only the 30px title bar */
 .vc-fw.vc-fw-css {
-    border-bottom: none;
     border-radius: 8px 8px 0 0;
-    box-shadow: none;
-
-    /* The actual element below carries the shadow */
+    border-bottom: none;
+    box-shadow: 0 -1px 4px rgb(0 0 0 / 20%);
 }
 
-/* ── Title bar ──────────────────────────────────────────────────────────── */
+/* ── Title bar ───────────────────────────────────────────────────────────────── */
 
 .vc-fw-bar {
     height: 30px;
@@ -89,8 +103,8 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 6px 0 10px;
-    background: var(--background-tertiary);
-    border-bottom: 1px solid var(--background-modifier-accent);
+    background-color: var(--background-tertiary, #1e1f22);
+    border-bottom: 1px solid var(--background-modifier-accent, rgb(255 255 255 / 6%));
     cursor: move;
     user-select: none;
 }
@@ -100,12 +114,14 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    color: var(--header-secondary);
+    color: var(--header-secondary, rgb(255 255 255 / 50%));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     flex: 1;
 }
+
+/* ── Close button ────────────────────────────────────────────────────────────── */
 
 .vc-fw-close {
     background: none;
@@ -119,11 +135,11 @@
     justify-content: center;
     flex-shrink: 0;
     line-height: 0;
-    transition: background 0.1s, color 0.1s;
+    transition: background-color 0.1s, color 0.1s;
 }
 
 .vc-fw-close:hover {
-    background: var(--background-modifier-hover);
+    background-color: var(--background-modifier-hover, rgb(255 255 255 / 4%));
     color: var(--interactive-hover);
 }
 
@@ -131,41 +147,69 @@
     color: var(--interactive-active);
 }
 
-/* ── Content body (DOM-float only) ─────────────────────────────────────── */
+/* ── Resize grip ─────────────────────────────────────────────────────────────── */
+
+.vc-fw-grip {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+    z-index: 10;
+
+    /* Subtle visual cue */
+    background: linear-gradient(135deg,
+            transparent 33%,
+            var(--interactive-muted, rgb(255 255 255 / 20%)) 33%,
+            var(--interactive-muted, rgb(255 255 255 / 20%)) 44%,
+            transparent 44%,
+            transparent 66%,
+            var(--interactive-muted, rgb(255 255 255 / 20%)) 66%,
+            var(--interactive-muted, rgb(255 255 255 / 20%)) 77%,
+            transparent 77%);
+    opacity: 0.4;
+    transition: opacity 0.15s;
+}
+
+.vc-fw:hover .vc-fw-grip {
+    opacity: 0.8;
+}
+
+/* ── Content body ────────────────────────────────────────────────────────────── */
 
 .vc-fw-body {
     flex: 1;
     overflow: hidden auto;
     display: flex;
     flex-direction: column;
-    background: var(--background-secondary);
+    background-color: var(--background-secondary, #313338);
     min-height: 0;
 }
 
 .vc-fw-body > * {
     flex-shrink: 0;
-    background: var(--background-secondary);
 }
 
-/* ── CSS-floated element (.vc-floating-el) ──────────────────────────────── */
+/* ── CSS-floated element ─────────────────────────────────────────────────────── */
 
 .vc-floating-el {
-    /* Solid background matching Discord's secondary panel color */
-    background: var(--background-secondary) !important;
-    border-radius: 0 0 8px 8px !important;
-    box-shadow: 0 8px 24px rgb(0 0 0 / 55%) !important;
+    background-color: var(--background-secondary, #313338) !important;
 }
 
-.vc-floating-el[class*="membersWrap_"] {
-    overflow: hidden !important;
+/* ── Placeholder ─────────────────────────────────────────────────────────────── */
+
+.vc-fw-placeholder {
+    display: none !important;
+    pointer-events: none;
 }
 
-/* ── Category / channel group inside float ──────────────────────────────── */
+/* ── Category group ──────────────────────────────────────────────────────────── */
 
 .vc-group {
     display: flex;
     flex-direction: column;
-    background: var(--background-secondary);
+    background-color: var(--background-secondary, #313338);
     overflow: hidden auto;
     width: 100%;
     min-height: 0;
@@ -173,5 +217,5 @@
 
 .vc-group [class*="containerDefault_"] {
     width: 100% !important;
-    background: var(--background-secondary);
+    background-color: transparent;
 }
