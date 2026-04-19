@@ -12,7 +12,6 @@ import definePlugin, { OptionType } from "@utils/types";
 import type { Channel, Guild, User } from "@vencord/discord-types";
 import { GuildMemberStore, IconUtils, Menu } from "@webpack/common";
 
-
 interface UserContextProps {
     channel: Channel;
     guildId?: string;
@@ -32,19 +31,9 @@ const settings = definePluginSettings({
         type: OptionType.SELECT,
         description: "Choose the image format to use for non animated images. Animated images will always use .gif",
         options: [
-            {
-                label: "webp",
-                value: "webp",
-            },
-            {
-                label: "png",
-                value: "png",
-                default: true
-            },
-            {
-                label: "jpg",
-                value: "jpg",
-            }
+            { label: "webp", value: "webp" },
+            { label: "png", value: "png", default: true },
+            { label: "jpg", value: "jpg" }
         ]
     },
     imgSize: {
@@ -112,7 +101,6 @@ const UserContext: NavContextMenuPatchCallback = (children, { user, guildId }: U
 
 const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildContextProps) => {
     if (!guild) return;
-
     const { id, icon, banner } = guild;
     if (!banner && !icon) return;
 
@@ -122,13 +110,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                 <Menu.MenuItem
                     id="view-icon"
                     label="Avatarı Görüntüle"
-                    action={() =>
-                        openAvatar(IconUtils.getGuildIconURL({
-                            id,
-                            icon,
-                            canAnimate: true
-                        })!)
-                    }
+                    action={() => openAvatar(IconUtils.getGuildIconURL({ id, icon, canAnimate: true })!)}
                     icon={ImageIcon}
                 />
             ) : null}
@@ -136,9 +118,7 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
                 <Menu.MenuItem
                     id="view-banner"
                     label="Banneri Görüntüle"
-                    action={() =>
-                        openBanner(IconUtils.getGuildBannerURL(guild, true)!)
-                    }
+                    action={() => openBanner(IconUtils.getGuildBannerURL(guild, true)!)}
                     icon={ImageIcon}
                 />
             ) : null}
@@ -148,28 +128,26 @@ const GuildContext: NavContextMenuPatchCallback = (children, { guild }: GuildCon
 
 const GroupDMContext: NavContextMenuPatchCallback = (children, { channel }: GroupDMContextProps) => {
     if (!channel) return;
-
     children.splice(-1, 0, (
         <Menu.MenuGroup>
             <Menu.MenuItem
                 id="view-group-channel-icon"
                 label="Avatarı Görüntüle"
-                action={() =>
-                    openAvatar(IconUtils.getChannelIconURL(channel)!)
-                }
+                action={() => openAvatar(IconUtils.getChannelIconURL(channel)!)}
                 icon={ImageIcon}
             />
         </Menu.MenuGroup>
     ));
 };
 
+let clickListener: (e: MouseEvent) => void;
+
 export default definePlugin({
     name: "ViewIcons",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
-    description: "Makes avatars and banners in user profiles clickable, adds View Icon/Banner entries in the user, server and group channel context menu.",
+    description: "Kullanıcı profillerinde avatar ve bannerlara tıklayarak büyütmenizi sağlar. Ayrıca sağ tık menüsüne seçenekler ekler.",
     tags: ["ImageUtilities"],
     dependencies: ["DynamicImageModalAPI"],
-
     settings,
 
     openAvatar,
@@ -181,21 +159,34 @@ export default definePlugin({
         "gdm-context": GroupDMContext
     },
 
+    start() {
+        clickListener = (e: MouseEvent) => {
+            const target = e.target as HTMLElement;
+            const wrapper = target.closest?.('[class*="wrapper__44b0c"]');
+            if (!wrapper) return;
+
+            // Sadece büyük avatarlar (profil popout/modal)
+            if ((wrapper as HTMLElement).offsetWidth < 80) return;
+
+            // Profil içinde olduğumuzdan emin olalım
+            const isProfile = target.closest?.('[class*="userPopoutOuter_"], [class*="userProfileModalOuter_"], [class*="overlay_"]');
+            if (!isProfile) return;
+
+            const img = wrapper.querySelector?.('img[class*="avatar__44b0c"]') as HTMLImageElement;
+            if (img?.src) {
+                e.preventDefault();
+                e.stopPropagation();
+                openAvatar(img.src);
+            }
+        };
+        document.addEventListener("click", clickListener, true);
+    },
+
+    stop() {
+        document.removeEventListener("click", clickListener, true);
+    },
+
     patches: [
-        // Make profile/popout avatars clickable (patch the SVG and fix props scoping)
-        {
-            find: ".size-1.375*",
-            replacement: [
-                {
-                    match: /function\s+\i\((\i)\)\{/,
-                    replace: "$&const __vc_props=$1;"
-                },
-                {
-                    match: /"svg",\{ref:\i,width:(\i),/,
-                    replace: (match, width) => `${match}onClick:e=>{if(${width}>=80){e.stopPropagation();e.preventDefault();$self.openAvatar(__vc_props.src)}},style:{cursor:${width}>=80?"pointer":void 0,pointerEvents:${width}>=80?"auto":void 0},`
-                }
-            ]
-        },
         // Banners
         {
             find: 'backgroundColor:"COMPLETE"',
@@ -209,7 +200,6 @@ export default definePlugin({
             find: '["aria-hidden"],"aria-label":',
             replacement: {
                 match: /null==\i\.icon\?.+?src:(\(0,\i\.\i\).+?\))(?=[,}])/,
-                // We have to check that icon is not an unread GDM in the server bar
                 replace: (m, iconUrl) => `${m},onClick:()=>arguments[0]?.size!=="SIZE_48"&&$self.openAvatar(${iconUrl})`
             }
         },
