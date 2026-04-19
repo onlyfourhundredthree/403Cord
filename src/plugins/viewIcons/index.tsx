@@ -48,7 +48,7 @@ function ProfileViewButton({ user }: { user: User; }) {
     return (
         <Button
             size={Button.Sizes.SMALL}
-            color={Button.Colors.SECONDARY}
+            color={Button.Colors.PRIMARY}
             look={Button.Looks.FILLED}
             onClick={e => {
                 e.stopPropagation();
