@@ -182,12 +182,12 @@ export default definePlugin({
     },
 
     patches: [
-        // Make all large Avatars (Profiles, Popouts) clickable
+        // Make profile/popout avatars clickable (patch the native SVG element directly)
         {
             find: ".size-1.375*",
             replacement: {
-                match: /(children:\(0,\i\.jsx\)\(\i,\{[^}]*?src:(\i)[^}]*?className:\i)(?=\}\))/,
-                replace: "$1,onClick:()=>(x=>typeof x===\"number\"?x>=80:String(x).match(/80|120/))(arguments[0].size)&&$2&&$self.openAvatar($2),style:{cursor:(x=>typeof x===\"number\"?x>=80:String(x).match(/80|120/))(arguments[0].size)&&$2?\"pointer\":undefined}"
+                match: /(?<=let\{src:(\i).+?)"svg",\{ref:\i,width:(\i),/,
+                replace: (match, src, width) => `${match}onClick:()=>${width}>=80&&$self.openAvatar(${src}),style:{cursor:${width}>=80?"pointer":void 0},`
             }
         },
         // Banners
