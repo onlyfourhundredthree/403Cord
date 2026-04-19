@@ -182,12 +182,12 @@ export default definePlugin({
     },
 
     patches: [
-        // Avatar component used in User DMs "User Profile" popup in the right and User Profile Modal pfp
+        // Make all large Avatars (Profiles, Popouts) clickable
         {
-            find: "imageClassName:null!=",
+            find: ".size-1.375*",
             replacement: {
-                match: /avatarSrc:(\i),eventHandlers:(\i).+?"div",.{0,100}className:\i,/,
-                replace: "$&style:{cursor:\"pointer\"},onClick:()=>{$self.openAvatar($1)},",
+                match: /(children:\(0,\i\.jsx\)\(\i,\{[^}]*?src:(\i)[^}]*?className:\i)(?=\}\))/,
+                replace: "$1,onClick:()=>(x=>typeof x===\"number\"?x>=80:String(x).match(/80|120/))(arguments[0].size)&&$2&&$self.openAvatar($2),style:{cursor:(x=>typeof x===\"number\"?x>=80:String(x).match(/80|120/))(arguments[0].size)&&$2?\"pointer\":undefined}"
             }
         },
         // Banners
