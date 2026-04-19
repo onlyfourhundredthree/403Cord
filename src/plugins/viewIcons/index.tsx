@@ -88,14 +88,43 @@ function injectProfileButton() {
 
         if (!avatarUrl && !bannerUrl) continue;
 
+        // Discord'un kendi buton sınıflarını aynı satırdaki mevcut butondan al
+        const existingBtn = row.querySelector<HTMLElement>("button[data-mana-component]");
+        if (!existingBtn) continue;
+
+        // Sınıf isimlerini Discord'un butonundan çıkar
+        const btnClasses = existingBtn.className;
+        const wrapperDiv = existingBtn.querySelector<HTMLElement>('[class*="buttonChildrenWrapper"]');
+        const innerDiv = existingBtn.querySelector<HTMLElement>('[class*="buttonChildren"]');
+        const iconEl = existingBtn.querySelector<HTMLElement>('[class*="icon_"]');
+
         const wrapper = document.createElement("span");
         const btn = document.createElement("button");
         btn.setAttribute("data-mana-component", "button");
         btn.setAttribute("role", "button");
         btn.setAttribute("type", "button");
         btn.setAttribute("aria-label", "Görselleri Görüntüle");
-        btn.className = "vc-viewicons-btn";
-        btn.innerHTML = '<div class="vc-viewicons-btn-wrapper"><div class="vc-viewicons-btn-inner">📷</div></div>';
+        btn.className = btnClasses + " vc-viewicons-btn";
+
+        const childWrapper = document.createElement("div");
+        childWrapper.className = wrapperDiv?.className || "";
+        const childInner = document.createElement("div");
+        childInner.className = innerDiv?.className || "";
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "16");
+        svg.setAttribute("height", "16");
+        svg.setAttribute("fill", "currentColor");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("role", "img");
+        if (iconEl) svg.setAttribute("class", iconEl.className);
+        svg.innerHTML = '<path d="M5 21h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2m0-2v-1.59l3-3 1.29 1.29c.39.39 1.02.39 1.41 0l5.29-5.29 3 3V19h-14ZM19 5v5.59L16.71 8.3a.996.996 0 0 0-1.41 0l-5.29 5.29-1.29-1.29a.996.996 0 0 0-1.41 0l-2.29 2.29V5h14Z"></path><path d="M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3"></path>';
+
+        childInner.appendChild(svg);
+        childWrapper.appendChild(childInner);
+        btn.appendChild(childWrapper);
+
         btn.onclick = e => {
             e.stopPropagation();
             openGallery(avatarUrl, bannerUrl);

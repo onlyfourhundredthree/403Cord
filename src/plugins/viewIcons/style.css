@@ -1,42 +1,4 @@
-/* ViewIcons — Discord native button style */
+/* ViewIcons — minimal override, Discord's own classes handle the rest */
 .vc-viewicons-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    border: none;
-    background: var(--button-secondary-background, #4e5058);
-    color: var(--interactive-normal, #b5bac1);
-    cursor: pointer;
-    transition: background 0.17s ease, color 0.17s ease;
-    padding: 0;
-    font-size: 16px;
-    line-height: 1;
-}
-
-.vc-viewicons-btn:hover {
-    background: var(--button-secondary-background-hover, #6d6f78);
-    color: var(--interactive-hover, #dbdee1);
-}
-
-.vc-viewicons-btn:active {
-    background: var(--button-secondary-background-active, #43444b);
-    color: var(--interactive-active, #fff);
-}
-
-.vc-viewicons-btn-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px 4px;
-}
-
-.vc-viewicons-btn-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    line-height: 1;
+    /* Sadece ek tanımlayıcı olarak kullanılır, Discord'un kendi buton sınıfları temel stili sağlar */
 }

@@ -37,7 +37,7 @@ const getMutualGroupDms = (userId: string) =>
     ChannelStore.getSortedPrivateChannels()
         .filter(c => c.isGroupDM() && c.recipients.includes(userId));
 
-const isBotOrSelf = (user: User) => user.bot || user.id === UserStore.getCurrentUser().id;
+const isBotOrSelf = (user: User) => user?.bot || user?.id === UserStore.getCurrentUser()?.id;
 
 function getMutualGDMCountText(user: User) {
     const count = getMutualGroupDms(user.id).length;
@@ -143,7 +143,7 @@ export default definePlugin({
 
     pushSection(sections: any[], user: User) {
         try {
-            if (isBotOrSelf(user) || sections[IS_PATCHED]) return;
+            if (!user || isBotOrSelf(user) || sections[IS_PATCHED]) return;
 
             sections[IS_PATCHED] = true;
             sections.push({
