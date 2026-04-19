@@ -182,12 +182,12 @@ export default definePlugin({
     },
 
     patches: [
-        // Make profile/popout avatars clickable (patch the outer wrapper)
+        // Make profile/popout avatars clickable (patch the inner img/svg component)
         {
             find: ".size-1.375*",
             replacement: {
-                match: /(return\s*\(0,\i\.jsx\)\(\i,\{\.\.\.\i,)/,
-                replace: "$1onClick:(e)=>{arguments[0].size>=80&&(e.stopPropagation(),e.preventDefault(),$self.openAvatar(arguments[0].src))},style:{cursor:arguments[0].size>=80?\"pointer\":void 0},"
+                match: /(children:\(0,\i\.jsx\)\(\i,\{)(ref:\i,src:(\i),isSpeaking:\i,voiceDb:\i,speakingStylesConfig:\i,className:\i)(?=\}\))/,
+                replace: "$1onClick:(e)=>{arguments[0].size>=80&&(e.stopPropagation(),e.preventDefault(),$self.openAvatar($3))},style:{cursor:arguments[0].size>=80?\"pointer\":void 0,pointerEvents:arguments[0].size>=80?\"auto\":\"none\"},$2"
             }
         },
         // Banners
