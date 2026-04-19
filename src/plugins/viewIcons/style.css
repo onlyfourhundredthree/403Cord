@@ -1,0 +1,28 @@
+.vc-viewicons-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: var(--background-secondary-alt, #232428);
+    color: var(--interactive-normal, #b5bac1);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    padding: 0;
+}
+
+.vc-viewicons-btn:hover {
+    background: var(--background-modifier-hover, #36373d);
+    color: var(--interactive-hover, #dbdee1);
+}
+
+.vc-viewicons-btn:active {
+    background: var(--background-modifier-active, #3b3d44);
+    color: var(--interactive-active, #fff);
+}
+
+.vc-viewicons-btn svg {
+    pointer-events: none;
+}
