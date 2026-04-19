@@ -192,7 +192,7 @@ function injectHandle(el: HTMLElement, label: string, onClick: () => void) {
 
 export default definePlugin({
     name: "PortableDiscord",
-    description: "Metin kanalı chat'ini ve üye listesini yüzen taşınabilir pencerelere dönüştürür.",
+    description: "Üye listesini yüzen taşınabilir bir pencereye dönüştürür.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     settings,
     patches: [],
@@ -212,29 +212,7 @@ export default definePlugin({
     },
 
     inject() {
-        this.injectChat();
         this.injectMemberList();
-    },
-
-    /**
-     * Ana chat alanı (mesajlar + yazı kutusu) — CSS float.
-     * React güncellemeleri korunur; farklı kanala geçilirse içerik güncellenir.
-     * Placeholder sayesinde sidebar ve içerik alanı layout'u bozulmaz.
-     */
-    injectChat() {
-        // Find the main chat element: inside content_, not inside sidebar_, large enough
-        const base = document.querySelector<HTMLElement>('[class*="base_"]');
-        if (!base) return;
-
-        const chatEl = Array.from(base.querySelectorAll<HTMLElement>('[class*="chat_"]'))
-            .find(e =>
-                !e.closest('[class*="sidebar_"]') &&
-                !e.closest('[class*="standardSidebarView_"]') &&
-                e.offsetWidth > 300
-            );
-        if (!chatEl || chatEl.querySelector(".vc-dh")) return;
-
-        injectHandle(chatEl, "� Sohbet", () => cssPopout(chatEl, "� Sohbet", "chat"));
     },
 
     /** Üye listesi — CSS float, tam interaktif (scroll, tıklama, sağ tık) */

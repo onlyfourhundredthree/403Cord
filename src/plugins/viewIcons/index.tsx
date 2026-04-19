@@ -186,8 +186,8 @@ export default definePlugin({
         {
             find: ".size-1.375*",
             replacement: {
-                match: /(?<=let\{src:(\i).+?)"svg",\{ref:\i,width:(\i),/,
-                replace: (match, src, width) => `${match}onClick:()=>${width}>=80&&$self.openAvatar(${src}),style:{cursor:${width}>=80?"pointer":void 0},`
+                match: /"svg",\{ref:\i,width:(\i),/,
+                replace: (match, width) => `${match}onClick:()=>${width}>=80&&$self.openAvatar(arguments[0].src),style:{cursor:${width}>=80?"pointer":void 0},`
             }
         },
         // Banners
