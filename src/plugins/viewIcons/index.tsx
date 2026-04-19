@@ -88,16 +88,20 @@ function injectProfileButton() {
 
         if (!avatarUrl && !bannerUrl) continue;
 
+        const wrapper = document.createElement("span");
         const btn = document.createElement("button");
+        btn.setAttribute("data-mana-component", "button");
+        btn.setAttribute("role", "button");
+        btn.setAttribute("type", "button");
+        btn.setAttribute("aria-label", "Görselleri Görüntüle");
         btn.className = "vc-viewicons-btn";
-        btn.title = "Görselleri Görüntüle";
-        btn.innerHTML = "<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V5h14v14zm-7-2l-4-5 1.5-2 2.5 3 3.5-4.5 1.5 2L12 17z\"/></svg>";
+        btn.innerHTML = '<div class="vc-viewicons-btn-wrapper"><div class="vc-viewicons-btn-inner">📷</div></div>';
         btn.onclick = e => {
             e.stopPropagation();
             openGallery(avatarUrl, bannerUrl);
         };
-
-        row.appendChild(btn);
+        wrapper.appendChild(btn);
+        row.appendChild(wrapper);
     }
 }
 

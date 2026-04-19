@@ -1,28 +1,42 @@
+/* ViewIcons — Discord native button style */
 .vc-viewicons-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    min-width: 32px;
     height: 32px;
-    border-radius: 50%;
+    border-radius: 4px;
     border: none;
-    background: var(--background-secondary-alt, #232428);
+    background: var(--button-secondary-background, #4e5058);
     color: var(--interactive-normal, #b5bac1);
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.17s ease, color 0.17s ease;
     padding: 0;
+    font-size: 16px;
+    line-height: 1;
 }
 
 .vc-viewicons-btn:hover {
-    background: var(--background-modifier-hover, #36373d);
+    background: var(--button-secondary-background-hover, #6d6f78);
     color: var(--interactive-hover, #dbdee1);
 }
 
 .vc-viewicons-btn:active {
-    background: var(--background-modifier-active, #3b3d44);
+    background: var(--button-secondary-background-active, #43444b);
     color: var(--interactive-active, #fff);
 }
 
-.vc-viewicons-btn svg {
-    pointer-events: none;
+.vc-viewicons-btn-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 4px;
+}
+
+.vc-viewicons-btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
 }

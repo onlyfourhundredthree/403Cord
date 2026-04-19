@@ -29,19 +29,28 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const { message } = props;
     if (!message) return;
 
+    const seen = new Set<string>();
     const images: string[] = [];
+
+    const addImage = (url: string) => {
+        const key = new URL(url).pathname;
+        if (!seen.has(key)) {
+            seen.add(key);
+            images.push(url);
+        }
+    };
 
     for (const attachment of message.attachments ?? []) {
         if (attachment.content_type?.startsWith("image/") && !attachment.content_type.includes("gif")) {
-            images.push(attachment.url);
+            addImage(attachment.url);
         }
     }
 
     for (const embed of message.embeds ?? []) {
         if (embed.image?.url && !embed.image.url.includes(".gif")) {
-            images.push(embed.image.url);
+            addImage(embed.image.url);
         } else if (embed.type === "image" && embed.url && !embed.url.includes(".gif")) {
-            images.push(embed.url);
+            addImage(embed.url);
         }
     }
 
@@ -94,7 +103,10 @@ async function uploadToCatbox(uint8Array: Uint8Array): Promise<string> {
     return (await response.text()).trim();
 }
 
+let isSending = false;
 async function convertToGifAndSend(url: string) {
+    if (isSending) return;
+    isSending = true;
     let objUrl: string | null = null;
     try {
         const response = await fetch(url);
@@ -141,6 +153,7 @@ async function convertToGifAndSend(url: string) {
         console.error(err);
     } finally {
         if (objUrl) URL.revokeObjectURL(objUrl);
+        isSending = false;
     }
 }
 
