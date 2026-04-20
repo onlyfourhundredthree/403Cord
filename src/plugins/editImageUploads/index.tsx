@@ -50,19 +50,47 @@ export default definePlugin({
     settings,
 
     start() {
-        // Plugin is starting!
-    },
+        // Enforce discovery of internal Discord modules for the components to use
+        const { Webpack } = Vencord;
 
-    stop() {
-        // Plugin is stopped!
+        // Find stores
+        Components.internals.SelectedChannelStore = Webpack.findStore("SelectedChannelStore");
+
+        // Find Action Bar styles
+        const actionStyles = Webpack.findByProps("actionBarIcon");
+        if (actionStyles) Components.internals.actionIconClass = actionStyles;
+
+        const buttonStyles = Webpack.findByProps("actionButton", "button");
+        if (buttonStyles) Components.internals.actionButtonClass = buttonStyles;
+
+        // Find Modal components
+        const ModalSystem = Webpack.findByProps("ModalRoot", "ModalHeader");
+        if (ModalSystem) {
+            Components.internals.ModalSystem = ModalSystem;
+            Components.internals.keys = {
+                ModalRoot: (Webpack.filters.byProps("ModalRoot")(ModalSystem) ? "ModalRoot" : Object.keys(ModalSystem).find(k => ModalSystem[k]?.displayName === "ModalRoot")) as string,
+                ModalHeader: "ModalHeader",
+                ModalContent: "ModalContent",
+                ModalFooter: "ModalFooter"
+            };
+        }
+
+        // Find native UI components
+        Components.internals.nativeUI = Webpack.findByProps("openModal", "closeModal") || {};
+        Components.internals.keys.openModal = "openModal";
+        Components.internals.keys.closeModal = "closeModal";
+        Components.internals.keys.FocusRing = "FocusRing";
+
+        // Find Upload Dispatcher (Crucial for saving edits)
+        Components.internals.uploadDispatcher = Webpack.findByProps("setFile", "addFile");
     },
 
     patches: [
         {
             find: ".attachmentItemSmall",
             replacement: {
-                match: /(?<=return )(\i\.jsx\(\i,{)(\n?.+?)(?=upload:)/s,
-                replace: "$1...$self.Components.injectUploadButton(arguments[0]),$2"
+                match: /actions:\(0,\i\.jsxs\)\(\i\.Fragment,{children:\[/g,
+                replace: "$&$self.Components.injectUploadButton(arguments[0]),"
             }
         },
         {

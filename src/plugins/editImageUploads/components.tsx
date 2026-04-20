@@ -15,29 +15,38 @@ import { CanvasEditor } from "./CanvasEditor";
 import { hooks } from "./hooks";
 import { utils } from "./utils";
 // Some BD APIs are mocked or translated
-const ContextMenu = { open: () => { }, buildMenu: () => { } };
-const UI = { showToast: msg => console.log(msg) };
-const BdApi = { Components: { ErrorBoundary: ({ children }) => children, Tooltip: ({ children }) => children, Spinner: () => null } };
+const meta = { slug: "EditImageUploads" };
 const internals = {
     actionIconClass: {},
     nativeUI: {},
-    keys: {},
+    keys: {
+        openModal: "openModal",
+        closeModal: "closeModal",
+        FocusRing: "FocusRing",
+        ModalRoot: "ModalRoot",
+        ModalHeader: "ModalHeader",
+        ModalContent: "ModalContent",
+        ModalFooter: "ModalFooter"
+    },
     actionButtonClass: {},
     ManaButton: {},
     scrollbarClass: {},
     contextMenuClass: {},
+    ModalSystem: {}, // Added to fix index.tsx error
     SelectedChannelStore: { getCurrentlySelectedChannelId: () => "0" },
     uploadDispatcher: { setFile: () => { }, addFile: () => { } }
 };
-const meta = { slug: "EditImageUploads" };
 
 // @ts-nocheck
 export const Components = {
+    internals,
     injectUploadButton(args: any) {
-        return null; // TODO: return the UploadIcon
+        if (!args.upload?.isImage) return null;
+        return jsx(Components.UploadIcon, { args });
     },
     injectRemixButton(args: any, hooks: any, utils: any) {
-        return null; // TODO: wrap the remix button
+        // This is for the media viewer
+        return jsx(Components.RemixIcon, { url: args.item.url });
     },
     /** @param {React.PropsWithChildren<{fallback?: React.ReactNode}>} props */
     ErrorBoundary({ fallback, ...restProps }) {
