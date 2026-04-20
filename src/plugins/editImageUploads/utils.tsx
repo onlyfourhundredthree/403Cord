@@ -6,7 +6,9 @@
 
 // @ts-nocheck
 import { Logger } from "@utils/Logger";
-import { findBulk,wreq } from "@webpack";
+import { findBulk, wreq } from "@webpack";
+
+import { Components, jsx } from "./components";
 
 const logger = new Logger("EditImageUploads");
 
@@ -248,32 +250,32 @@ export const utils = {
 
     /** @param {{onSubmit: () => void, bitmap: ImageBitmap, userActions: React.RefObject<any>}} */
     openEditor({ onSubmit, bitmap, userActions }) {
-        const id = internals.nativeUI[internals.keys.openModal]?.(e => {
-            const channelId = internals.SelectedChannelStore.getCurrentlySelectedChannelId();
+        const id = Components.internals.nativeUI[Components.internals.keys.openModal]?.(e => {
+            const channelId = Components.internals.SelectedChannelStore.getCurrentlySelectedChannelId();
 
-            return jsx(BdApi.Components.ErrorBoundary, null, jsx(internals.ModalSystem[internals.keys.ModalRoot], {
+            return jsx(Components.VTools.ErrorBoundary, null, jsx(Components.internals.ModalSystem[Components.internals.keys.ModalRoot], {
                 ...e,
                 animation: "subtle",
                 size: "dynamic",
-                className: `${meta.slug}Root`,
+                className: "EditImageUploadsRoot",
                 children: [
-                    jsx(internals.ModalSystem[internals.keys.ModalFooter], {
+                    jsx(Components.internals.ModalSystem[Components.internals.keys.ModalFooter], {
                         className: "modal-footer",
-                        children: internals.uploadDispatcher && channelId ? [
-                            jsx(internals.ManaButton[internals.keys.ManaButton], {
+                        children: Components.internals.uploadDispatcher && channelId ? [
+                            jsx(Components.internals.ManaButton[Components.internals.keys.ManaButton], {
                                 text: "Save",
                                 variant: "active",
                                 type: "submit",
                                 onClick: () => {
                                     onSubmit?.();
-                                    internals.nativeUI[internals.keys.closeModal](id);
+                                    Components.internals.nativeUI[Components.internals.keys.closeModal](id);
                                 }
                             }),
-                            jsx(internals.ManaButton[internals.keys.ManaButton], {
+                            jsx(Components.internals.ManaButton[Components.internals.keys.ManaButton], {
                                 text: "Cancel",
                                 variant: "secondary",
                                 onClick: () => {
-                                    internals.nativeUI[internals.keys.closeModal](id);
+                                    Components.internals.nativeUI[Components.internals.keys.closeModal](id);
                                 }
                             })
                         ] : jsx("div", {
@@ -281,7 +283,7 @@ export const utils = {
                             children: "Unable to save. Please use [Ctrl] + [C] instead."
                         })
                     }),
-                    jsx(internals.ModalSystem[internals.keys.ModalContent], {
+                    jsx(Components.internals.ModalSystem[Components.internals.keys.ModalContent], {
                         className: "image-editor",
                         children: jsx(Components.ImageEditor, {
                             bitmap,

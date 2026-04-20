@@ -8,14 +8,22 @@
 import { Logger } from "@utils/Logger";
 import { React } from "@webpack/common";
 
-const logger = new Logger("EditImageUploads");
-const jsx = (...args) => (React as any).jsx ? (React as any).jsx(...args) : React.createElement(...args);
-
 import { CanvasEditor } from "./CanvasEditor";
 import { hooks } from "./hooks";
 import { utils } from "./utils";
+
+const logger = new Logger("EditImageUploads");
+export const jsx = (...args) => (React as any).jsx ? (React as any).jsx(...args) : React.createElement(...args);
+
+export const UI = { showToast: (msg: string) => console.log(msg) };
+// We map these to actual Vencord/Discord components later
+export const VTools = {
+    ErrorBoundary: ({ children }: any) => children,
+    Tooltip: ({ children }: any) => children,
+    Spinner: () => null
+};
 // Some BD APIs are mocked or translated
-const meta = { slug: "EditImageUploads" };
+export const meta = { slug: "EditImageUploads" };
 const internals = {
     actionIconClass: {},
     nativeUI: {},
@@ -50,7 +58,7 @@ export const Components = {
     },
     /** @param {React.PropsWithChildren<{fallback?: React.ReactNode}>} props */
     ErrorBoundary({ fallback, ...restProps }) {
-        return jsx(BdApi.Components.ErrorBoundary, {
+        return jsx(VTools.ErrorBoundary, {
             ...restProps,
             fallback: fallback ?? jsx("div", { style: { color: "var(--red-430, #d6363f)" } }, "Component Error")
         });
@@ -82,7 +90,7 @@ export const Components = {
      */
     IconButton({ onClick, tooltip, d, disabled, active, className }) {
         return jsx(Components.ErrorBoundary, {
-            children: jsx(BdApi.Components.Tooltip, {
+            children: jsx(VTools.Tooltip, {
                 spacing: 11,
                 text: tooltip,
                 children: ({ onContextMenu, ...restProps }) => jsx(internals.nativeUI[internals.keys.FocusRing], {
@@ -108,7 +116,7 @@ export const Components = {
 
         React.useEffect(() => () => ctrl.current.abort(), []);
 
-        return !isPending ? jsx(BdApi.Components.Tooltip, {
+        return !isPending ? jsx(VTools.Tooltip, {
             spacing: 11,
             position: "bottom",
             text: "Edit Image",
@@ -142,8 +150,8 @@ export const Components = {
                     });
                 },
             })
-        }) : jsx(BdApi.Components.Spinner, {
-            type: BdApi.Components.Spinner.Type.SPINNING_CIRCLE_SIMPLE
+        }) : jsx(VTools.Spinner, {
+            type: VTools.Spinner.Type.SPINNING_CIRCLE_SIMPLE
         });
     },
 
@@ -173,8 +181,8 @@ export const Components = {
             },
             tooltip: "Edit Image",
             d: utils.paths.Main
-        }) : jsx(BdApi.Components.Spinner, {
-            type: BdApi.Components.Spinner.Type.SPINNING_CIRCLE_SIMPLE
+        }) : jsx(VTools.Spinner, {
+            type: VTools.Spinner.Type.SPINNING_CIRCLE_SIMPLE
         });
     },
 
