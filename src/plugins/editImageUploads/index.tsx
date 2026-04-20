@@ -67,12 +67,12 @@ export default definePlugin({
         const ModalSystem = Webpack.findByProps("ModalRoot", "ModalHeader");
         if (ModalSystem) {
             Components.internals.ModalSystem = ModalSystem;
-            Components.internals.keys = {
+            Object.assign(Components.internals.keys, {
                 ModalRoot: (Webpack.filters.byProps("ModalRoot")(ModalSystem) ? "ModalRoot" : Object.keys(ModalSystem).find(k => ModalSystem[k]?.displayName === "ModalRoot")) as string,
                 ModalHeader: "ModalHeader",
                 ModalContent: "ModalContent",
                 ModalFooter: "ModalFooter"
-            };
+            });
         }
 
         // Find native UI components
