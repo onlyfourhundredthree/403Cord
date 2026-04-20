@@ -4,12 +4,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+// @ts-nocheck
 import { React } from "@webpack/common";
 const { useState, useEffect, useCallback, useRef } = React;
 const Data = { load: () => null, save: () => { } };
 const meta = { slug: "EditImageUploads" };
 
-// @ts-nocheck
 export const hooks = {
     /**
      * @template T

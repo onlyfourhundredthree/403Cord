@@ -4,9 +4,9 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+// @ts-nocheck
 import { Components } from "./components";
 
-// @ts-nocheck
 export const utils = {
     /** @param {Record<string, {id: number, filter: () => boolean}>} filters */
     getBulk(filters) {

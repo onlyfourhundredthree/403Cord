@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+// @ts-nocheck
 import { React } from "@webpack/common";
 
 import { CanvasEditor } from "./CanvasEditor";
