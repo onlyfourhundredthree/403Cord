@@ -88,23 +88,25 @@ function injectProfileButton() {
 
         if (!avatarUrl && !bannerUrl) continue;
 
-        // Discord'un kendi buton sınıflarını aynı satırdaki mevcut butondan al
-        const existingBtn = row.querySelector<HTMLElement>("button[data-mana-component]");
-        if (!existingBtn) continue;
+        // Son icon-only butonu bul (Daha fazla butonu gibi — secondary, text yok)
+        const allBtns = row.querySelectorAll<HTMLElement>("button[data-mana-component]");
+        let refBtn: HTMLElement | null = null;
+        for (const b of allBtns) {
+            if (!b.querySelector("span")) refBtn = b; // text span'ı olmayan = icon-only
+        }
+        if (!refBtn) refBtn = allBtns[allBtns.length - 1] || null;
+        if (!refBtn) continue;
 
-        // Sınıf isimlerini Discord'un butonundan çıkar
-        const btnClasses = existingBtn.className;
-        const wrapperDiv = existingBtn.querySelector<HTMLElement>('[class*="buttonChildrenWrapper"]');
-        const innerDiv = existingBtn.querySelector<HTMLElement>('[class*="buttonChildren"]');
-        const iconEl = existingBtn.querySelector<HTMLElement>('[class*="icon_"]');
+        // Discord'un sınıflarını birebir kopyala
+        const wrapperDiv = refBtn.querySelector<HTMLElement>('[class*="buttonChildrenWrapper"]');
+        const innerDiv = refBtn.querySelector<HTMLElement>('[class*="buttonChildren"]');
+        const iconEl = refBtn.querySelector<SVGElement>("svg");
 
         const wrapper = document.createElement("span");
-        const btn = document.createElement("button");
-        btn.setAttribute("data-mana-component", "button");
-        btn.setAttribute("role", "button");
-        btn.setAttribute("type", "button");
+        const btn = refBtn.cloneNode(false) as HTMLElement;
+        btn.classList.add("vc-viewicons-btn");
         btn.setAttribute("aria-label", "Görselleri Görüntüle");
-        btn.className = btnClasses + " vc-viewicons-btn";
+        btn.removeAttribute("aria-expanded");
 
         const childWrapper = document.createElement("div");
         childWrapper.className = wrapperDiv?.className || "";
@@ -112,14 +114,15 @@ function injectProfileButton() {
         childInner.className = innerDiv?.className || "";
 
         const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("width", "16");
-        svg.setAttribute("height", "16");
-        svg.setAttribute("fill", "currentColor");
-        svg.setAttribute("viewBox", "0 0 24 24");
+        if (iconEl) svg.setAttribute("class", iconEl.getAttribute("class") || "");
         svg.setAttribute("aria-hidden", "true");
         svg.setAttribute("role", "img");
-        if (iconEl) svg.setAttribute("class", iconEl.className);
-        svg.innerHTML = '<path d="M5 21h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2m0-2v-1.59l3-3 1.29 1.29c.39.39 1.02.39 1.41 0l5.29-5.29 3 3V19h-14ZM19 5v5.59L16.71 8.3a.996.996 0 0 0-1.41 0l-5.29 5.29-1.29-1.29a.996.996 0 0 0-1.41 0l-2.29 2.29V5h14Z"></path><path d="M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3"></path>';
+        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        svg.setAttribute("width", "16");
+        svg.setAttribute("height", "16");
+        svg.setAttribute("fill", "none");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.innerHTML = '<path fill="currentColor" d="M5 21h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2m0-2v-1.59l3-3 1.29 1.29c.39.39 1.02.39 1.41 0l5.29-5.29 3 3V19h-14ZM19 5v5.59L16.71 8.3a.996.996 0 0 0-1.41 0l-5.29 5.29-1.29-1.29a.996.996 0 0 0-1.41 0l-2.29 2.29V5h14Z" class=""></path><path fill="currentColor" d="M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3" class=""></path>';
 
         childInner.appendChild(svg);
         childWrapper.appendChild(childInner);

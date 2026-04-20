@@ -11,7 +11,6 @@ import { Menu, SelectedChannelStore } from "@webpack/common";
 import { applyPalette, GIFEncoder, quantize } from "gifenc";
 
 const imageContextMenuPatch: NavContextMenuPatchCallback = (children, props) => {
-    // Only show if we have a src and it's not a link to another page
     if (!props.src || props.href) return;
 
     children.push(
@@ -33,11 +32,13 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     const images: string[] = [];
 
     const addImage = (url: string) => {
-        const key = new URL(url).pathname;
-        if (!seen.has(key)) {
-            seen.add(key);
-            images.push(url);
-        }
+        try {
+            const key = new URL(url).pathname;
+            if (!seen.has(key)) {
+                seen.add(key);
+                images.push(url);
+            }
+        } catch { /* geçersiz URL */ }
     };
 
     for (const attachment of message.attachments ?? []) {
@@ -83,23 +84,23 @@ const messageContextMenuPatch: NavContextMenuPatchCallback = (children, props) =
     );
 };
 
-async function uploadToCatbox(uint8Array: Uint8Array): Promise<string> {
-    const helper = (VencordNative as any).pluginHelpers["Görselden Gif"];
-    if (helper?.uploadToCatbox) {
-        return await helper.uploadToCatbox(uint8Array);
+async function uploadFile(uint8Array: Uint8Array): Promise<string> {
+    // Native helper'ı dene (Electron tarafı, CORS yok)
+    const helper = (VencordNative as any).pluginHelpers?.ImageToGif;
+    if (helper?.uploadFile) {
+        return await helper.uploadFile(uint8Array);
     }
 
-    // Fallback if native is not available (e.g. web or not rebuilt)
+    // Tarayıcı fallback: 0x0.st
     const formData = new FormData();
-    formData.append("reqtype", "fileupload");
-    formData.append("fileToUpload", new Blob([uint8Array as any], { type: "image/gif" }), "image.gif");
+    formData.append("file", new Blob([uint8Array as any], { type: "image/gif" }), "image.gif");
 
-    const response = await fetch("https://catbox.moe/user/api.php", {
+    const response = await fetch("https://0x0.st", {
         method: "POST",
         body: formData,
     });
 
-    if (!response.ok) throw new Error("Görsel Catbox'a yüklenemedi.");
+    if (!response.ok) throw new Error(`Yükleme hatası: ${response.status}`);
     return (await response.text()).trim();
 }
 
@@ -131,26 +132,23 @@ async function convertToGifAndSend(url: string) {
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const { data } = imageData;
 
-        // Quantize and create palette
         const palette = quantize(data, 256);
         const index = applyPalette(data, palette);
 
-        // Encode to GIF
         const gif = GIFEncoder();
         gif.writeFrame(index, canvas.width, canvas.height, { palette });
         gif.finish();
 
         const uint8Array = gif.bytesView();
-
-        const catboxUrl = await uploadToCatbox(uint8Array);
+        const fileUrl = await uploadFile(uint8Array);
 
         const channelId = SelectedChannelStore.getChannelId();
         if (channelId) {
-            sendMessage(channelId, { content: catboxUrl });
+            sendMessage(channelId, { content: fileUrl });
         }
 
     } catch (err: any) {
-        console.error(err);
+        console.error("[ImageToGif]", err);
     } finally {
         if (objUrl) URL.revokeObjectURL(objUrl);
         isSending = false;
@@ -158,8 +156,8 @@ async function convertToGifAndSend(url: string) {
 }
 
 export default definePlugin({
-    name: "Görselden Gif",
-    description: "Görseli GIF'e dönüştürüp Catbox'a yükler ve mevcut kanala mesaj olarak gönderir.",
+    name: "ImageToGif",
+    description: "Görseli GIF'e dönüştürüp kalıcı bir linke yükler ve mevcut kanala mesaj olarak gönderir.",
     authors: [{ name: "toji", id: 1078973188718993418n }, { name: "aki", id: 219652216095506433n }],
     contextMenus: {
         "image-context": imageContextMenuPatch,

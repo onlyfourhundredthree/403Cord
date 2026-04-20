@@ -7,17 +7,13 @@
 import { IpcMainInvokeEvent } from "electron";
 import { request } from "https";
 
-export async function uploadToCatbox(_: IpcMainInvokeEvent, buffer: Uint8Array) {
+export async function uploadFile(_: IpcMainInvokeEvent, buffer: Uint8Array) {
     return new Promise<string>((resolve, reject) => {
-        const boundary = "----vencord-boundary";
+        const boundary = "----vencord-boundary-" + Date.now();
 
         const header = [
             `--${boundary}`,
-            "Content-Disposition: form-data; name=\"reqtype\"",
-            "",
-            "fileupload",
-            `--${boundary}`,
-            "Content-Disposition: form-data; name=\"fileToUpload\"; filename=\"image.gif\"",
+            'Content-Disposition: form-data; name="file"; filename="image.gif"',
             "Content-Type: image/gif",
             "",
             "",
@@ -25,7 +21,7 @@ export async function uploadToCatbox(_: IpcMainInvokeEvent, buffer: Uint8Array) 
 
         const footer = `\r\n--${boundary}--\r\n`;
 
-        const req = request("https://catbox.moe/user/api.php", {
+        const req = request("https://0x0.st", {
             method: "POST",
             headers: {
                 "Content-Type": `multipart/form-data; boundary=${boundary}`,
@@ -35,7 +31,7 @@ export async function uploadToCatbox(_: IpcMainInvokeEvent, buffer: Uint8Array) 
             let data = "";
             res.on("data", chunk => data += chunk);
             res.on("end", () => {
-                if (res.statusCode !== 200) reject(new Error(`Catbox error: ${data}`));
+                if (res.statusCode !== 200) reject(new Error(`Upload error: ${res.statusCode} ${data}`));
                 else resolve(data.trim());
             });
         });
