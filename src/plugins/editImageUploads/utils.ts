@@ -5,7 +5,10 @@
  */
 
 // @ts-nocheck
-import { Components } from "./components";
+import { Logger } from "@utils/Logger";
+import { findBulk,wreq } from "@webpack";
+
+const logger = new Logger("EditImageUploads");
 
 export const utils = {
     /** @param {Record<string, {id: number, filter: () => boolean}>} filters */
@@ -14,7 +17,7 @@ export const utils = {
         const result = {};
 
         for (const name in filters) {
-            const exports = Webpack.getById(filters[name].id);
+            const exports = wreq(filters[name].id);
             const { id } = filters[name];
 
             if (exports && filters[name].filter(exports, { id, exports, loaded: true }, `${id}`)) {
@@ -26,9 +29,13 @@ export const utils = {
         }
 
         if (wrongOrMissed) {
-            const missing = Webpack.getBulkKeyed(filters);
-            BdApi.Logger.warn(meta.slug, "Mismatched id for modules:", missing);
-            Object.assign(result, missing);
+            // Convert filters record to array for findBulk
+            const filterEntries = Object.entries(filters);
+            const missingResults = findBulk(...filterEntries.map(([_, f]) => f.filter));
+            filterEntries.forEach(([name, _], i) => {
+                result[name] = missingResults[i];
+            });
+            logger.warn("Mismatched id for modules, searched again.");
         }
 
         return result;

@@ -5,12 +5,15 @@
  */
 
 // @ts-nocheck
+import { Logger } from "@utils/Logger";
 import { React } from "@webpack/common";
+
+const logger = new Logger("EditImageUploads");
+const jsx = (...args) => (React as any).jsx ? (React as any).jsx(...args) : React.createElement(...args);
 
 import { CanvasEditor } from "./CanvasEditor";
 import { hooks } from "./hooks";
 import { utils } from "./utils";
-const { jsx } = React;
 // Some BD APIs are mocked or translated
 const ContextMenu = { open: () => { }, buildMenu: () => { } };
 const UI = { showToast: msg => console.log(msg) };
@@ -90,11 +93,11 @@ export const Components = {
 
     /** @param {{url: string}} props */
     RemixIcon({ url }) {
-        const [isPending, startTransition] = useTransition();
-        const ctrl = useRef(new AbortController());
-        const userActions = useRef(null);
+        const [isPending, startTransition] = React.useTransition();
+        const ctrl = React.useRef(new AbortController());
+        const userActions = React.useRef(null);
 
-        useEffect(() => () => ctrl.current.abort(), []);
+        React.useEffect(() => () => ctrl.current.abort(), []);
 
         return !isPending ? jsx(BdApi.Components.Tooltip, {
             spacing: 11,
@@ -136,8 +139,8 @@ export const Components = {
     },
 
     UploadIcon({ args }) {
-        const [isPending, startTransition] = useTransition();
-        const userActions = useRef(null);
+        const [isPending, startTransition] = React.useTransition();
+        const userActions = React.useRef(null);
 
         return !isPending ? jsx(Components.IconButton, {
             onClick: () => {
@@ -176,14 +179,14 @@ export const Components = {
      */
     LayerThumbnails({ layers, onChange, width, height, editor }) {
         /** @type {React.RefObject<number?>} */
-        const dragIndex = useRef(null);
-        const stableLayers = useRef(layers);
+        const dragIndex = React.useRef(null);
+        const stableLayers = React.useRef(layers);
         /** @type {React.RefObject<(() => Promise<void>)[] >} */
-        const actions = useRef([]);
+        const actions = React.useRef([]);
         /** @type {React.RefObject<number?>} */
-        const timer = useRef(null);
+        const timer = React.useRef(null);
 
-        useEffect(() => {
+        React.useEffect(() => {
             if (stableLayers.current.length !== layers.length) {
                 stableLayers.current = layers;
             } else {
@@ -192,7 +195,7 @@ export const Components = {
         }, [layers]);
 
         /** @type {(e: React.MouseEvent<HTMLLIElement>, i: number) => void} */
-        const handleContextMenu = useCallback((e, i) => {
+        const handleContextMenu = React.useCallback((e, i) => {
             (i !== editor.current.activeLayerIndex) && editor.current.sandwichLayer(i);
 
             ContextMenu.open(e, ContextMenu.buildMenu([{
@@ -543,19 +546,19 @@ export const Components = {
     /** @param {{index: number, editor: React.RefObject<CanvasEditor>, width: number, height: number}} */
     Thumbnail({ index, editor, width, height }) {
         /** @type {React.RefObject<HTMLCanvasElement | null>} */
-        const canvas = useRef(null);
+        const canvas = React.useRef(null);
 
-        useEffect(() => {
+        React.useEffect(() => {
             canvas.current.getContext("2d").imageSmoothingEnabled = false;
         }, [width, height]);
 
-        useEffect(() => {
+        React.useEffect(() => {
             // on mount, force render initial thumbnail.
             const s = Math.max(canvas.current.width / width, canvas.current.height / height);
             editor.current.layers[index].layer.drawThumbnailOn(canvas.current, s, true);
         }, []);
 
-        useEffect(() => {
+        React.useEffect(() => {
             const s = Math.max(canvas.current.width / width, canvas.current.height / height);
             editor.current.layers[index].layer.drawThumbnailOn(canvas.current, s);
         }); // yes, no dependency! Update the thumbnail on rerenders. However, repainting will only occur if thumbnail is stale!
@@ -570,30 +573,30 @@ export const Components = {
 
     /** @param {{bitmap: ImageBitmap, ref: React.RefObject<any>}} props */
     ImageEditor({ bitmap, ref }) {
-        const [canUndoRedo, setCanUndoRedo] = useState(0);
+        const [canUndoRedo, setCanUndoRedo] = React.useState(0);
         /** @type {[LayerState[], React.Dispatch<React.SetStateAction<LayerState[]>>]} */
-        const [layers, setLayers] = useState(() => []);
-        const [dims, setDims] = useState({ width: bitmap.width, height: bitmap.height });
+        const [layers, setLayers] = React.useState(() => []);
+        const [dims, setDims] = React.useState({ width: bitmap.width, height: bitmap.height });
 
-        const [mode, _setMode] = useState(null);
+        const [mode, _setMode] = React.useState(null);
         const [font, setFont] = hooks.useStoredState("font", () => ({ family: "gg sans", weight: 500 }));
         const [fixedAspect, setFixedAspect] = hooks.useStoredState("fixedAspectRatio", true);
         const [strokeStyle, setStrokeStyle] = hooks.useStoredState("strokeStyle", () => ({ width: 25, color: "#000000" }));
 
-        const isInteracting = useRef(false);
+        const isInteracting = React.useRef(false);
         /** @type { React.RefObject<HTMLCanvasElement?> } */
-        const canvasRef = useRef(null);
-        const canvasRect = useRef(new DOMRect());
+        const canvasRef = React.useRef(null);
+        const canvasRect = React.useRef(new DOMRect());
         /** @type { React.RefObject<CanvasEditor?> } */
-        const editor = useRef(null);
+        const editor = React.useRef(null);
         /** @type { React.RefObject<HTMLDivElement?> } */
-        const overlay = useRef(null);
+        const overlay = React.useRef(null);
         /** @type { React.RefObject<{ focus: () => void }> } */
-        const textarea = useRef(null);
+        const textarea = React.useRef(null);
         /**  @type { React.RefObject<{ setValue: (value: number) => void, previewValue: (value: number) => void }?> } */
-        const auxRef = useRef(null);
+        const auxRef = React.useRef(null);
 
-        const setMode = useCallback(newVal => {
+        const setMode = React.useCallback(newVal => {
             if (isInteracting.current) return;
 
             _setMode(oldMode => {
@@ -608,7 +611,7 @@ export const Components = {
             });
         }, []);
 
-        useImperativeHandle(ref, () => ({
+        React.useImperativeHandle(ref, () => ({
             replace({ draftType, upload }) {
                 UI.showToast("Processing...", { type: "warning" });
                 editor.current?.toBlob({ type: Data.load(meta.slug, "exportType") ?? "image/webp" }).then(blob => {
@@ -658,7 +661,7 @@ export const Components = {
             }
         }), []);
 
-        const updateClipRect = useCallback(() => {
+        const updateClipRect = React.useCallback(() => {
             const { clipRect } = editor.current;
             if (!clipRect) return;
 
@@ -668,7 +671,7 @@ export const Components = {
             overlay.current.style.setProperty("--cy2", `${100 * clipRect.bottom}%`);
         }, []);
 
-        const updateRegionRect = useCallback(() => {
+        const updateRegionRect = React.useCallback(() => {
             const rect = editor.current.regionRect;
             if (!rect) return;
 
@@ -678,7 +681,7 @@ export const Components = {
             overlay.current.style.setProperty("--ry2", `${100 * rect.bottom}%`);
         }, []);
 
-        const syncStates = useCallback(() => {
+        const syncStates = React.useCallback(() => {
             setCanUndoRedo(editor.current.canUndo << 1 ^ editor.current.canRedo);
             setDims(d => {
                 const { width, height } = editor.current.canvasDims;
@@ -698,7 +701,7 @@ export const Components = {
             })));
         }, []);
 
-        useEffect(() => {
+        React.useEffect(() => {
             const rect = canvasRef.current.offsetParent.getBoundingClientRect();
             canvasRef.current.width = ~~(rect.width);
             canvasRef.current.height = ~~(rect.height);
@@ -861,7 +864,7 @@ export const Components = {
         }, []);
 
         /** @type {(e: React.MouseEvent<HTMLElement>) => void} */
-        const handleMouseMove = useCallback(e => {
+        const handleMouseMove = React.useCallback(e => {
             if (mode !== 4 && mode !== 6 || (e.buttons & ~4)) return;
 
             if (e.shiftKey) {
@@ -1483,8 +1486,8 @@ export const Components = {
      */
     Resizer({ dimensions, layerCount, onCanvasResize, onImageResize }) {
         /** @type {React.RefObject<{mode: number, keepAspect: boolean}?>} */
-        const resize = useRef(Data.load(meta.slug, "resize") ?? { mode: 0, keepAspect: false });
-        const menuData = useRef({ ...dimensions, canvasP: 100, imageP: 100 });
+        const resize = React.useRef(Data.load(meta.slug, "resize") ?? { mode: 0, keepAspect: false });
+        const menuData = React.useRef({ ...dimensions, canvasP: 100, imageP: 100 });
 
         const handleClick = e => {
             Object.assign(menuData.current, { width: dimensions.width, height: dimensions.height, canvasP: 100, imageP: 100 });
@@ -1715,8 +1718,8 @@ export const Components = {
         const [smoothing, setSmoothing] = hooks.useStoredState("smoothing", "auto");
         const [background, setBackground] = hooks.useStoredState("backgroundColor", "#303038");
 
-        const exportOptions = useRef([{ label: "jpg", value: "image/jpeg" }, { label: "png", value: "image/png" }, { label: "webp", value: "image/webp" }]);
-        const smoothingOptions = useRef(["Auto", "High", "Medium", "Low", "Off"].map(e => ({ label: e, value: e.toLowerCase() })));
+        const exportOptions = React.useRef([{ label: "jpg", value: "image/jpeg" }, { label: "png", value: "image/png" }, { label: "webp", value: "image/webp" }]);
+        const smoothingOptions = React.useRef(["Auto", "High", "Medium", "Low", "Off"].map(e => ({ label: e, value: e.toLowerCase() })));
 
         const handleClick = e => {
             ContextMenu.open(e, ContextMenu.buildMenu([{
@@ -1802,7 +1805,7 @@ export const Components = {
      * @param {{ initialValue: T, options: { label: string, value: T }[], onChange?: (newValue: T) => void, label?: string }}
      */
     MenuItemSelect({ initialValue, options, onChange, label }) {
-        const [value, setValue] = useState(initialValue);
+        const [value, setValue] = React.useState(initialValue);
 
         return jsx("div", {
             className: utils.clsx(internals.contextMenuClass?.item, internals.contextMenuClass?.labelContainer),
@@ -1831,13 +1834,13 @@ export const Components = {
 
     /** @param {{ value: { family: string, weight: number }, onChange: (e: { family: string, weight: number }) => void }} */
     FontSelector({ onChange, value }) {
-        const [family, _setFamily] = useState(() => value.family);
-        const [weight, setWeight] = useState(() => value.weight);
+        const [family, _setFamily] = React.useState(() => value.family);
+        const [weight, setWeight] = React.useState(() => value.weight);
 
-        const [familyOptions, setFamilyOptions] = useState(() => []);
-        const [weightOptions, setWeightsOptions] = useState(() => []);
+        const [familyOptions, setFamilyOptions] = React.useState(() => []);
+        const [weightOptions, setWeightsOptions] = React.useState(() => []);
 
-        const getWeightsOptions = useCallback(f => {
+        const getWeightsOptions = React.useCallback(f => {
             return Array.from({ length: 9 }, (_, i) => {
                 const w = (i + 1) * 100;
                 const loaded = document.fonts.check(`${w} 1rem ${f}`);
@@ -1845,7 +1848,7 @@ export const Components = {
             }).filter(Boolean);
         }, []);
 
-        const setFamily = useCallback(newFamily => {
+        const setFamily = React.useCallback(newFamily => {
             const f = newFamily instanceof Function ? newFamily(family) : newFamily;
             const wo = getWeightsOptions(f);
             setWeightsOptions(wo);
@@ -1856,7 +1859,7 @@ export const Components = {
             _setFamily(f);
         }, []);
 
-        useLayoutEffect(() => {
+        React.useLayoutEffect(() => {
             Promise.all(Array.from(document.fonts, f => f.load())).finally(() => {
                 const defaults = ["Arial", "Arial Black", "cursive", "fantasy", "Garamond", "Georgia", "Helvetica", "monospace", "sans-serif", "serif", "system-ui", "Tahoma", "Times New Roman", "Verdana"];
                 const docFonts = Array.from(document.fonts, e => e.family);
@@ -1918,7 +1921,7 @@ export const Components = {
     /** @param {{onChange: (value: string) => void, value: string, colors?: string[], wait?: number}} */
     ColorInput({ onChange, value, colors, wait = 150 }) {
         /** @type {React.RefObject<number | null>} */
-        const timer = useRef(null);
+        const timer = React.useRef(null);
 
         return jsx(BdApi.Components.ColorInput, {
             value,
@@ -1941,15 +1944,15 @@ export const Components = {
      * }} props
      */
     NumberSlider({ value, onChange, className, suffix, ref, minValue, centerValue, maxValue, decimals, onSlide, label, withSlider = true, expScaling = true, ...restProps }) {
-        const [textValue, setTextValue] = useState(`${value}`);
-        const [sliderValue, setSliderValue] = useState(() => expScaling && withSlider ? utils.logScaling(value, { minValue, centerValue, maxValue }) : value);
-        const id = useId();
-        const oldValue = useRef(value);
+        const [textValue, setTextValue] = React.useState(`${value}`);
+        const [sliderValue, setSliderValue] = React.useState(() => expScaling && withSlider ? utils.logScaling(value, { minValue, centerValue, maxValue }) : value);
+        const id = React.useId();
+        const oldValue = React.useRef(value);
         /** @type {React.RefObject<HTMLInputElement?>} */
-        const inputRef = useRef(null);
-        const sliderRef = useRef(null);
+        const inputRef = React.useRef(null);
+        const sliderRef = React.useRef(null);
 
-        useImperativeHandle(ref, () => ({
+        React.useImperativeHandle(ref, () => ({
             setValue: v => {
                 setTextValue(`${v}`);
                 oldValue.current = v;
@@ -1967,7 +1970,7 @@ export const Components = {
             }
         }), [minValue, centerValue, maxValue]);
 
-        useEffect(() => {
+        React.useEffect(() => {
             const ctrl = new AbortController();
             inputRef.current?.addEventListener("wheel", e => {
                 if (document.activeElement !== e.currentTarget || !e.deltaY || e.buttons) return;
@@ -1982,7 +1985,7 @@ export const Components = {
             return () => { ctrl.abort(); };
         }, []);
 
-        useEffect(() => {
+        React.useEffect(() => {
             setTextValue(`${value}`);
             oldValue.current = value;
 
@@ -1992,11 +1995,11 @@ export const Components = {
             sliderRef.current?._reactInternals.stateNode.setState({ value: val });
         }, [value]);
 
-        const handleChange = useCallback(e => {
+        const handleChange = React.useCallback(e => {
             setTextValue(e.target.value);
         }, []);
 
-        const handleTextCommit = useCallback(() => {
+        const handleTextCommit = React.useCallback(() => {
             const newValue = !Number.isNaN(Number(textValue)) && textValue !== "" ? Math.max(minValue ?? Number(textValue), Number(textValue)) : oldValue.current;
             if (oldValue.current === newValue) return;
 
@@ -2010,7 +2013,7 @@ export const Components = {
             sliderRef.current?._reactInternals.stateNode.setState({ value: val });
         }, [onChange, textValue]);
 
-        const handleSliderChange = useCallback(newValue => {
+        const handleSliderChange = React.useCallback(newValue => {
             setSliderValue(newValue);
 
             let val = expScaling ? utils.expScaling(newValue / 100, { minValue, centerValue, maxValue }) : newValue;
@@ -2018,7 +2021,7 @@ export const Components = {
             onSlide?.(val);
         }, [onSlide, minValue, centerValue, maxValue]);
 
-        const handleSliderCommit = useCallback(newValue => {
+        const handleSliderCommit = React.useCallback(newValue => {
             let val = expScaling ? utils.expScaling(newValue / 100, { minValue, centerValue, maxValue }) : newValue;
             val = Number(val.toFixed(decimals ?? 0));
             if (val === oldValue.current) return;
@@ -2028,7 +2031,7 @@ export const Components = {
             onChange?.(val);
         }, [onChange, setTextValue, minValue, maxValue]);
 
-        const handleKeyDown = useCallback(e => {
+        const handleKeyDown = React.useCallback(e => {
             if (e.key === "Enter" || e.key === "Escape") {
                 e.currentTarget.blur();
             } else if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
@@ -2044,12 +2047,12 @@ export const Components = {
             }
         }, []);
 
-        const handleBeforeInput = useCallback(e => {
+        const handleBeforeInput = React.useCallback(e => {
             if (e.data && /[^0-9e+\-.]+/.test(e.data)) e.preventDefault?.();
         }, []);
 
-        const handleMouseEnter = useCallback(e => !e.buttons && !document.activeElement.matches(`.${meta.slug}Root textarea.hiddenVisually`) && e.currentTarget.focus(), []);
-        const handleMouseLeave = useCallback(e => e.currentTarget.blur(), []);
+        const handleMouseEnter = React.useCallback(e => !e.buttons && !document.activeElement.matches(`.${meta.slug}Root textarea.hiddenVisually`) && e.currentTarget.focus(), []);
+        const handleMouseLeave = React.useCallback(e => e.currentTarget.blur(), []);
 
         const pointerHanders = hooks.usePointerCapture({
             buttons: 7,
@@ -2143,16 +2146,16 @@ export const Components = {
 
     /** @param {{ value: string, onChange?: (value: string) => void, label?: string, className: string }} props */
     TextInput({ value, onChange, label, className }) {
-        const [text, setText] = useState(value);
-        const oldValue = useRef(value);
-        const id = useId();
+        const [text, setText] = React.useState(value);
+        const oldValue = React.useRef(value);
+        const id = React.useId();
 
-        const handleChange = useCallback(e => {
+        const handleChange = React.useCallback(e => {
             setText(e.target.value);
         }, []);
 
         /** @type {(e: React.KeyboardEvent<HTMLInputElement>) => void} */
-        const handleKeyDown = useCallback(e => {
+        const handleKeyDown = React.useCallback(e => {
             e.stopPropagation();
 
             if (e.repeat) return;
@@ -2178,7 +2181,7 @@ export const Components = {
             }
         }, []);
 
-        const handleBlur = useCallback(e => {
+        const handleBlur = React.useCallback(e => {
             if (oldValue.current === e.target.value) return;
 
             if (!e.target.value) {
@@ -2189,8 +2192,8 @@ export const Components = {
             }
         }, [onChange]);
 
-        const handleMouseEnter = useCallback(e => !e.buttons && e.currentTarget.focus(), []);
-        const handleMouseLeave = useCallback(e => e.currentTarget.blur(), []);
+        const handleMouseEnter = React.useCallback(e => !e.buttons && e.currentTarget.focus(), []);
+        const handleMouseLeave = React.useCallback(e => e.currentTarget.blur(), []);
 
         return jsx("div", {
             className: utils.clsx(className),
@@ -2233,9 +2236,9 @@ export const Components = {
     /** @param {{ onChange?: (value: string) => void, onSubmit?: () => void, ref?: React.RefObject<any> }} */
     TextAreaHidden({ onChange, onSubmit, ref }) {
         /** @type {React.RefObject<HTMLTextAreaElement?>} */
-        const textarea = useRef(null);
+        const textarea = React.useRef(null);
 
-        useImperativeHandle(ref, () => ({
+        React.useImperativeHandle(ref, () => ({
             focus: () => {
                 if (!textarea.current) return;
                 textarea.current.hidden = false;
@@ -2243,18 +2246,18 @@ export const Components = {
             }
         }));
 
-        const handleChange = useCallback(e => {
+        const handleChange = React.useCallback(e => {
             onChange?.(e.target.value);
         }, [onChange]);
 
         /** @type {(e: React.FocusEvent<HTMLTextAreaElement) => void} */
-        const handleBlur = useCallback(() => {
+        const handleBlur = React.useCallback(() => {
             textarea.current.hidden = true;
             onSubmit?.();
             textarea.current.value = "";
         }, [onSubmit]);
 
-        const handleKeyDown = useCallback(e => {
+        const handleKeyDown = React.useCallback(e => {
             if (!(e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === "Enter" || e.key === "Escape")) {
                 textarea.current.blur();
                 e.stopPropagation();

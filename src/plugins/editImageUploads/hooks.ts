@@ -6,7 +6,6 @@
 
 // @ts-nocheck
 import { React } from "@webpack/common";
-const { useState, useEffect, useCallback, useRef } = React;
 const Data = { load: () => null, save: () => { } };
 const meta = { slug: "EditImageUploads" };
 
@@ -18,7 +17,7 @@ export const hooks = {
      * @returns {[T, typeof setval]}
      */
     useStoredState(key, initialvalue) {
-        const [val, setval] = useState(() => {
+        const [val, setval] = React.useState(() => {
             /** @type {T | null} */
             const stored = Data.load(meta.slug, key);
             if (stored == null) {
@@ -32,7 +31,7 @@ export const hooks = {
             }
         });
 
-        useEffect(() => {
+        React.useEffect(() => {
             Data.save(meta.slug, key, val);
         }, [val, key]);
 
@@ -49,13 +48,13 @@ export const hooks = {
      */
     usePointerCapture({ onStart, onChange, onSubmit, buttons = 5 }) {
         /** @type {React.RefObject<number?>} */
-        const pointerId = useRef(null);
+        const pointerId = React.useRef(null);
         /** @type {React.RefObject<number?>} */
-        const rafId = useRef(null);
-        const smolStore = useRef({});
+        const rafId = React.useRef(null);
+        const smolStore = React.useRef({});
 
         /** @type {(e: React.PointerEvent<HTMLElement>) => void} */
-        const onPointerDown = useCallback(e => {
+        const onPointerDown = React.useCallback(e => {
             if (!(e.buttons & buttons) || pointerId.current != null) return;
 
             e.currentTarget.setPointerCapture(e.pointerId);
@@ -65,7 +64,7 @@ export const hooks = {
         }, [onStart]);
 
         /** @type {(e: React.PointerEvent<HTMLElement>) => void} */
-        const onPointerMove = useCallback(e => {
+        const onPointerMove = React.useCallback(e => {
             if (!(e.buttons & buttons) || pointerId.current !== e.pointerId || rafId.current) return;
 
             rafId.current = requestAnimationFrame(() => {
@@ -75,7 +74,7 @@ export const hooks = {
         }, [onChange]);
 
         /** @type {(e: React.PointerEvent<HTMLElement>) => void} */
-        const onPointerUp = useCallback(e => {
+        const onPointerUp = React.useCallback(e => {
             if (pointerId.current !== e.pointerId) return;
 
             e.preventDefault();
@@ -105,10 +104,10 @@ export const hooks = {
      */
     useDebouncedWheel({ onStart, onChange, onSubmit, wait = 250 }) {
         /** @type {React.RefObject<number?>} */
-        const timer = useRef(null);
+        const timer = React.useRef(null);
 
         /** @type {(e: React.WheelEvent<HTMLCanvasElement>) => void} */
-        const onWheel = useCallback(e => {
+        const onWheel = React.useCallback(e => {
             if (!e.deltaY) return;
 
             onChange?.(e);

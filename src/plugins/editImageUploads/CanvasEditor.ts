@@ -8,6 +8,9 @@
 import { Layer } from "./Layer";
 import { utils } from "./utils";
 
+const Data = { load: () => null, save: () => { } };
+const meta = { slug: "EditImageUploads" };
+
 export class CanvasEditor {
     #mainCanvas;
     #viewportCanvas;
