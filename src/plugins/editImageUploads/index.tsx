@@ -82,7 +82,15 @@ export default definePlugin({
         Components.internals.keys.FocusRing = "FocusRing";
 
         // Find Upload Dispatcher (Crucial for saving edits)
-        Components.internals.uploadDispatcher = Webpack.findByProps("setFile", "addFile");
+        // DEBUG: Log module 572855 source to fix patch
+        try {
+            const rawMod = (Webpack as any).modules?.["572855"] || (Webpack as any).m?.["572855"];
+            console.log("EditImageUploads - Modül 572855 Kaynak Kod:", rawMod?.toString() || "Modül bulunamadı");
+        } catch (e) {
+            console.error("EditImageUploads - Log hatası:", e);
+        }
+
+        const UploadDispatcher = Webpack.findByProps("dispatch", "enqueue");
     },
 
     patches: [
