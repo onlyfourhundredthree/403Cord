@@ -100,19 +100,19 @@ export default definePlugin({
             }
         },
         {
-            // Media Viewer Module - Dynamic find by unique code string
+            // Media Viewer Module - Targeting the items mapping
             find: "GlobalDiscoveryAppsDetailCarousel",
             replacement: {
-                match: /(e\.type===\i\.geh\.IMG){let t=a\.filter/g,
-                replace: "$1,editImageUploads=true; $&"
+                match: /type:"IMAGE"/g,
+                replace: "$&,editImageUploads:true"
             }
         },
         {
-            // Alternative Media Viewer Matcher
+            // Media Viewer Module - Alternative hook in the useCallback
             find: "GlobalDiscoveryAppsDetailCarousel",
             replacement: {
-                match: /(?<=type:"IMAGE")/g,
-                replace: ",editImageUploads:true"
+                match: /if\(e\.type===\i\.geh\.IMG\){let \i=a\.filter/g,
+                replace: "if(e.type===$self.utils.dummyLine,true){$self.logger.log('Media hook triggered');} $&"
             }
         }
     ],
