@@ -92,12 +92,11 @@ function injectProfileButton() {
         const allBtns = row.querySelectorAll<HTMLElement>("button[data-mana-component]");
         let refBtn: HTMLElement | null = null;
         for (const b of allBtns) {
-            if (!b.querySelector("span")) refBtn = b; // text span'ı olmayan = icon-only
+            if (!b.querySelector("span")) refBtn = b;
         }
         if (!refBtn) refBtn = allBtns[allBtns.length - 1] || null;
         if (!refBtn) continue;
 
-        // Discord'un sınıflarını birebir kopyala
         const wrapperDiv = refBtn.querySelector<HTMLElement>('[class*="buttonChildrenWrapper"]');
         const innerDiv = refBtn.querySelector<HTMLElement>('[class*="buttonChildren"]');
         const iconEl = refBtn.querySelector<SVGElement>("svg");
