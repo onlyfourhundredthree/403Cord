@@ -50,47 +50,45 @@ export default definePlugin({
     settings,
 
     start() {
-        // Enforce discovery of internal Discord modules for the components to use
         const { Webpack } = Vencord;
 
         // Find stores
         Components.internals.SelectedChannelStore = Webpack.findStore("SelectedChannelStore");
 
         // Find Action Bar styles
-        const actionStyles = Webpack.findByProps("actionBarIcon");
-        if (actionStyles) Components.internals.actionIconClass = actionStyles;
+        Components.internals.actionIconClass = Webpack.findByProps("actionBarIcon") || {};
+        Components.internals.actionButtonClass = Webpack.findByProps("actionButton", "button") || {};
 
-        const buttonStyles = Webpack.findByProps("actionButton", "button");
-        if (buttonStyles) Components.internals.actionButtonClass = buttonStyles;
+        // Find Modal components DYNAMICALLY by displayName
+        const ModalMod = Webpack.find(m => m.default?.ModalRoot)?.default || Webpack.find(m => m.ModalRoot);
+        if (ModalMod) {
+            Components.internals.ModalSystem = ModalMod;
+            const findKey = (name: string) => Object.keys(ModalMod).find(k => ModalMod[k]?.displayName === name || ModalMod[k]?.type?.displayName === name);
 
-        // Find Modal components
-        const ModalSystem = Webpack.findByProps("ModalRoot", "ModalHeader");
-        if (ModalSystem) {
-            Components.internals.ModalSystem = ModalSystem;
             Object.assign(Components.internals.keys, {
-                ModalRoot: (Webpack.filters.byProps("ModalRoot")(ModalSystem) ? "ModalRoot" : Object.keys(ModalSystem).find(k => ModalSystem[k]?.displayName === "ModalRoot")) as string,
-                ModalHeader: "ModalHeader",
-                ModalContent: "ModalContent",
-                ModalFooter: "ModalFooter"
+                ModalRoot: findKey("ModalRoot") || "ModalRoot",
+                ModalHeader: findKey("ModalHeader") || "ModalHeader",
+                ModalContent: findKey("ModalContent") || "ModalContent",
+                ModalFooter: findKey("ModalFooter") || "ModalFooter"
             });
         }
 
         // Find native UI components
-        Components.internals.nativeUI = Webpack.findByProps("openModal", "closeModal") || {};
+        const UI = Webpack.findByProps("openModal", "closeModal") || {};
+        Components.internals.nativeUI = UI;
         Components.internals.keys.openModal = "openModal";
         Components.internals.keys.closeModal = "closeModal";
         Components.internals.keys.FocusRing = "FocusRing";
 
-        // Find Upload Dispatcher (Crucial for saving edits)
-        // DEBUG: Log module 572855 source to fix patch
-        try {
-            const rawMod = (Webpack as any).modules?.["572855"] || (Webpack as any).m?.["572855"];
-            console.log("EditImageUploads - Modül 572855 Kaynak Kod:", rawMod?.toString() || "Modül bulunamadı");
-        } catch (e) {
-            console.error("EditImageUploads - Log hatası:", e);
-        }
+        // Find Upload Dispatcher
+        Components.internals.uploadDispatcher = Webpack.findByProps("addFile", "setFile");
 
-        const UploadDispatcher = Webpack.findByProps("dispatch", "enqueue");
+        // Use findByCode to ensure we found the right modules for patching
+        const uploadMod = Webpack.findByCode(".attachmentItemSmall");
+        const mediaMod = Webpack.findByCode("GlobalDiscoveryAppsDetailCarousel");
+
+        if (uploadMod) console.log("EditImageUploads: Upload Card Hooked.");
+        if (mediaMod) console.log("EditImageUploads: Media Viewer Hooked.");
     },
 
     patches: [
@@ -102,10 +100,19 @@ export default definePlugin({
             }
         },
         {
-            find: 'children:["IMAGE"===',
+            // Media Viewer Module - Dynamic find by unique code string
+            find: "GlobalDiscoveryAppsDetailCarousel",
             replacement: {
-                match: /(type:"IMAGE"[^]+?)(?=return )/,
-                replace: "$1return $self.Components.injectRemixButton(arguments[0], $self.hooks, $self.utils);"
+                match: /(e\.type===\i\.geh\.IMG){let t=a\.filter/g,
+                replace: "$1,editImageUploads=true; $&"
+            }
+        },
+        {
+            // Alternative Media Viewer Matcher
+            find: "GlobalDiscoveryAppsDetailCarousel",
+            replacement: {
+                match: /(?<=type:"IMAGE")/g,
+                replace: ",editImageUploads:true"
             }
         }
     ],
