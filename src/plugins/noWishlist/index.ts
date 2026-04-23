@@ -5,6 +5,7 @@
  */
 
 import { definePluginSettings, migratePluginSettings } from "@api/Settings";
+import { localStorage } from "@utils/localStorage";
 import definePlugin, { OptionType } from "@utils/types";
 
 const CSS_RULES: Record<string, string> = {
